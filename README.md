@@ -2,7 +2,7 @@
 
 Dig your crates.
 
-Phase 1: Discogs connection and application foundation. No infrastructure has been provisioned.
+Stage 2: local collection explorer with search, filters, original-year lookup, and personal corrections. No infrastructure has been provisioned.
 
 ## Run locally
 
@@ -17,6 +17,14 @@ Register an application at https://www.discogs.com/settings/developers and put i
 Discogs handles passwords. OAuth access credentials live in an AES-256-GCM encrypted, authenticated browser cookie, HttpOnly, SameSite=Lax, Secure in production, with an eight-hour absolute expiry. Only transient request processing and bounded in-memory cache keys use them server-side. SQLite stores expiring one-time OAuth attempt IDs, not tokens. Callback values and cookies must never be logged by hosting/proxy tooling; the application sends same-origin referrer headers and no-referrer on the OAuth callback. Configure any observability to redact query strings and cookies. Logout clears local cookies/cache, not Discogs authorization. A copied cookie can remain valid until expiry: immediate session revocation is not implemented. Rotate the encryption key to invalidate all sessions.
 
 The single-process scheduler spaces upstream calls and honors observed rate-limit exhaustion/429s. It does not retry indefinitely or bypass limits. Collection and release cache entries expire after five minutes, are scoped by account token, capped at 100 entries, and are never served stale. This design is for one application process; multiple Machines need a coordinated limiter/cache architecture. Large imports are deliberately paginated, not automatically expanded into thousands of detail requests.
+
+## Original-year cache and code organization
+
+Original years are stored in a shared SQLite `master_years` table keyed by Discogs master ID, with source, fetched-at, and expiry timestamps. Fresh entries are restored automatically on collection load, including results originally fetched for another user. Only missing/expired masters require Discogs requests. The five-hour TTL (`MASTER_YEAR_TTL` in `lib/year-data.ts`) refreshes before the six-hour freshness boundary. Expired rows are removed when the cache is read and expired browser results are removed too. Missing years are cached as unknown; failed requests are not cached. The refresh icon bypasses the cache. No collection membership, artwork, credentials, or user identifiers are stored in this shared table. Personal corrections remain in `original_years`, scoped by user and release, and take precedence over shared years.
+
+`app/collection.tsx` composes focused components and hooks under `app/collection/`. Pure filtering/year rules live in `lib/collection.ts`; SQL lives in focused data modules with ordered migrations. Global CSS covers base elements; page and collection CSS Modules scope feature styles. No inline CSS is used, including for the native progress indicator. `npm run format` and `npm run format:check` maintain readable formatting.
+
+Run browser fixtures against the dev server with `node --env-file=.env.local --import tsx tests/explorer.browser.ts` and `node --env-file=.env.local --import tsx tests/year-recovery.browser.ts`. They isolate account data and intercept Discogs calls. Cache persistence/expiry and correction isolation are also covered by `npm test`.
 
 ## SQLite and backups
 

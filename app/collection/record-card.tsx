@@ -1,0 +1,77 @@
+import { useState } from "react";
+import { VinylRecordIcon } from "@phosphor-icons/react";
+import { Entry } from "../../lib/collection";
+import styles from "./collection.module.css";
+export function Cover({ entry }: { entry: Entry }) {
+  const [failed, setFailed] = useState(false);
+  const b = entry.basic_information;
+  return (
+    <div className={styles["art"]}>
+      {!failed && (b.cover_image || b.thumb) ? (
+        <img
+          src={b.cover_image || b.thumb}
+          alt={"Cover of " + b.title}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className={styles["cover-fallback"]}>
+          <VinylRecordIcon size={64} weight="duotone" aria-hidden="true" />
+          <small>No artwork available</small>
+        </span>
+      )}
+    </div>
+  );
+}
+export function RecordCard({
+  group,
+  year,
+  onOpen,
+  onGenre,
+}: {
+  group: Entry[];
+  year: number | null;
+  onOpen: (group: Entry[], trigger: HTMLElement) => void;
+  onGenre: (genre: string) => void;
+}) {
+  const e = group[0],
+    b = e.basic_information;
+  return (
+    <article>
+      <button
+        className={styles["cover-button"]}
+        onClick={(ev) => onOpen(group, ev.currentTarget)}
+        aria-label={"View " + b.title}
+      >
+        <Cover entry={e} />
+      </button>
+      <h3>
+        <button
+          className={styles["text-button"]}
+          onClick={(ev) => onOpen(group, ev.currentTarget)}
+        >
+          {b.title}
+        </button>
+      </h3>
+      <p className={styles["artist"]}>
+        {b.artists.map((a) => a.name).join(", ")}
+      </p>
+      <div className={styles["chips"]}>
+        {year && <span>{year}</span>}
+        {(b.genres || []).slice(0, 2).map((g) => (
+          <span key={g}>
+            <button
+              className={styles["genre-tag"]}
+              aria-label={"Filter by genre " + g}
+              onClick={() => onGenre(g)}
+            >
+              {g}
+            </button>
+          </span>
+        ))}
+        {group.length > 1 && <span>{group.length} owned copies</span>}
+      </div>
+    </article>
+  );
+}
