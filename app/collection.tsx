@@ -8,6 +8,7 @@ import { useMasterYears } from "./collection/use-master-years";
 import { CollectionFilters, initialFilters } from "./collection/filters";
 import { RecordCard } from "./collection/record-card";
 import { RecordDetails } from "./collection/record-details";
+import { RandomSet } from "./sets/random-set";
 import styles from "./collection/collection.module.css";
 export default function Collection({
   mode = "collection",
@@ -107,6 +108,20 @@ export default function Collection({
             addGenre={addGenre}
           />
         </>
+      )}
+      {mode === "sets" && (
+        <RandomSet
+          standalone
+          yearLookup={lookup}
+          entries={entries}
+          corrections={years}
+          masters={lookup.masters}
+          disabled={loading || !!collection.error}
+          onOpen={(records, element) => {
+            trigger.current = element;
+            setSelected(records);
+          }}
+        />
       )}
       <a
         className={styles["collection-attribution"]}

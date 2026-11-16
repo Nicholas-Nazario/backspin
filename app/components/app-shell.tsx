@@ -32,6 +32,22 @@ export async function AppShell({
           </span>
         </h1>
         {s && (
+          <nav className={styles.navigation} aria-label="Main navigation">
+            <Link
+              href="/"
+              aria-current={active === "sets" ? "page" : undefined}
+            >
+              Make a set
+            </Link>
+            <Link
+              href="/collection"
+              aria-current={active === "collection" ? "page" : undefined}
+            >
+              Collection
+            </Link>
+          </nav>
+        )}
+        {s && (
           <details className={styles["settings"]}>
             <summary>
               <GearSixIcon size={18} aria-hidden="true" /> Settings
