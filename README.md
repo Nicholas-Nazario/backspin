@@ -2,7 +2,7 @@
 
 Dig your crates.
 
-Stage 2: local collection explorer with search, filters, original-year lookup, and personal corrections. No infrastructure has been provisioned.
+Stages 1–3: Discogs integration, collection explorer, random sets, and manual listening controls. No infrastructure has been provisioned.
 
 ## Run locally
 
@@ -11,6 +11,12 @@ Use Node 24 and npm. Run `npm ci`, copy `.env.example` to `.env.local`, then run
 Register an application at https://www.discogs.com/settings/developers and put its consumer key/secret directly into `.env.local`. Set its callback to `http://localhost:3000/api/auth/callback`. Set `SESSION_KEY` to the output of `openssl rand -hex 32`. Never paste secrets into chat or commit them. `APP_URL` must match the browser origin. Visit http://localhost:3000 and connect.
 
 `npm test`, `npm run typecheck`, and `npm run build` verify the foundation. No mocked collection is presented as a real connection. Check private collection access with your authorized account. Click a record title to fetch release genres/styles. Collection pages load progressively (50 instances per upstream request); the grid shows 60 cards initially with a show-more control. Collection snapshots reload after five minutes.
+
+## Random sets
+
+The home page (`/`) opens the random set builder directly. Use **Collection** in the navigation to browse your records at `/collection`. Search and filters belong to Collection; Surprise me draws from the whole collection; explicit Genre, Style, and Era modes constrain the mix. Mixes are intentionally ephemeral, not saved playlists; navigating away clears the current mix. Choose an album count with the number field or slider, then adjust artist, genre, and era variety from Not much to A lot. A short animated shuffle reveals the picks; reduced-motion preferences skip the delay. The set uses the selected mode, avoids duplicate albums, and returns a shorter set if needed. Era mode and era variety use resolved original years; unknown dates are excluded from era modes. Era mode includes a year-lookup control. Genre and style options come from your collection. Swaps use the displayed mix’s mode until you generate a new mix; reshuffle uses the currently selected mode. Incompatible pins block generation until you explicitly release them. Shuffle again to apply changed options. Mixes appear as a responsive grid of large album covers with genre tags. Use each record’s pin, swap, drag handle, and remove controls to shape the moment. Reshuffling retains pinned records and their positions where the mix length permits. Unpin to swap; removing a pin also unpins it. Drag the grip with a mouse or touch to reorder. Keyboard users can focus the grip, press Space, use arrow keys, then press Space to drop or Escape to cancel. Use the play icon on a mix card to set it as now playing. The compact control bar offers previous, next, and stop; these are manual display controls, not audio playback. Navigation follows the current mix order without wrapping. A swapped/removed playing record remains on the turntable, marked outside the mix, until changed or stopped. Now-playing state clears on page reload/navigation. History is intentionally excluded: no “mark played,” listening log, or persistence. See `docs/STAGE_3_RANDOM_SETS.md`.
+
+Run the additional browser fixture with `node --env-file=.env.local --import tsx tests/random-set.browser.ts` against the dev server.
 
 ## Credential handling
 
