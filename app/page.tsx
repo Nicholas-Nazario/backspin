@@ -8,8 +8,8 @@ export default async function Home({
 }) {
   const { error } = await searchParams;
   return (
-    <AppShell active="collection" error={error}>
-      <Collection />
+    <AppShell active="sets" error={error}>
+      <Collection mode="sets" />
     </AppShell>
   );
 }
