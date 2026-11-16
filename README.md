@@ -2,48 +2,34 @@
 
 Dig your crates.
 
-Stages 1–3: Discogs integration, collection explorer, random sets, and manual listening controls. No infrastructure has been provisioned.
+Backspin helps you rediscover records you already own and choose what to put on next. Connect your Discogs collection, explore your shelves, and build a short mix for a listening session.
 
-## Run locally
+## Find your next record
 
-Use Node 24 and npm. Run `npm ci`, copy `.env.example` to `.env.local`, then run `npm run dev`.
+Browse your collection with album artwork, search, and filters for artist, genre, style, era, format, and folder. Open a record for more details.
 
-Register an application at https://www.discogs.com/settings/developers and put its consumer key/secret directly into `.env.local`. Set its callback to `http://localhost:3000/api/auth/callback`. Set `SESSION_KEY` to the output of `openssl rand -hex 32`. Never paste secrets into chat or commit them. `APP_URL` must match the browser origin. Visit http://localhost:3000 and connect.
+Era browsing uses the music’s original release year rather than the date of your pressing. Look up missing years or add personal corrections; unknown years stay unknown.
 
-`npm test`, `npm run typecheck`, and `npm run build` verify the foundation. No mocked collection is presented as a real connection. Check private collection access with your authorized account. Click a record title to fetch release genres/styles. Collection pages load progressively (50 instances per upstream request); the grid shows 60 cards initially with a show-more control. Collection snapshots reload after five minutes.
+## Build a mix
 
-## Random sets
+Start with **Surprise me** across your collection, or narrow your picks by **Genre**, **Style**, or **Era**. Choose how many albums to include and how much artist, genre, and era variety you want.
 
-The home page (`/`) opens the random set builder directly. Use **Collection** in the navigation to browse your records at `/collection`. Search and filters belong to Collection; Surprise me draws from the whole collection; explicit Genre, Style, and Era modes constrain the mix. Mixes are intentionally ephemeral, not saved playlists; navigating away clears the current mix. Choose an album count with the number field or slider, then adjust artist, genre, and era variety from Not much to A lot. A short animated shuffle reveals the picks; reduced-motion preferences skip the delay. The set uses the selected mode, avoids duplicate albums, and returns a shorter set if needed. Era mode and era variety use resolved original years; unknown dates are excluded from era modes. Era mode includes a year-lookup control. Genre and style options come from your collection. Swaps use the displayed mix’s mode until you generate a new mix; reshuffle uses the currently selected mode. Incompatible pins block generation until you explicitly release them. Shuffle again to apply changed options. Mixes appear as a responsive grid of large album covers with genre tags. Use each record’s pin, swap, drag handle, and remove controls to shape the moment. Reshuffling retains pinned records and their positions where the mix length permits. Unpin to swap; removing a pin also unpins it. Drag the grip with a mouse or touch to reorder. Keyboard users can focus the grip, press Space, use arrow keys, then press Space to drop or Escape to cancel. Use the play icon on a mix card to set it as now playing. The compact control bar offers previous, next, and stop; these are manual display controls, not audio playback. Navigation follows the current mix order without wrapping. A swapped/removed playing record remains on the turntable, marked outside the mix, until changed or stopped. Now-playing state clears on page reload/navigation. History is intentionally excluded: no “mark played,” listening log, or persistence. See `docs/STAGE_3_RANDOM_SETS.md`.
+Shape the result as you go:
 
-Run the additional browser fixture with `node --env-file=.env.local --import tsx tests/random-set.browser.ts` against the dev server.
+- Pin records to keep them when you reshuffle.
+- Swap a pick, remove an album, or drag records into a new order.
+- Reorder with the keyboard using Space to pick up, arrow keys to move, and Space to drop or Escape to cancel.
 
-## Credential handling
+Mixes avoid duplicate albums and may be shorter when there aren’t enough eligible records. They are temporary: leaving the page or reloading clears the mix.
 
-Discogs handles passwords. OAuth access credentials live in an AES-256-GCM encrypted, authenticated browser cookie, HttpOnly, SameSite=Lax, Secure in production, with an eight-hour absolute expiry. Only transient request processing and bounded in-memory cache keys use them server-side. SQLite stores expiring one-time OAuth attempt IDs, not tokens. Callback values and cookies must never be logged by hosting/proxy tooling; the application sends same-origin referrer headers and no-referrer on the OAuth callback. Configure any observability to redact query strings and cookies. Logout clears local cookies/cache, not Discogs authorization. A copied cookie can remain valid until expiry: immediate session revocation is not implemented. Rotate the encryption key to invalidate all sessions.
+## Follow your listening
 
-The single-process scheduler spaces upstream calls and honors observed rate-limit exhaustion/429s. It does not retry indefinitely or bypass limits. Collection and release cache entries expire after five minutes, are scoped by account token, capped at 100 entries, and are never served stale. This design is for one application process; multiple Machines need a coordinated limiter/cache architecture. Large imports are deliberately paginated, not automatically expanded into thousands of detail requests.
+Mark a record as now playing, then use previous, next, and stop to follow your mix. If you remove or swap the playing record, it stays on the turntable display until you change it or stop.
 
-## Original-year cache and code organization
+Backspin accompanies physical listening. These controls update the display; they do not play audio or detect your turntable. Listening history is not recorded, and now playing clears when you leave the page or reload.
 
-Original years are stored in a shared SQLite `master_years` table keyed by Discogs master ID, with source, fetched-at, and expiry timestamps. Fresh entries are restored automatically on collection load, including results originally fetched for another user. Only missing/expired masters require Discogs requests. The five-hour TTL (`MASTER_YEAR_TTL` in `lib/year-data.ts`) refreshes before the six-hour freshness boundary. Expired rows are removed when the cache is read and expired browser results are removed too. Missing years are cached as unknown; failed requests are not cached. The refresh icon bypasses the cache. No collection membership, artwork, credentials, or user identifiers are stored in this shared table. Personal corrections remain in `original_years`, scoped by user and release, and take precedence over shared years.
+## Connect your collection
 
-`app/collection.tsx` composes focused components and hooks under `app/collection/`. Pure filtering/year rules live in `lib/collection.ts`; SQL lives in focused data modules with ordered migrations. Global CSS covers base elements; page and collection CSS Modules scope feature styles. No inline CSS is used, including for the native progress indicator. `npm run format` and `npm run format:check` maintain readable formatting.
+Backspin uses Discogs authorization, so you sign in with Discogs without giving Backspin your password. Your collection loads progressively. Disconnecting clears your local session; you can revoke Backspin’s authorization in Discogs settings.
 
-Run browser fixtures against the dev server with `node --env-file=.env.local --import tsx tests/explorer.browser.ts` and `node --env-file=.env.local --import tsx tests/year-recovery.browser.ts`. They isolate account data and intercept Discogs calls. Cache persistence/expiry and correction isolation are also covered by `npm test`.
-
-## SQLite and backups
-
-The default file is `data/mystery.sqlite`; never place it on Fly's ephemeral root filesystem in production. Set `DATABASE_PATH=/data/mystery.sqlite` and mount the volume. Migrations run idempotently on database initialization.
-
-For a consistent local backup: `mkdir -p backups` then `npm run backup -- backups/mystery.sqlite`. Supply DATABASE_PATH in the shell if backing up a different file; the script does not load `.env.local`. Copy backups to a separate host/storage location with access controls and an explicit retention policy. SQLite's backup API includes committed WAL changes. Do not copy a live database file by itself.
-
-To restore: stop the app, preserve the existing database/WAL/SHM together for rollback, remove the old database/WAL/SHM from the destination, place the backup at DATABASE_PATH, check ownership, run SQLite `PRAGMA integrity_check`, then restart and verify expected data. Never restore over an active process. Automated off-machine backup scheduling is not yet configured; it is a production prerequisite. Tests exercise backup/restore consistency.
-
-## Fly preparation
-
-Dockerfile builds a standalone Next server running as the node user. `fly.toml` is a template: set a unique app name and HTTPS APP_URL, provision one volume, ensure the mounted directory is writable by the node user, and set consumer credentials and SESSION_KEY via Fly Secrets. Use exactly one Machine; separate volume copies do not share data. Do not run database migrations in a Fly release command because the volume is not mounted there. Start with 512MB only as a measurement target. No deployment has been performed. The production image intentionally excludes TypeScript tooling; run backups with an appropriate operational tool/container using SQLite's backup API and arrange off-machine transfer before public use.
-
-## Remaining live checks
-
-The user verified live OAuth connection, collection preview, artwork, pagination, and release metadata in the local app. Explicit private-account coverage, cancellation/revocation, observed rate headers, long sessions, Docker/Fly operation, and artwork licensing remain separate checks. Automated fixtures do not establish those live behaviors.
+To run Backspin locally, follow the [development and operations guide](docs/DEVELOPMENT.md), which covers setup, verification, security, backups, and deployment preparation.
