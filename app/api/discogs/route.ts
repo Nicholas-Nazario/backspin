@@ -1,3 +1,5 @@
+import { database } from "../../../lib/db";
+import { resolveMasterYear } from "../../../lib/year-data";
 import { session } from "../../../lib/session";
 import { json, request, UpstreamError } from "../../../lib/discogs";
 const headers = { "Cache-Control": "private, no-store", Vary: "Cookie" };
@@ -33,6 +35,25 @@ export async function GET(req: Request) {
       { status: 400, headers },
     );
   try {
+    if (kind === "master") {
+      const result = await resolveMasterYear(
+        database(),
+        Number(q.get("id")),
+        async () => {
+          const data = await (await request(path, s.token)).json();
+          return data.year;
+        },
+        q.get("refresh") === "1",
+      );
+      return Response.json(
+        {
+          data: { id: result.masterId, year: result.year },
+          expiresAt: result.expiresAt,
+          source: result.source,
+        },
+        { headers },
+      );
+    }
     const result = await json(path, s.token);
     return Response.json(
       { data: result.value, expiresAt: result.expires },
