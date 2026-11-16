@@ -1,0 +1,139 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid #ded4bc;
+  position: relative;
+}
+.title {
+  font-size: 28px;
+  letter-spacing: -0.055em;
+  margin: 0;
+  line-height: 1.2;
+}
+.title span {
+  color: #ef7257;
+  margin-left: 10px;
+  display: inline-flex;
+  vertical-align: middle;
+}
+.settings {
+  position: relative;
+  z-index: 5;
+}
+.settings summary {
+  list-style: none;
+  cursor: pointer;
+  border-radius: 22px;
+  color: #655e50;
+  font-size: 13px;
+  padding: 8px 0 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.settings summary::-webkit-details-marker {
+  display: none;
+}
+.settings summary:focus-visible {
+  outline: 3px solid #276b51;
+  outline-offset: 3px;
+}
+.settings-menu {
+  position: absolute;
+  right: 0;
+  width: min(300px, calc(100vw - 36px));
+  background: #fffaf0;
+  border: 1px solid #c8bda6;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px #302b2420;
+  margin-top: 10px;
+}
+.settings-menu p {
+  font-size: 14px;
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+.settings-menu .small {
+  font-size: 12px;
+  margin: 16px 0 0;
+}
+.welcome {
+  text-align: center;
+  padding: 55px 20px;
+}
+.record {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(#282822 0 3px, #39392f 4px 5px);
+  margin: auto;
+  color: #edb74b;
+  display: grid;
+  place-items: center;
+  font-size: 65px;
+}
+.welcome p {
+  max-width: 580px;
+  margin: 22px auto;
+  line-height: 1.6;
+}
+.small {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.notice {
+  background: #f9dfad;
+  padding: 18px;
+  border-radius: 12px;
+}
+.footer {
+  border-top: 1px solid #c8bda6;
+  margin-top: 50px;
+  padding-top: 20px;
+  color: #655e50;
+  font-size: 13px;
+  line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .title {
+    font-size: 24px;
+  }
+}
+.navigation {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.navigation a {
+  color: #817764;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 9px 13px;
+  border-radius: 20px;
+}
+.navigation a[aria-current="page"] {
+  background: #d8e6d0;
+  color: #265d45;
+  font-weight: 600;
+}
+.navigation a:hover {
+  color: #276b51;
+}
+@media (max-width: 700px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .navigation {
+    order: 3;
+    width: 100%;
+    margin: 0;
+  }
+  .settings {
+    margin-left: auto;
+  }
+}
