@@ -1,6 +1,6 @@
 # Visual identity: a living-room record cafe
 
-Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustrated listening bar: spinning vinyl, plants, flowers, coffee, soft light, and a friendly hand-built turntable booth. This is a direction document, not a finished design system. The proposed listening-scene art direction and staged delivery are in [Phase 4 plan](PHASE_4_PLAN.md).
+Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustrated listening bar: spinning vinyl, plants, flowers, coffee, soft light, and a friendly hand-built turntable booth. This is a direction document, not a finished design system.
 
 ## Visual language
 
