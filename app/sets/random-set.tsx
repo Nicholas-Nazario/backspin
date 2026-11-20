@@ -12,6 +12,8 @@ import {
 import { Entry } from "../../lib/collection";
 import { VarietyLevel } from "../../lib/random-set";
 import { useListening } from "../listening/use-listening";
+import type { LightingPreference } from "../../lib/room-lighting";
+import { ListeningRoom } from "../listening/listening-room";
 import { ListeningControls } from "../listening/listening-controls";
 import { MixQueue } from "./mix-queue";
 
@@ -26,6 +28,8 @@ export function RandomSet({
   masters,
   yearLookup,
   disabled,
+  collectionError,
+  onRefresh,
   onOpen,
 }: {
   standalone?: boolean;
@@ -34,8 +38,14 @@ export function RandomSet({
   masters: Record<number, number | null>;
   yearLookup: ReturnType<typeof useMasterYears>;
   disabled: boolean;
+  collectionError: string;
+  onRefresh: () => void;
   onOpen: (group: Entry[], trigger: HTMLElement) => void;
 }) {
+  const [lightingPreference, setLightingPreference] =
+    useState<LightingPreference>("auto");
+  const [motionEnabled, setMotionEnabled] = useState(true);
+  const [roomOpen, setRoomOpen] = useState(false);
   const [open, setOpen] = useState(standalone);
   const mix = useMix(entries, corrections, masters, disabled, open);
   const {
@@ -240,7 +250,12 @@ export function RandomSet({
               <span>Finding the next records for your rotation.</span>
             </div>
           )}
-          {!disabled && <ListeningControls listening={listening} />}
+          {!disabled && (
+            <ListeningControls
+              listening={listening}
+              onEnterRoom={() => setRoomOpen(true)}
+            />
+          )}
           {generated && !disabled && !revealing && (
             <>
               {generated.ids.length < generated.requestedCount && (
@@ -282,6 +297,22 @@ export function RandomSet({
             </>
           )}
         </div>
+      )}
+      {roomOpen && (
+        <ListeningRoom
+          lightingPreference={lightingPreference}
+          onLightingChange={setLightingPreference}
+          entries={entries}
+          motionEnabled={motionEnabled}
+          onMotionChange={setMotionEnabled}
+          listening={listening}
+          corrections={corrections}
+          masters={masters}
+          busy={disabled && !collectionError}
+          error={collectionError}
+          onRetry={onRefresh}
+          onClose={() => setRoomOpen(false)}
+        />
       )}
     </section>
   );

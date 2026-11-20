@@ -34,6 +34,38 @@ Original years are stored in a shared SQLite `master_years` table keyed by Disco
 
 Run browser fixtures against the dev server with `node --env-file=.env.local --import tsx tests/explorer.browser.ts` and `node --env-file=.env.local --import tsx tests/year-recovery.browser.ts`. They isolate account data and intercept Discogs calls. Cache persistence/expiry and correction isolation are also covered by `npm test`.
 
+## Listening-room verification
+
+The 4B listening room is a same-route native dialog owned by the existing mix component; entering/leaving does not remount the mix or collection hooks. `ListeningActions` shares navigation/stop semantics with the now-playing strip. The room reads current entries and original-year rules directly, shows a neutral fallback for missing/failed images, and hides collection artwork/metadata during refresh/error states while preserving the selected ID. Expired snapshots are not retained by a separate scene cache.
+
+`app/listening/` contains the room, dialog content and CSS Module. `public/listening-room/` retains editable original vector source, passive scene assets, their MIT notice and layer notes. Fredoka and Nunito Sans are self-hosted under SIL OFL 1.1; notices and source hashes are retained in `public/fonts/`. No external font request is made. The standalone build and Docker image include public assets.
+
+Run `node --env-file=.env.local --import tsx tests/listening-room.browser.ts` against the local server, using the same session key as the server. Like the existing browser fixtures, it uses a fabricated isolated account and intercepts Discogs requests. It covers mix/order/pin continuity, navigation boundaries, nested-dialog Escape/focus, uncropped artwork shapes and failures, original year, mobile/TV layouts, expiry with success/failure/retry, removed records, stop and reload. Screenshots are saved under `/tmp/backspin-room-*.png`. Fixture checks do not verify a real Discogs account, cover resolution/licensing, or room-distance TV readability.
+
+The user reviewed the static room in the local app and approved 4B on November 16, 2026. This is visual acceptance, separate from the automated fixture checks. 4C now adds optional ambient motion and the shelf-swap transition to that daytime composition. The user approved 4C on November 20, 2026. The requested 4D increment adds a next-record preview and automatic/manual lighting; fullscreen and idle/reveal controls remain unimplemented. The 4B visual checkpoint is approved. 4C visual motion is approved; sustained-session comfort and TV-distance viewing remain pending checks. No infrastructure has been provisioned or deployed.
+
+### Motion ownership and verification
+
+`lib/room-motion.ts` is a pure ID/phase reducer. `use-room-motion.ts` owns media/visibility listeners and one timeout for the active swap phase, cleaned up on interruption and unmount. It never caches collection metadata. The existing listening hook remains the selection owner; the room temporarily presents the outgoing ID until the incoming record reaches the player, then switches identity once. A second navigation request during a swap settles on the latest selection. Expiry/missing data clears old artwork immediately. Pausing, reduced motion, compact layout or hiding the tab cancels choreography and settles on the selected ID.
+
+`room-motion.module.css` owns phase durations, the eighteen-second circular vinyl rotation and a nine-second ±0.6° leaf sway. The hook reads the CSS duration once per phase, handling both `ms` and optimizer-normalized `s`. There are no per-frame React updates, repeat JS animation timers or new upstream requests. Tonearm rotation is performed in its unprojected plane, then flattened back into the player perspective. The two decorative shelf slots alternate without recording personal collection membership or listening history. Manual motion preference survives room entry/exit within this page; it is not persisted across reload.
+
+`scripts/prepare-room-art.py` regenerates passive scene bases and `room-parts.tsx` from the approved editable SVG. It is a manual asset-preparation tool using Python's standard library, not an app/build dependency. Run Prettier on the generated TSX after regeneration. Mobile retains the animated record but simplifies record changes to a fade. Reduced motion always disables scene animation. Steam was omitted to keep the room calm.
+
+The room typography is scoped against collection-page heading rules. Dense identity blocks use the open space above the jacket, clamp long titles to two/three lines according to available scene width, and keep genre labels on one row; full text stays available in details. Fixture bounds checks include an unusually long artist/title pair at 720p–4K.
+
+The room browser fixture also covers full transition order and one-time identity commit, actual CSS rotation, manual pause/return, rapid navigation, visibility-event simulation, changing reduced-motion preference, compact changes, refresh during a swap and stop cleanup. `BACKSPIN_TEST_URL` optionally points this fixture at an isolated production server; existing fixture callers default to localhost:3000. Visibility simulation validates event handling, not operating-system tab throttling. Accelerated clocks do not establish thirty minutes of real viewing comfort.
+
+### Bottom-bar preview and lighting
+
+`room-controls.tsx` owns the visible control bar. The small next-record preview derives directly from `listening.next`, including navigation boundaries, reordering and outside-mix semantics; it has no separate queue/cache state. The caller clears it while collection data is loading or failed. It loads only the eligible next cover and uses the existing uncropped cover/failure treatment.
+
+`lib/room-lighting.ts` owns device-local cutoffs: dawn 05:00–08:00, day 08:00–17:00, dusk 17:00–20:00, night 20:00–05:00. `use-room-lighting.ts` checks Automatic at minute boundaries and on focus/visibility restoration. It stops its one timer while hidden, unsubscribes in manual mode, and cleans up on exit. No geolocation, weather service, dependency or persistent setting is introduced. The preference belongs to the existing mix owner, so manual selection survives room entry/exit within the page and resets to Automatic after reload.
+
+`prepare-room-art.py` generates four passive scene/player palettes from the same original source; moving leaves/sleeves and HTML text/controls use matching scoped CSS variables. Album images are not recolored or filtered. Lighting changes update assets/attributes without remounting the motion workflow or resetting the mix. Controls remain visible; fullscreen and idle/reveal work are outside this requested increment.
+
+Run `node --env-file=.env.local --import tsx tests/room-display.browser.ts` against the local server (or set `BACKSPIN_TEST_URL` for an isolated production fixture). It checks manual palettes, automatic cutoffs and midnight, manual preference persistence, clock resume after hidden state, cover preservation, next-record order/boundaries/outside-mix state, expired/error preview removal and retry, responsive layouts, selector contrast, and lighting changes during swaps. Screenshots are written to `/tmp/backspin-room-{dawn,day,dusk,night}.png`. These are isolated fixture checks, not verified live-account or real-TV behavior.
+
 ## SQLite and backups
 
 The default file is `data/mystery.sqlite`; never place it on Fly's ephemeral root filesystem in production. Set `DATABASE_PATH=/data/mystery.sqlite` and mount the volume. Migrations run idempotently on database initialization.

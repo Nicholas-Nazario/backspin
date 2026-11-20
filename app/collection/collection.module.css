@@ -541,3 +541,13 @@
     animation: none;
   }
 }
+
+.art.fullArtwork {
+  border-radius: 0;
+  background: #f1ebdc;
+}
+
+.art.fullArtwork img {
+  object-position: center bottom;
+  display: block;
+}

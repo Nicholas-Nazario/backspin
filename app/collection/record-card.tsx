@@ -2,16 +2,22 @@ import { useState } from "react";
 import { VinylRecordIcon } from "@phosphor-icons/react";
 import { Entry } from "../../lib/collection";
 import styles from "./collection.module.css";
-export function Cover({ entry }: { entry: Entry }) {
+export function Cover({
+  entry,
+  fullArtwork = false,
+}: {
+  entry: Entry;
+  fullArtwork?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
   const b = entry.basic_information;
   return (
-    <div className={styles["art"]}>
+    <div className={`${styles.art} ${fullArtwork ? styles.fullArtwork : ""}`}>
       {!failed && (b.cover_image || b.thumb) ? (
         <img
           src={b.cover_image || b.thumb}
           alt={"Cover of " + b.title}
-          loading="lazy"
+          loading={fullArtwork ? "eager" : "lazy"}
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
         />

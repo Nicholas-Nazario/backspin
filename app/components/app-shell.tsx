@@ -56,6 +56,7 @@ export async function AppShell({
               <p>
                 Connected as <strong>{s.username}</strong>
               </p>
+              <Link href="/artwork-credits">Artwork credits</Link>
               <form action="/api/auth/disconnect" method="post">
                 <button>
                   <SignOutIcon size={18} aria-hidden="true" /> Disconnect

@@ -1,0 +1,137 @@
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  min-height: 104px;
+  padding: 16px 24px;
+  background: var(--room-panel);
+  color: var(--room-ink);
+  border-top: 1px solid var(--room-border);
+}
+
+.controls button {
+  min-height: 44px;
+}
+
+.playback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 210px;
+  min-height: 48px;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.cover {
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.cover svg {
+  width: 24px;
+  height: 24px;
+}
+
+.cover small {
+  display: none;
+}
+
+.previewText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.previewText > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewText strong {
+  font-size: 14px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lighting {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.lighting > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lighting select {
+  width: 180px;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: var(--room-panel);
+  color: var(--room-ink);
+  border-color: var(--room-border);
+}
+
+.lighting select:focus-visible {
+  outline-color: var(--room-link);
+}
+
+.secondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.secondary button {
+  font-size: 14px;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--room-ink);
+  border: 1px solid var(--room-border);
+}
+
+@media (max-width: 1400px) {
+  .controls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 700px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  .controls {
+    padding: 16px;
+    margin-top: auto;
+  }
+
+  .playback {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .preview {
+    width: min(100%, 300px);
+  }
+
+  .secondary {
+    justify-content: center;
+  }
+}

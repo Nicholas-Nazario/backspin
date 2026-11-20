@@ -1,0 +1,321 @@
+@font-face {
+  font-family: "Backspin Fredoka";
+  src: url("/fonts/fredoka.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Backspin Nunito";
+  src: url("/fonts/nunito-sans.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+}
+
+.room {
+  --room-ink: #302b24;
+  --room-panel: #fff6df;
+  --room-border: #c8bda6;
+  --room-frame: #efe2bf;
+  --room-link: #276b51;
+  --room-leaf: #276b51;
+  --room-leaf-vein: #5a8c62;
+  --room-sleeve-incoming: #b7c8be;
+  --room-sleeve-outgoing: #d8ad77;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: var(--room-frame);
+  color: var(--room-ink);
+  font-family: "Backspin Nunito", Arial, sans-serif;
+  overflow: auto;
+}
+
+.room[data-lighting="dawn"] {
+  --room-frame: #e9d4b5;
+  --room-panel: #f7e8d3;
+  --room-border: #c4ac8b;
+  --room-sleeve-incoming: #cdd1bf;
+}
+
+.room[data-lighting="dusk"] {
+  --room-frame: #bca58d;
+  --room-panel: #ead6c1;
+  --room-border: #a58d75;
+  --room-sleeve-incoming: #9ca99c;
+  --room-sleeve-outgoing: #b6926a;
+}
+
+.room[data-lighting="night"] {
+  --room-ink: #f5ebd4;
+  --room-panel: #26231f;
+  --room-border: #75664f;
+  --room-frame: #33362b;
+  --room-link: #c4d9aa;
+  --room-leaf: #354c3e;
+  --room-leaf-vein: #446f4d;
+  --room-sleeve-incoming: #6e8576;
+  --room-sleeve-outgoing: #947853;
+  --listening-action-ink: #c4d9aa;
+  --listening-action-hover: #354c3e;
+}
+
+.room[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.room::backdrop {
+  background: #302b24;
+}
+
+:global(body):has(.room[open]) {
+  overflow: hidden;
+}
+
+.viewport {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+
+.scene {
+  width: min(100cqw, calc(100cqh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  position: relative;
+  container-type: inline-size;
+}
+
+.background {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.jacket {
+  position: absolute;
+  left: 11.8304%;
+  top: 24.6032%;
+  width: 16.9643%;
+}
+
+.identity {
+  position: absolute;
+  left: 35.2679%;
+  top: 21%;
+  width: 35%;
+  overflow-wrap: anywhere;
+}
+
+.artist,
+.identity .title {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: "Backspin Fredoka", "Trebuchet MS", sans-serif;
+}
+
+.artist {
+  font-size: 1.61cqw;
+  line-height: 1.2;
+  -webkit-line-clamp: 2;
+  font-weight: 400;
+}
+
+.identity .title {
+  font-size: 2.59cqw;
+  line-height: 1.08;
+  -webkit-line-clamp: 2;
+  font-weight: 500;
+  margin-top: 0.8cqw;
+  letter-spacing: normal;
+}
+
+.identity[data-long="true"] {
+  top: 16%;
+}
+
+.identity[data-long="true"] .artist {
+  font-size: 1.3cqw;
+}
+
+.identity[data-long="true"] .title {
+  font-size: 1.8cqw;
+  -webkit-line-clamp: 3;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4em 0.8em;
+  margin: 1.2cqw 0 0.2cqw;
+  font-size: 1.16cqw;
+}
+
+.tags span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attribution {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--room-ink);
+  font-size: max(12px, 0.99cqw);
+  text-underline-offset: 0.2em;
+}
+
+.unavailable {
+  position: absolute;
+  inset: 12% 24%;
+  padding: 28px;
+  border: 2px solid var(--room-border);
+  border-radius: 16px;
+  background: var(--room-panel);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  overflow: auto;
+}
+
+.unavailable h2,
+.unavailable p {
+  margin: 0;
+}
+
+.details {
+  width: min(620px, calc(100vw - 32px));
+  max-height: 85dvh;
+  padding: 28px;
+  border: 1px solid var(--room-border);
+  border-radius: 18px;
+  background: var(--room-panel);
+  color: var(--room-ink);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  font-family: "Backspin Nunito", Arial, sans-serif;
+}
+
+.details::backdrop {
+  background: #302b2488;
+}
+
+.details a {
+  color: var(--room-link);
+}
+
+.details h2 {
+  font-family: "Backspin Fredoka", "Trebuchet MS", sans-serif;
+  font-weight: 500;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@container (max-width: 1250px) {
+  .identity[data-long="true"] .title {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 700px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  .viewport {
+    flex: initial;
+    min-height: auto;
+    container-type: normal;
+  }
+
+  .scene {
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: auto;
+    padding: 28px 24px;
+    display: grid;
+    justify-items: center;
+    gap: 24px;
+  }
+
+  .background {
+    display: none;
+  }
+
+  .jacket {
+    position: static;
+    width: min(75vw, 340px);
+  }
+
+  .identity {
+    position: static;
+    width: 100%;
+    text-align: center;
+  }
+
+  .artist,
+  .identity[data-long="true"] .artist {
+    font-size: 22px;
+  }
+
+  .identity .title,
+  .identity[data-long="true"] .title {
+    font-size: 32px;
+    margin-top: 12px;
+    -webkit-line-clamp: 3;
+  }
+
+  .tags {
+    justify-content: center;
+    font-size: 16px;
+    margin-top: 16px;
+  }
+
+  .attribution {
+    font-size: 14px;
+  }
+
+  .unavailable {
+    position: static;
+    padding: 20px;
+  }
+}
+
+.jacket[data-reveal="true"],
+.identity[data-reveal="true"] {
+  animation: reveal-record 180ms ease-out;
+}
+
+@keyframes reveal-record {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jacket[data-reveal="true"],
+  .identity[data-reveal="true"] {
+    animation: none;
+  }
+}

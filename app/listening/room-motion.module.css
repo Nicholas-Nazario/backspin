@@ -1,0 +1,218 @@
+.motion[data-transition="clear"] {
+  --swap-duration: 300ms;
+}
+.motion[data-transition="lift"] {
+  --swap-duration: 300ms;
+}
+.motion[data-transition="file"] {
+  --swap-duration: 650ms;
+}
+.motion[data-transition="take"] {
+  --swap-duration: 650ms;
+}
+.motion[data-transition="place"] {
+  --swap-duration: 350ms;
+}
+.motion[data-transition="settle"] {
+  --swap-duration: 250ms;
+}
+
+.artwork {
+  pointer-events: none;
+  overflow: visible;
+}
+
+.desktopArtwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.compactArtwork {
+  display: none;
+}
+
+.discSpin {
+  transform-origin: 0 0;
+  animation: record-turn 18s linear infinite;
+  animation-play-state: paused;
+}
+
+.leafSway {
+  transform-origin: 0 0;
+  animation: leaf-sway 9s ease-in-out -3s infinite alternate;
+  animation-play-state: paused;
+}
+
+.artwork[data-running="true"] .leafSway,
+.artwork[data-running="true"][data-phase="idle"] .discSpin {
+  animation-play-state: running;
+}
+
+.armLift,
+.armSwing,
+.discTravel {
+  transform-origin: 0 0;
+}
+
+.armLift,
+.armSwing {
+  transition: transform var(--swap-duration, 250ms) ease-in-out;
+}
+
+.artwork[data-phase="clear"] .armSwing,
+.artwork[data-phase="lift"] .armSwing,
+.artwork[data-phase="file"] .armSwing,
+.artwork[data-phase="take"] .armSwing,
+.artwork[data-phase="place"] .armSwing {
+  transform: rotate(-55deg);
+}
+
+.artwork[data-phase="clear"] .armLift,
+.artwork[data-phase="lift"] .armLift,
+.artwork[data-phase="file"] .armLift,
+.artwork[data-phase="take"] .armLift,
+.artwork[data-phase="place"] .armLift {
+  transform: translateY(-8px);
+}
+
+.artwork[data-running="false"] .armSwing,
+.artwork[data-running="false"] .armLift {
+  transition: none;
+}
+
+.artwork[data-phase="lift"] .discTravel {
+  animation: disc-lift var(--swap-duration) ease-in-out both;
+}
+
+.artwork[data-phase="place"] .discTravel {
+  animation: disc-lift var(--swap-duration) ease-in-out reverse both;
+}
+
+.returningRecord,
+.takingRecord {
+  transform-origin: 0 0;
+  animation-duration: var(--swap-duration);
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.returningRecord {
+  animation-name: file-right;
+}
+
+.takingRecord {
+  animation-name: file-left;
+  animation-direction: reverse;
+}
+
+.artwork[data-slot="1"] .returningRecord {
+  animation-name: file-left;
+}
+
+.artwork[data-slot="1"] .takingRecord {
+  animation-name: file-right;
+}
+
+.sleevePaper {
+  animation: sleeve-appear var(--swap-duration) ease both;
+}
+
+.takingRecord .sleevePaper {
+  animation-direction: reverse;
+}
+
+@keyframes record-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes leaf-sway {
+  from {
+    transform: rotate(-0.6deg);
+  }
+  to {
+    transform: rotate(0.6deg);
+  }
+}
+
+@keyframes disc-lift {
+  from {
+    transform: translateY(0) scaleY(1);
+  }
+  to {
+    transform: translateY(-121px) scaleY(1.666667);
+  }
+}
+
+@keyframes file-right {
+  0% {
+    transform: translate(0, 0) scale(1, 0.7);
+  }
+  35% {
+    transform: translate(133px, 100px) scale(1, 1);
+  }
+  78% {
+    transform: translate(133px, 505px) scale(0.5, 1);
+  }
+  100% {
+    transform: translate(133px, 505px) scale(0.04575, 1);
+  }
+}
+
+@keyframes file-left {
+  0% {
+    transform: translate(0, 0) scale(1, 0.7);
+  }
+  35% {
+    transform: translate(5px, 100px) scale(1, 1);
+  }
+  78% {
+    transform: translate(5px, 511px) scale(0.5, 1);
+  }
+  100% {
+    transform: translate(5px, 511px) scale(0.04575, 1);
+  }
+}
+
+@keyframes sleeve-appear {
+  0%,
+  5% {
+    opacity: 0;
+  }
+  30%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 700px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  .desktopArtwork {
+    display: none;
+  }
+  .compactArtwork {
+    display: block;
+    order: 3;
+    width: min(100%, 420px);
+  }
+  .compactArtwork[data-record="false"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discSpin,
+  .leafSway,
+  .discTravel,
+  .returningRecord,
+  .takingRecord,
+  .sleevePaper {
+    animation: none;
+  }
+  .armSwing,
+  .armLift {
+    transition: none;
+  }
+}
