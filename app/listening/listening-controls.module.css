@@ -48,14 +48,14 @@
 }
 .actions button {
   background: transparent;
-  color: #276b51;
+  color: var(--listening-action-ink, #276b51);
   padding: 10px;
   border-radius: 50%;
   min-width: 44px;
   min-height: 44px;
 }
 .actions button:hover {
-  background: #dbe4c7;
+  background: var(--listening-action-hover, #dbe4c7);
 }
 .actions button:disabled {
   opacity: 0.3;

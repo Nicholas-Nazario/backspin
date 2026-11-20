@@ -8,13 +8,23 @@ Cream backgrounds, dark espresso text, and confident coral, leafy green, marigol
 
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.
 
+## Current listening-room direction
+
+Phase 4A studies have settled on a listening nook with a full wooden window, a counter, and a built-in cabinet with tall LP storage beneath the turntable. The illustration uses gently irregular outlines, flat warm colors and shallow depth from the window reveals, wall returns, counter surface and overlapping objects. Flowers, a leafy plant and coffee provide restrained detail. The outside view uses sky and distant greenery.
+
+The current 16:9 composition keeps a smaller upright jacket in proportion to the player and window, with a roomy artist/title area beside it. Dawn, day, dusk and night lighting affect the room while preserving album colors. Automatic lighting now uses device-local clock cutoffs: dawn 05:00–08:00, day 08:00–17:00, dusk 17:00–20:00, and night 20:00–05:00. The bottom bar offers Automatic and each manual state. The user chose these basic cutoffs; location and astronomical sunrise/sunset calculations are not required.
+
+Record-change storyboards explore the arm moving clear, the old record returning to the cabinet shelf, and the next record coming out before the arm returns. The display jacket changes once with the new selection. The 4C implementation now follows this sequence in about 2.5 seconds on desktop, with an upright jacket and one identity change at record placement. Mobile uses a simpler fade. Rapid navigation settles on the latest choice. Motion remains cosmetic and preserves the existing manual listening semantics.
+
+The user approved this 16:9 composition and record-change storyboard at the final 4A review on November 16, 2026. The static 4B implementation now uses that visual baseline with self-hosted Fredoka for identity and Nunito Sans for controls, both SIL OFL 1.1. Desktop/TV keeps the 16:9 room; portrait/mobile prioritizes the jacket, identity and simplified turntable. It preserves the mix on entry/return and provides visible listening controls, record details and artwork credits. The user approved the static 4B room in the local app. The user approved 4C rotation, subtle leaf movement and the shelf-swap sequence on November 20, 2026; reduced motion and manual pause retain a still scene. The requested 4D additions—next-record preview and automatic/manual lighting in the bottom bar—are implemented for review. Fullscreen and idle/reveal behavior remain planned separately. Sustained-session and TV-distance checks remain part of the long-session polish.
+
 ## Artwork and hierarchy
 
 The product has two complementary visual modes: a cover-art-led browser for exploring and choosing records, and a stylized now-playing scene for ambient viewing while listening. Both are core to the intended experience.
 
 The now-playing scene presents the selected jacket as part of an illustrated listening setup: turntable, slowly spinning disc, plants or flowers, coffee, and warm surrounding shapes. Style the presentation around the cover while preserving the recognizable original artwork. Keep the scene spacious enough to read across a room, with discreet linked Discogs attribution.
 
-Keep the album cover large, square, legible, and unaltered. Illustrate the surrounding listening environment rather than repainting or decorating the cover itself. The vinyl disc can rotate beside or behind a static jacket so the artwork remains readable.
+Keep album artwork prominent, legible, and unaltered, preserving the source image’s actual aspect ratio. Illustrate the surrounding listening environment rather than repainting or decorating the cover itself. The vinyl disc can rotate beside or behind a static jacket so the artwork remains readable.
 
 Now playing foregrounds cover, artist, album, original year when known, and a small selection of useful genre/style labels. Pressing details, credits, and longer context remain available on demand. Keep the next-record preview with active controls. Personal moods and sourced musical connections remain deferred.
 

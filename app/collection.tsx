@@ -117,6 +117,8 @@ export default function Collection({
           corrections={years}
           masters={lookup.masters}
           disabled={loading || !!collection.error}
+          collectionError={collection.error}
+          onRefresh={collection.refresh}
           onOpen={(records, element) => {
             trigger.current = element;
             setSelected(records);

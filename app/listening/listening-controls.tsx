@@ -1,19 +1,17 @@
-import {
-  SkipBackIcon,
-  SkipForwardIcon,
-  StopIcon,
-  VinylRecordIcon,
-} from "@phosphor-icons/react";
+import { VinylRecordIcon, ArmchairIcon } from "@phosphor-icons/react";
+import { ListeningActions } from "./listening-actions";
 import type { useListening } from "./use-listening";
 import { Cover } from "../collection/record-card";
 import styles from "./listening-controls.module.css";
 export function ListeningControls({
   listening,
+  onEnterRoom,
 }: {
   listening: ReturnType<typeof useListening>;
+  onEnterRoom: () => void;
 }) {
   if (listening.currentId === null) return null;
-  const { current, previous, next } = listening;
+  const { current } = listening;
   return (
     <section className={styles.player} aria-label="Now playing">
       {current ? (
@@ -40,31 +38,10 @@ export function ListeningControls({
           This record is no longer available in your collection.
         </p>
       )}
-      <div className={styles.actions}>
-        <button
-          disabled={!previous}
-          aria-label="Previous album"
-          title="Previous album"
-          onClick={() => previous && listening.start(previous.instance_id)}
-        >
-          <SkipBackIcon size={22} weight="fill" aria-hidden="true" />
-        </button>
-        <button
-          aria-label="Stop listening"
-          title="Clear now playing"
-          onClick={listening.stop}
-        >
-          <StopIcon size={19} weight="fill" aria-hidden="true" />
-        </button>
-        <button
-          disabled={!next}
-          aria-label="Next album"
-          title="Next album"
-          onClick={() => next && listening.start(next.instance_id)}
-        >
-          <SkipForwardIcon size={22} weight="fill" aria-hidden="true" />
-        </button>
-      </div>
+      <button onClick={onEnterRoom} disabled={!current}>
+        <ArmchairIcon size={20} aria-hidden="true" /> Listening room
+      </button>
+      <ListeningActions listening={listening} />
       <span className={styles.announcement} aria-live="polite">
         {current ? "Now playing " + current.basic_information.title : ""}
       </span>

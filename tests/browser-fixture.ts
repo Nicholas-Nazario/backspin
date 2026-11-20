@@ -1,6 +1,9 @@
 import type { Browser } from "@playwright/test";
 import { seal } from "../lib/session";
-export async function collectionFixture(browser: Browser) {
+export async function collectionFixture(
+  browser: Browser,
+  baseURL = "http://localhost:3000",
+) {
   const page = await browser.newPage();
   const cached = new Map<
     number,
@@ -16,7 +19,7 @@ export async function collectionFixture(browser: Browser) {
         userId: 999999,
         expires: Date.now() + 3600000,
       }),
-      url: "http://localhost:3000",
+      url: baseURL,
       httpOnly: true,
       sameSite: "Lax",
     },
