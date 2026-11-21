@@ -1,0 +1,445 @@
+.experience {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 52px 0 12px;
+  text-align: center;
+}
+.experience[data-refreshing="true"] button:disabled {
+  opacity: 1;
+  cursor: wait;
+}
+.experience[data-result="true"] {
+  padding-top: 12px;
+}
+.intro h2 {
+  font-family: "Backspin Display", sans-serif;
+  font-size: clamp(1.9rem, 7vw, 3.375rem);
+  font-weight: 550;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  margin: 14px 0 18px;
+}
+.stage {
+  min-height: 280px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-width: 0;
+  width: 100%;
+  margin: 12px 0;
+}
+.vinyl {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid #654a35;
+  border-radius: 24px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 23px,
+      #654a350c 24px 25px,
+      transparent 26px 42px
+    ),
+    linear-gradient(110deg, #ddb580, #c99763);
+  box-shadow:
+    0 8px 0 #90633e,
+    0 12px 0 #e6d8b8;
+}
+.recordDisc {
+  position: absolute;
+  left: 6.25%;
+  top: 17.1875%;
+  width: 70%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 6px solid #302b24;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    #302b24 0 3px,
+    #3d382f 4px 5px,
+    #302b24 6px 8px
+  );
+  box-shadow:
+    0 3px 0 #1e1c18,
+    0 5px 8px #654a3540;
+}
+.tonearm {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.arm {
+  transform-origin: 295px 40px;
+  transform: rotate(0deg);
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1.1);
+}
+.armOutline,
+.armHighlight,
+.stylus {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.armOutline {
+  stroke: #302b24;
+  stroke-width: 8;
+}
+.armHighlight {
+  stroke: #f3e7ca;
+  stroke-width: 5;
+}
+.stylus {
+  stroke: #302b24;
+  stroke-width: 2;
+}
+.cartridge {
+  fill: #c2d8b5;
+  stroke: #302b24;
+  stroke-width: 2;
+}
+.pivot {
+  fill: #f3e7ca;
+  stroke: #302b24;
+  stroke-width: 2;
+}
+.pivotCenter {
+  fill: #655e50;
+}
+.recordLabel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 64%;
+  height: 64%;
+  padding: 16px 8px;
+  border: 3px solid #302b24;
+  border-radius: 50%;
+  background: #ec8e73;
+  color: #302b24;
+  font:
+    550 clamp(1rem, 5vw, 1.5rem) / 1.05 "Backspin Display",
+    sans-serif;
+  box-shadow: 0 0 0 5px #302b24;
+}
+.vinyl:not(:disabled):hover .arm,
+.vinyl:not(:disabled):focus-visible .arm {
+  transform: rotate(15deg);
+}
+.suspense {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 24px;
+  min-height: 280px;
+  color: #655e50;
+  font-size: 16px;
+  animation: reveal 250ms ease-out both;
+}
+.actions > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.actions {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 10px auto 28px;
+}
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: #276b51;
+  border: 2px solid #174b38;
+  border-radius: 32px;
+  color: #fffaf0;
+  box-shadow: 0 5px 0 #174b38;
+  min-height: 58px;
+  width: min(100%, 340px);
+  padding: 14px 24px;
+  font-size: 18px;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.primary:not(:disabled):hover {
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: 0 7px 0 #174b38;
+}
+.primary:not(:disabled):active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #174b38;
+}
+.actions > .quiet,
+.again {
+  font-size: 18px;
+}
+.quiet,
+.again {
+  background: transparent;
+  color: #4a5d45;
+  padding: 10px 14px;
+  min-height: 44px;
+  font-weight: 700;
+}
+.again {
+  background: #e4eacb;
+  min-width: 200px;
+}
+.quiet:hover,
+.again:hover {
+  background: #ece5d1;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.chips:empty {
+  display: none;
+}
+.chips > button {
+  background: #f7dfb6;
+  color: #59432c;
+  font-size: 13px;
+  padding: 10px 14px;
+  min-height: 44px;
+}
+.chips > .quiet {
+  background: transparent;
+}
+.hint {
+  color: #655e50;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+.result {
+  width: 100%;
+  min-width: 0;
+  margin: 28px auto 0;
+  max-width: 400px;
+  animation: reveal 450ms cubic-bezier(0.2, 0.8, 0.2, 1.15) both;
+}
+.cover {
+  width: calc(100% - 16px);
+  min-width: 0;
+  max-width: 310px;
+  margin: 18px auto 24px;
+  padding: 12px;
+  background: #fffaf0;
+  border: 1px solid #ded4bc;
+  border-radius: 15px;
+  box-shadow: 0 8px 0 #e6d8b8;
+  transform: rotate(-2deg);
+}
+.identity h3 {
+  font-family: "Backspin Display", sans-serif;
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  font-weight: 550;
+  line-height: 1.15;
+  margin: 7px 0 12px;
+  overflow-wrap: anywhere;
+}
+.identity > p:first-child {
+  font-size: 16px;
+  margin: 0;
+  color: #655e50;
+  overflow-wrap: anywhere;
+}
+.metadata {
+  color: #655e50;
+  font-size: 13px;
+}
+.reason {
+  margin: 20px 0 24px;
+  line-height: 1.65;
+  font-size: 15px;
+}
+.notice {
+  background: #f7dfb6;
+  padding: 16px;
+  border-radius: 20px;
+  line-height: 1.6;
+}
+.sheet {
+  min-width: 0;
+  scroll-padding-block: 24px;
+  border: 1px solid #d9ccb0;
+  border-radius: 28px;
+  background: #fffaf0;
+  color: #302b24;
+  padding: 24px;
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100dvh - 40px);
+  overscroll-behavior: contain;
+  text-align: left;
+}
+.sheet::backdrop {
+  background: #302b2460;
+  backdrop-filter: blur(4px);
+}
+.sheet[open] {
+  animation: sheet-in 220ms ease-out;
+}
+.sheetHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.sheetHeading h2 {
+  font:
+    500 30px "Backspin Display",
+    sans-serif;
+  margin: 0;
+}
+.sheet > p {
+  color: #655e50;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.field {
+  display: block;
+  margin: 24px 0 12px;
+}
+.field > span {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 750;
+}
+.field small,
+.moods small {
+  display: block;
+  color: #655e50;
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 3px;
+}
+.moods {
+  border: 0;
+  margin: 24px 0;
+  padding: 0;
+}
+.moods legend {
+  font-weight: 750;
+  margin-bottom: 12px;
+}
+.moods > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.moods button {
+  border: 1px solid #c8bda6;
+  background: transparent;
+  color: #655e50;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.moods button[aria-pressed="true"] {
+  background: #d8e6d0;
+  border-color: #276b51;
+  color: #174b38;
+  box-shadow: inset 0 0 0 1px #276b51;
+}
+.moods p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #655e50;
+}
+.sheet > .primary {
+  display: flex;
+  width: 100%;
+  margin: 28px auto 8px;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) rotate(2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 600px) {
+  .experience {
+    padding-top: 24px;
+  }
+  .sheet {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 24px);
+    border-radius: 26px 26px 0 0;
+    padding: 24px 22px max(24px, env(safe-area-inset-bottom));
+  }
+  .stage,
+  .suspense {
+    min-height: min(320px, 42svh);
+  }
+  .vinyl {
+    max-width: min(320px, 42svh);
+  }
+  .cover {
+    max-width: min(270px, 42svh);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .result,
+  .sheet[open] {
+    animation: none;
+  }
+  .primary,
+  .vinyl,
+  .arm {
+    transition: none;
+  }
+  .suspense {
+    animation: none;
+  }
+  .vinyl:not(:disabled):hover,
+  .vinyl:not(:disabled):active {
+    transform: none;
+  }
+  .vinyl:not(:disabled):hover .arm,
+  .vinyl:not(:disabled):focus-visible .arm {
+    transform: rotate(0deg);
+  }
+  .primary:not(:disabled):hover,
+  .primary:not(:disabled):active {
+    transform: none;
+  }
+}

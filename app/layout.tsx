@@ -1,7 +1,14 @@
 import "./style.css";
+import type { Viewport } from "next";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#fff6df",
+};
 export const metadata = {
   title: "Backspin",
-  description: "Rediscover your record collection",
+  description: "Less time choosing, more time listening.",
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

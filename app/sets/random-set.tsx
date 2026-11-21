@@ -1,11 +1,10 @@
 "use client";
+import { ShuffleDeck } from "../components/shuffle-deck";
 import { useMix } from "./use-mix";
 import { useState } from "react";
 import {
   ShuffleIcon,
   XIcon,
-  VinylRecordIcon,
-  SparkleIcon,
   SlidersHorizontalIcon,
   CaretDownIcon,
 } from "@phosphor-icons/react";
@@ -234,18 +233,7 @@ export function RandomSet({
           )}
           {revealing && !disabled && (
             <div className={styles.suspense} role="status">
-              <div className={styles.deck} aria-hidden="true">
-                <div />
-                <div />
-                <div>
-                  <VinylRecordIcon size={72} weight="duotone" />
-                </div>
-                <SparkleIcon
-                  className={styles.sparkle}
-                  size={28}
-                  weight="fill"
-                />
-              </div>
+              <ShuffleDeck />
               <strong>Cueing up your next session…</strong>
               <span>Finding the next records for your rotation.</span>
             </div>

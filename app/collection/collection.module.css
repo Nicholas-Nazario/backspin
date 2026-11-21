@@ -1,4 +1,5 @@
 .explorer h2 {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -25,6 +26,7 @@
   color: #302b24;
 }
 .section-title > .secondary {
+  min-height: 44px;
   font-size: 12px;
   background: transparent;
   padding: 8px 0;
@@ -134,7 +136,7 @@
   border-bottom: 1px solid #c8bda6;
   border-radius: 0;
   padding: 10px 30px 10px 0;
-  font-size: 14px;
+  font-size: 16px;
   color: #302b24;
   letter-spacing: normal;
   cursor: pointer;
@@ -205,6 +207,7 @@
   min-width: 0;
 }
 .grid article h3 {
+  overflow-wrap: anywhere;
   margin-bottom: 6px;
 }
 .grid article p {
@@ -485,6 +488,7 @@
 }
 @media (max-width: 700px) {
   .section-title {
+    flex-wrap: wrap;
     padding-top: 22px;
     align-items: start;
   }
@@ -499,7 +503,7 @@
     margin-top: 16px;
   }
   .search input {
-    font-size: 15px;
+    font-size: 16px;
     padding-top: 16px;
     padding-bottom: 16px;
   }
@@ -550,4 +554,10 @@
 .art.fullArtwork img {
   object-position: center bottom;
   display: block;
+}
+
+.lastUpdated {
+  font-size: inherit;
+  font-weight: inherit;
+  white-space: nowrap;
 }

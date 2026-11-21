@@ -49,10 +49,23 @@ export default function Collection({
           {mode === "sets" ? "Make a set" : "Collection"}{" "}
           {mode === "collection" && (
             <span className={styles["record-count"]}>
-              {loading
+              {loading && !collection.refreshing
                 ? entries.length + " / " + collection.total
                 : entries.length}{" "}
               records
+              {collection.lastUpdated && (
+                <span className={styles.lastUpdated}>
+                  {" · Last updated "}
+                  <time
+                    dateTime={new Date(collection.lastUpdated).toISOString()}
+                  >
+                    {new Date(collection.lastUpdated).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </time>
+                </span>
+              )}
             </span>
           )}
         </h2>
@@ -61,7 +74,7 @@ export default function Collection({
           Refresh collection
         </button>
       </div>
-      {loading && (
+      {loading && !collection.refreshing && (
         <p role="status">
           Opening your crates… Filters currently cover the records loaded so
           far.

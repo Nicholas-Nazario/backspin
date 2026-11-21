@@ -1,13 +1,33 @@
+@font-face {
+  font-family: "Backspin Display";
+  src: url("/fonts/fredoka.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Backspin Body";
+  src: url("/fonts/nunito-sans.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
 * {
   box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 body {
   margin: 0;
   background: #fff6df;
   color: #302b24;
-  font-family: Arial, sans-serif;
+  font-family: "Backspin Body", Arial, sans-serif;
 }
 main {
+  width: 100%;
+  min-width: 0;
   max-width: 1200px;
   margin: auto;
   padding: 24px 28px 48px;
@@ -60,7 +80,15 @@ select:focus-visible {
 }
 @media (max-width: 700px) {
   main {
-    padding: 20px 18px 25px;
+    padding: 20px max(16px, env(safe-area-inset-right))
+      max(25px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+}
+@media (max-width: 700px), (pointer: coarse) {
+  input,
+  select {
+    font-size: 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Entry } from "../../lib/collection";
 import { api } from "./api";
 export function useCollection() {
+  const hasSnapshot = useRef(false);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]),
     [total, setTotal] = useState(0),
     [loading, setLoading] = useState(true),
@@ -13,21 +15,22 @@ export function useCollection() {
   useEffect(() => {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
-    setEntries([]);
+    const background = hasSnapshot.current;
+    if (!background) setEntries([]);
     setLoading(true);
     setError("");
     (async () => {
       let expiry = Infinity;
+      let fetchedAt = Infinity;
       try {
         const annotations = await api("/api/years", controller.signal);
-        setYears(
-          Object.fromEntries(
-            annotations.years.map((y: { release_id: number; year: number }) => [
-              y.release_id,
-              y.year,
-            ]),
-          ),
+        const nextYears = Object.fromEntries(
+          annotations.years.map((y: { release_id: number; year: number }) => [
+            y.release_id,
+            y.year,
+          ]),
         );
+        if (!background) setYears(nextYears);
         let page = 1,
           pages = 1;
         const all = new Map<number, Entry>();
@@ -38,11 +41,11 @@ export function useCollection() {
           );
           if (controller.signal.aborted) return;
           expiry = Math.min(expiry, response.expiresAt);
+          fetchedAt = Math.min(fetchedAt, response.fetchedAt ?? Date.now());
           clearTimeout(timer);
           timer = setTimeout(
             () => {
               controller.abort();
-              setEntries([]);
               refresh((v) => v + 1);
             },
             Math.max(0, expiry - Date.now()),
@@ -52,17 +55,27 @@ export function useCollection() {
               "Collection snapshot expired during loading. Please retry.",
             );
           pages = response.data.pagination.pages;
-          setTotal(response.data.pagination.items);
+          if (!background) setTotal(response.data.pagination.items);
           for (const entry of response.data.releases)
             all.set(entry.instance_id, entry);
-          setEntries([...all.values()]);
+          if (!background) setEntries([...all.values()]);
           page++;
         } while (page <= pages);
+        if (controller.signal.aborted) return;
+        setEntries([...all.values()]);
+        setTotal(all.size);
+        setYears(nextYears);
+        setLastUpdated(fetchedAt);
+        hasSnapshot.current = true;
       } catch (e) {
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted) {
+          // Keep the last view during refresh, but never offer an expired snapshot after failure.
+          setEntries([]);
+          hasSnapshot.current = false;
           setError(
             e instanceof Error ? e.message : "Unable to open collection",
           );
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -100,6 +113,8 @@ export function useCollection() {
     entries,
     total,
     loading,
+    refreshing: loading && hasSnapshot.current,
+    lastUpdated,
     error,
     years,
     folders,

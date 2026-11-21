@@ -1,7 +1,7 @@
-import type { Browser } from "@playwright/test";
+import type { Browser, BrowserContext } from "@playwright/test";
 import { seal } from "../lib/session";
 export async function collectionFixture(
-  browser: Browser,
+  browser: Browser | BrowserContext,
   baseURL = "http://localhost:3000",
 ) {
   const page = await browser.newPage();

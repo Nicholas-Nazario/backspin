@@ -81,19 +81,22 @@ export async function oauthToken(
   return { key, secret };
 }
 // Bounded memory cache; never persists account data. No stale fallback.
-const cache = new Map<string, { expires: number; value: unknown }>();
+const cache = new Map<
+  string,
+  { expires: number; fetchedAt: number; value: unknown }
+>();
 export async function json(path: string, token: Token, refresh = false) {
   const id = token.key + ":" + path;
   const old = cache.get(id);
   if (!refresh && old && old.expires > Date.now())
-    return { value: old.value, expires: old.expires };
+    return { value: old.value, expires: old.expires, fetchedAt: old.fetchedAt };
   const value = await (await request(path, token)).json();
   const now = Date.now();
   for (const [k, v] of cache) if (v.expires <= now) cache.delete(k);
   if (cache.size >= 100) cache.delete(cache.keys().next().value!);
   const expires = now + 5 * 60 * 1000;
-  cache.set(id, { expires, value });
-  return { value, expires };
+  cache.set(id, { expires, fetchedAt: now, value });
+  return { value, expires, fetchedAt: now };
 }
 export function clearCache(token: Token) {
   for (const k of cache.keys())

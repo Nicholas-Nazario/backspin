@@ -1,4 +1,4 @@
-# Visual identity: a living-room record cafe
+# Visual identity: one good record
 
 Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustrated listening bar: spinning vinyl, plants, flowers, coffee, soft light, and a friendly hand-built turntable booth. This is a direction document, not a finished design system.
 
@@ -7,6 +7,18 @@ Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustra
 Cream backgrounds, dark espresso text, and confident coral, leafy green, marigold, and sky-blue accents. Rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes. Reserve a quieter dark evening theme for long listening sessions.
 
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.
+
+## Current product direction — November 20, 2026
+
+Tagline: **Less time choosing, more time listening.** A mobile-first home screen foregrounds **Drop the needle**, with a quiet **Narrow it down** action for Genre, Mood, and Era. Reveal one album with a brief, grounded explanation, then offer **Try another**. Avoid generic recommendation filler and repeated outbound record links. Album artwork remains unaltered, uncropped, and attributed to Discogs.
+
+Keep the warm palette, rounded controls, self-hosted Fredoka and Nunito Sans, and Phosphor icons. The user specifically chose the existing shuffle-deck loading animation as the reference for further motion: gently offset sleeves, small lifts and rotations, and a sparkle. Reuse that deck, with brief springy reveals and tactile button responses. Respect reduced motion; the revealed album stays still. Do not add an ambient room or queues to this experience.
+
+Genre and Era visibly constrain the pool. Mood is a softer preference and must not imply that tags establish an album’s actual emotional character. Spotify, listening history, and richer models are future exploration, not current capabilities.
+
+## Historical room direction (superseded)
+
+The remaining notes document the former implementation and approvals. They are not requirements for the current recommendation experience.
 
 ## Current listening-room direction
 
