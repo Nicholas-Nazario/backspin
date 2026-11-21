@@ -1,25 +1,35 @@
-# Set app and APP_URL for your own Fly app before deployment.
-app = "mystery-dj-change-me"
-primary_region = "ewr"
+# fly.toml app configuration file generated for backspin on 2026-11-21T15:59:37Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
+
+app = 'backspin'
+primary_region = 'ewr'
+
+[build]
 [env]
-  PORT = "3000"
-  DATABASE_PATH = "/data/mystery.sqlite"
-  APP_URL = "https://mystery-dj-change-me.fly.dev"
+  APP_URL = 'https://mystery-dj-change-me.fly.dev'
+  DATABASE_PATH = '/data/mystery.sqlite'
+  PORT = '3000'
+
+[[mounts]]
+  source = 'mystery_data'
+  destination = '/data'
+
 [http_service]
   internal_port = 3000
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
+
   [[http_service.checks]]
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "15s"
-    method = "GET"
-    path = "/api/health"
-[mounts]
-  source = "mystery_data"
-  destination = "/data"
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '15s'
+    method = 'GET'
+    path = '/api/health'
+
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
+  size = 'shared-cpu-1x'
+  memory = '512mb'
