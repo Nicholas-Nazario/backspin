@@ -11,10 +11,12 @@ export async function AppShell({
   children,
   active,
   error,
+  tagline = "Less time choosing, more time listening.",
 }: {
   children: React.ReactNode;
-  active: "sets" | "collection";
+  active: "discover" | "collection";
   error?: string;
+  tagline?: string;
 }) {
   const s = await session();
   const configured = !!(
@@ -35,9 +37,9 @@ export async function AppShell({
           <nav className={styles.navigation} aria-label="Main navigation">
             <Link
               href="/"
-              aria-current={active === "sets" ? "page" : undefined}
+              aria-current={active === "discover" ? "page" : undefined}
             >
-              Make a set
+              Discover
             </Link>
             <Link
               href="/collection"
@@ -56,7 +58,6 @@ export async function AppShell({
               <p>
                 Connected as <strong>{s.username}</strong>
               </p>
-              <Link href="/artwork-credits">Artwork credits</Link>
               <form action="/api/auth/disconnect" method="post">
                 <button>
                   <SignOutIcon size={18} aria-hidden="true" /> Disconnect
@@ -82,10 +83,10 @@ export async function AppShell({
           <div className={styles["record"]} aria-hidden="true">
             ●
           </div>
-          <h2>What’s your next spin?</h2>
+          <h2>{tagline}</h2>
           <p>
-            Connect Discogs to make a listening set from your own records. Your
-            password stays with Discogs.
+            One album from your own collection, picked for right now. Connect
+            Discogs to drop the needle.
           </p>
           {configured ? (
             <form action="/api/auth/connect" method="post">
@@ -107,6 +108,17 @@ export async function AppShell({
         </section>
       )}
       <footer className={styles.footer}>
+        {s && active === "discover" && (
+          <p>
+            <a
+              href="https://www.discogs.com/mycollection"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Collection data and artwork provided by Discogs.
+            </a>
+          </p>
+        )}
         <p>
           This application uses Discogs’ API but is not affiliated with,
           sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink

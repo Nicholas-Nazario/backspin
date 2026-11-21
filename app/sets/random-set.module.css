@@ -203,60 +203,6 @@
   font-size: 12px;
   color: #817764;
 }
-.deck {
-  position: relative;
-  width: 160px;
-  height: 145px;
-  margin-bottom: 8px;
-}
-.deck > div {
-  width: 112px;
-  height: 112px;
-  border: 2px solid #302b24;
-  border-radius: 12px;
-  position: absolute;
-  left: 24px;
-  top: 16px;
-  background: #e9b74f;
-  transform: rotate(-12deg);
-  animation: shuffle-back 1s ease-in-out infinite;
-}
-.deck > div:nth-child(2) {
-  background: #ec8e73;
-  transform: rotate(10deg);
-  animation-direction: reverse;
-  animation-delay: -0.3s;
-}
-.deck > div:nth-child(3) {
-  background: #c2d8b5;
-  display: grid;
-  place-items: center;
-  transform: rotate(-3deg);
-  animation: shuffle-front 1s ease-in-out infinite;
-  color: #276b51;
-}
-.sparkle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  color: #d68c30;
-  animation: twinkle 0.8s ease-in-out infinite alternate;
-}
-@keyframes shuffle-back {
-  50% {
-    transform: translateX(-16px) rotate(-20deg);
-  }
-}
-@keyframes shuffle-front {
-  50% {
-    transform: translateY(-10px) rotate(5deg);
-  }
-}
-@keyframes twinkle {
-  to {
-    transform: scale(1.25) rotate(20deg);
-  }
-}
 @media (max-width: 700px) {
   .panel {
     padding: 18px;
@@ -284,13 +230,6 @@
   }
   .suspense {
     min-height: 210px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .deck > div,
-  .deck > div:nth-child(3),
-  .sparkle {
-    animation: none;
   }
 }
 .releasePins {

@@ -12,13 +12,21 @@ Register an application at https://www.discogs.com/settings/developers and put i
 
 `npm test`, `npm run typecheck`, and `npm run build` verify the foundation. No mocked collection is presented as a real connection. Check private collection access with your authorized account. Click a record title to fetch release genres/styles. Collection pages load progressively (50 instances per upstream request); the grid shows 60 cards initially with a show-more control. Collection snapshots reload after five minutes.
 
-## Random-set browser verification
+## Recommendation browser verification
 
-Run the browser fixture against the dev server:
+Run `node --env-file=.env.local --import tsx tests/recommendation.browser.ts` against the local server. Set `BACKSPIN_TEST_URL` for an isolated production server. These fixture checks cover one-album picks, rerolls with retained filters, genre/era limits, synced years, mood fallback, quiet background refresh, collection timestamps, keyboard focus, reduced motion, mobile layout, and import error recovery. They intercept Discogs calls and do not establish live-account recommendation quality.
 
-```sh
-node --env-file=.env.local --import tsx tests/random-set.browser.ts
-```
+`lib/recommendation.ts` owns pure eligibility, work deduplication, mood weights, and explanations. `app/recommendation/use-recommendation.ts` owns selection IDs and the cancellable reveal timer; collection and year data stay owned by the existing hooks. Background refresh retains the current pick while requests finish, then resolves its ID against the replacement collection; a removed or ineligible album disappears. New picks pause during refresh. Failed loads clear the snapshot. The collection count shows the oldest page fetch time from the server cache, not the browser render time. Expired years remove era eligibility immediately. No listening history or recommendation metadata is persisted.
+
+The previous set/room components and their unit tests remain for a later cleanup. Browser fixtures targeting the former home-page set builder are historical and no longer apply to the current route. The product direction below supersedes the old room milestones: mobile-first, one album, Genre/Mood/Era, and no visual listening room in the main flow.
+
+## Mobile verification
+
+Run `node --env-file=.env.local --import tsx tests/mobile.browser.ts` for Chromium touch emulation, and add `MOBILE_BROWSER=webkit` for Safari-engine coverage (`npx playwright install webkit` installs the test browser). `BACKSPIN_TEST_URL` can target an isolated production server. The fixture covers 320, 360, 375, 390, and 430px portrait widths plus short landscape, all approved taglines, long artist/album names, uncropped artwork, touch selection, sheet scrolling, rerolls, and settings. It checks document overflow and individual element bounds, with the primary action visible on portrait phones. These are browser-engine simulations, not physical iPhone or Android verification.
+
+The viewport allows user zoom and uses safe-area insets. Mobile inputs use 16px text to avoid iOS focus zoom. The player and artwork scale to the available width and short portrait height; the sheet uses the dynamic viewport height and scrolls independently. Layout containers explicitly allow shrinking instead of hiding horizontal overflow.
+
+If Chrome Device Mode shows a clipped page while fixture bounds pass, check `window.visualViewport.scale` in its Console. At 125% pinch zoom, a 375px layout has only a 300px visual viewport; the header, heading, and player appear cut off together. That zoom can survive a reload. Selecting another device and then returning to the desired device resets emulated pinch zoom. Keep real user pinch zoom enabled. Mobile fixtures assert that layout and visual viewports match before checking element bounds.
 
 ## Credential handling
 

@@ -56,7 +56,11 @@ export async function GET(req: Request) {
     }
     const result = await json(path, s.token);
     return Response.json(
-      { data: result.value, expiresAt: result.expires },
+      {
+        data: result.value,
+        expiresAt: result.expires,
+        fetchedAt: result.fetchedAt,
+      },
       { headers },
     );
   } catch (e) {
