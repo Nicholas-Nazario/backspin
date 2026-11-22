@@ -8,14 +8,17 @@ import {
 } from "../../../../lib/session";
 import { createAttempt } from "../../../../lib/oauth-attempts";
 import { spotifyAuthorizationUrl } from "../../../../lib/spotify";
-import { SPOTIFY_HANDSHAKE_COOKIE } from "../../../../lib/spotify-session";
+import {
+  SPOTIFY_HANDSHAKE_COOKIE,
+  spotifyReturnPath,
+} from "../../../../lib/spotify-session";
 
 export async function POST(req: NextRequest) {
   if (!sameOrigin(req)) return new NextResponse("Forbidden", { status: 403 });
   let returnTo = "/";
   try {
     const form = await req.formData();
-    if (form.get("returnTo") === "/collection") returnTo = "/collection";
+    returnTo = spotifyReturnPath.safeParse(form.get("returnTo")).data ?? "/";
     const state = randomBytes(32).toString("base64url");
     const authorize = spotifyAuthorizationUrl(state);
     const expires = Date.now() + 10 * 60 * 1000;

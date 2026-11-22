@@ -1,8 +1,9 @@
 import styles from "../page.module.css";
 import {
   ArrowUpRightIcon,
-  CompassIcon,
-  StackIcon,
+  PathIcon,
+  AlienIcon,
+  VinylRecordIcon,
 } from "@phosphor-icons/react/ssr";
 import { session } from "../../lib/session";
 import Link from "next/link";
@@ -19,7 +20,7 @@ export async function AppShell({
   spotifyResult,
 }: {
   children: React.ReactNode;
-  active: "discover" | "collection";
+  active: "discover" | "collection" | "spotify";
   error?: string;
   tagline?: string;
   spotifyResult?: string;
@@ -35,7 +36,11 @@ export async function AppShell({
     <main>
       <header className={styles.header}>
         <h1 className={styles.title}>
-          <Link href="/" className={styles.brandLink} title="Back to Discover">
+          <Link
+            href="/"
+            className={styles.brandLink}
+            title="Back to Surprise Me"
+          >
             Backspin
             <BrandMark size={36} />
           </Link>
@@ -47,16 +52,24 @@ export async function AppShell({
               href="/"
               aria-current={active === "discover" ? "page" : undefined}
             >
-              <CompassIcon size={19} aria-hidden="true" />
-              Discover
+              <AlienIcon size={19} aria-hidden="true" />
+              Surprise Me
             </Link>
             <Link
               className={interaction.navigation}
               href="/collection"
               aria-current={active === "collection" ? "page" : undefined}
             >
-              <StackIcon size={19} aria-hidden="true" />
+              <VinylRecordIcon size={19} aria-hidden="true" />
               Collection
+            </Link>
+            <Link
+              className={interaction.navigation}
+              href="/spotify"
+              aria-current={active === "spotify" ? "page" : undefined}
+            >
+              <PathIcon size={19} aria-hidden="true" />
+              Explore
             </Link>
           </nav>
         )}
@@ -66,7 +79,7 @@ export async function AppShell({
           spotifyDisplayName={spotify?.displayName ?? null}
           spotifyConfigured={!!spotifyConfiguration()}
           spotifyResult={spotifyResult}
-          returnTo={active === "collection" ? "/collection" : "/"}
+          returnTo={active === "discover" ? "/" : `/${active}`}
         />
       </header>
       {error && (
@@ -106,7 +119,7 @@ export async function AppShell({
         </section>
       )}
       <footer className={styles.footer}>
-        {s && active === "discover" && (
+        {s && active !== "collection" && (
           <p>
             <a
               href="https://www.discogs.com/mycollection"

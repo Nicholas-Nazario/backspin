@@ -120,6 +120,25 @@ try {
       discogs.getByText("Fixture Listener", { exact: true }),
     ).toBeVisible();
   }
+  await page.goto(baseURL);
+  await expect(
+    page.getByRole("button", { name: "Pick from recent Spotify plays" }),
+  ).toHaveCount(0);
+  const connectionsTab = page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Explore", exact: true });
+  await connectionsTab.click();
+  await expect(page).toHaveURL(baseURL + "/spotify");
+  await expect(connectionsTab).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "Explore" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick from recent Spotify plays" }),
+  ).toBeVisible();
+  await settings.click();
+  await expect(
+    spotify.getByRole("button", { name: "Connect Spotify" }),
+  ).toHaveAttribute("value", "/spotify");
+
   await page.context().clearCookies();
   await page.goto(baseURL);
   await settings.click();

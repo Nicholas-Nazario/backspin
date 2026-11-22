@@ -24,12 +24,13 @@ export default function PrivacyPage() {
       </p>
       <h2>Spotify</h2>
       <p>
-        Connecting Spotify reads your profile display name to identify the
-        account in Settings. The current connection requests the profile
-        permission only. It does not read your email, library, playlists,
-        listening history, or playback activity, and it cannot control playback.
-        Your Discogs collection is not sent to Spotify, and your Spotify profile
-        is not sent to Discogs.
+        Connecting Spotify reads your display name for Settings and requests
+        access to recent plays. When you ask for Spotify picks, Backspin fetches
+        up to 50 recent plays and sends album names, artists, album identifiers,
+        cover artwork URLs, and play timestamps to your browser to match against
+        your collection. Backspin processes this information for the request and
+        keeps it in page memory for the results. It does not save listening
+        history to disk or send your Discogs collection to Spotify.
       </p>
       <h2>Cookies and stored data</h2>
       <p>
@@ -63,9 +64,10 @@ export default function PrivacyPage() {
       <h2>Other services</h2>
       <p>
         Discogs supplies album artwork, and your browser requests those images
-        directly. The hosting provider processes network requests to serve
-        Backspin. Backspin does not implement advertising, analytics tracking,
-        or a listening-history database. Spotify’s own handling of your data is
+        directly. Spotify supplies the cover artwork for recently played albums.
+        The hosting provider processes network requests to serve Backspin.
+        Backspin does not implement advertising, analytics tracking, or a
+        listening-history database. Spotify’s own handling of your data is
         described in its{" "}
         <a href="https://www.spotify.com/legal/privacy-policy/">
           privacy policy

@@ -16,7 +16,7 @@ import {
   SPOTIFY_SESSION_COOKIE,
   readSpotifySession,
 } from "../lib/spotify-session";
-import { spotifyConfiguration } from "../lib/spotify";
+import { spotifyConfiguration, spotifyRecentPlays } from "../lib/spotify";
 
 const directory = mkdtempSync(join(tmpdir(), "backspin-spotify-"));
 process.env.DATABASE_PATH = join(directory, "fixture.sqlite");
@@ -89,7 +89,10 @@ test("connection binds state and exact callback to a protected one-use handshake
   const authorize = new URL(response.headers.get("location")!);
   assert.equal(authorize.origin, "https://accounts.spotify.com");
   assert.equal(authorize.searchParams.get("state"), handshake.state);
-  assert.equal(authorize.searchParams.get("scope"), "user-read-private");
+  assert.equal(
+    authorize.searchParams.get("scope"),
+    "user-read-private user-read-recently-played",
+  );
   assert.equal(
     authorize.searchParams.get("redirect_uri"),
     appOrigin + "/api/spotify/callback",
@@ -310,4 +313,74 @@ test("shared OAuth attempts expire without storing credential material", () => {
   const id = createAttempt(Date.now() + 10000);
   assert.equal(consumeAttempt(id), true);
   assert.equal(consumeAttempt(id), false);
+});
+
+test("recent plays are uncached and reduced to the album fields used for picks", async () => {
+  provider = async () =>
+    Response.json({
+      items: [
+        {
+          played_at: "2026-11-22T16:00:00Z",
+          track: {
+            album: {
+              id: "album123",
+              name: "Example Album",
+              artists: [{ name: "Example Artist" }],
+              images: [
+                { url: "https://example.test/cover" },
+                { url: "https://i.scdn.co/image/abc123" },
+              ],
+            },
+          },
+          context: { uri: "private-playlist" },
+        },
+        { played_at: "2026-11-22T15:00:00Z", track: null },
+      ],
+    });
+
+  assert.deepEqual(
+    await spotifyRecentPlays("fixture-token", new AbortController().signal),
+    {
+      ok: true,
+      plays: [
+        {
+          albumId: "album123",
+          album: "Example Album",
+          artists: ["Example Artist"],
+          playedAt: "2026-11-22T16:00:00Z",
+          artworkUrl: "https://i.scdn.co/image/abc123",
+        },
+      ],
+    },
+  );
+  assert.equal(
+    calls[0].url,
+    "https://api.spotify.com/v1/me/player/recently-played?limit=50",
+  );
+  assert.equal(calls[0].options?.cache, "no-store");
+
+  provider = async () => new Response("private response", { status: 429 });
+  assert.deepEqual(
+    await spotifyRecentPlays("fixture-token", new AbortController().signal),
+    { ok: false, status: 429 },
+  );
+});
+
+test("Spotify authorization and disconnect return to the Spotify tab", async () => {
+  const { cookie, handshake } = await begin("/spotify");
+  const cancelled = await callback(
+    callbackRequest(cookie, { state: handshake.state, error: "access_denied" }),
+  );
+  assert.equal(
+    cancelled.headers.get("location"),
+    appOrigin + "/spotify?spotify=denied",
+  );
+
+  const disconnected = await disconnect(
+    form("/api/spotify/disconnect", "", "/spotify"),
+  );
+  assert.equal(
+    disconnected.headers.get("location"),
+    appOrigin + "/spotify?spotify=disconnected",
+  );
 });

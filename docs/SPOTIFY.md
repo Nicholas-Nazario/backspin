@@ -1,6 +1,6 @@
 # Spotify connection setup
 
-Backspin connects to Spotify through its server-side authorization-code flow. Spotify handles login and consent. This first integration identifies the connected profile in Settings; it does not enable playback or use listening history, saved music, playlists, or email.
+Backspin connects to Spotify through its server-side authorization-code flow. Spotify handles login and consent. Settings identifies the connected profile. The Explore tab can fetch recent plays on demand and match them against the owned Discogs collection in the browser. Backspin temporarily handles the recent-play response on its server and keeps only the album metadata and timestamps in page memory for the picks.
 
 ## Manual dashboard setup
 
@@ -47,10 +47,10 @@ This setup does not configure a Spotify application, change your Fly secrets, or
 
 ## Authorization and storage
 
-- The only requested scope is `user-read-private`, which Spotify lists for its [current-user profile endpoint](https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile). Backspin reads the display name to label the connection. It does not request email, library, playback, or listening-history scopes.
+- Backspin requests `user-read-private` for the profile display name and `user-read-recently-played` for [recent plays](https://developer.spotify.com/documentation/web-api/reference/get-recently-played). Accounts connected before the recent-play scope was added must disconnect and reconnect. Choose **Pick from recent Spotify plays** on the Explore tab to make a request. The existing picker remains available.
 - A random state binds the callback to a ten-minute encrypted, HttpOnly handshake cookie and a one-use attempt ID. The existing SQLite attempt table stores only the ID and expiry, never authorization codes, Spotify profile data, or credentials.
 - The access token and display name live only in a separate encrypted, HttpOnly browser cookie. There is no auth localStorage or Spotify account table. The app holds token data transiently while completing authorization. Token values are not passed to client components or written to callback logs.
-- The connection expires with Spotify's access token, usually after one hour, with an eight-hour upper bound. Refresh tokens returned by Spotify are discarded. Reconnect through Spotify when the connection expires; long-lived sessions and automatic token refresh are not part of this connection-only stage.
+- The connection expires with Spotify's access token, usually after one hour, with an eight-hour upper bound. Refresh tokens returned by Spotify are discarded. Reconnect through Spotify when the connection expires; automatic token refresh is unavailable.
 - Disconnecting Spotify clears its cookies and invalidates its pending authorization attempt. It leaves Discogs connected. Disconnecting Discogs leaves Spotify connected. To revoke the underlying Spotify grant, remove Backspin from [Spotify's apps page](https://www.spotify.com/account/apps/).
 - Provider errors and cancellations return fixed messages without exposing authorization codes, credentials, or upstream response bodies. Both callback URLs are excluded from application request logging. Any hosting or proxy logs must also redact callback query strings.
 

@@ -6,6 +6,7 @@ import {
   SignOutIcon,
   ArrowUpRightIcon,
 } from "@phosphor-icons/react";
+import type { SpotifyReturnPath } from "../../lib/spotify-session";
 import styles from "./settings-menu.module.css";
 import interaction from "./interaction.module.css";
 
@@ -39,7 +40,7 @@ export function SettingsMenu({
   spotifyDisplayName: string | null;
   spotifyConfigured: boolean;
   spotifyResult?: string;
-  returnTo: "/" | "/collection";
+  returnTo: SpotifyReturnPath;
 }) {
   const details = useRef<HTMLDetailsElement>(null);
   const trigger = useRef<HTMLElement>(null);

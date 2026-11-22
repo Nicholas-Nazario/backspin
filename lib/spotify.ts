@@ -33,7 +33,7 @@ export function spotifyAuthorizationUrl(state: string) {
     response_type: "code",
     redirect_uri: config.redirectUri,
     state,
-    scope: "user-read-private",
+    scope: "user-read-private user-read-recently-played",
   }).toString();
   return url.href;
 }
@@ -70,7 +70,7 @@ export async function exchangeSpotifyCode(
       expires_in: z.number().int().positive(),
     })
     .parse(await response.json());
-  // This connection-only stage keeps no long-lived refresh credential.
+  // Keep the connection bounded by the access token lifetime.
   return {
     accessToken: token.access_token,
     expires: Date.now() + Math.min(token.expires_in, 8 * 3600) * 1000,
@@ -91,4 +91,57 @@ export async function spotifyDisplayName(
     .object({ display_name: z.string().max(200).nullable() })
     .parse(await response.json());
   return profile.display_name?.trim() || "Spotify listener";
+}
+
+const recentPlay = z.object({
+  played_at: z.iso.datetime({ offset: true }),
+  track: z.object({
+    album: z.object({
+      id: z.string().regex(/^[a-zA-Z0-9]+$/),
+      name: z.string().min(1),
+      artists: z.array(z.object({ name: z.string().min(1) })).min(1),
+      images: z.array(z.object({ url: z.string() })).optional(),
+    }),
+  }),
+});
+
+export async function spotifyRecentPlays(
+  accessToken: string,
+  signal: AbortSignal,
+) {
+  const response = await fetch(
+    "https://api.spotify.com/v1/me/player/recently-played?limit=50",
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+      signal: AbortSignal.any([signal, AbortSignal.timeout(20000)]),
+    },
+  );
+  if (!response.ok) return { ok: false as const, status: response.status };
+
+  const { items } = z
+    .object({ items: z.array(z.unknown()) })
+    .parse(await response.json());
+  const plays = items.flatMap((item) => {
+    const parsed = recentPlay.safeParse(item);
+    if (!parsed.success) return [];
+    const {
+      played_at,
+      track: { album },
+    } = parsed.data;
+    return [
+      {
+        albumId: album.id,
+        album: album.name,
+        artists: album.artists.map(({ name }) => name),
+        playedAt: played_at,
+        artworkUrl: album.images?.find(({ url }) =>
+          /^https:\/\/i\.scdn\.co\/image\/[a-z0-9]+$/i.test(url),
+        )?.url,
+      },
+    ];
+  });
+  if (items.length && !plays.length)
+    throw new Error("Spotify play metadata unavailable");
+  return { ok: true as const, plays };
 }
