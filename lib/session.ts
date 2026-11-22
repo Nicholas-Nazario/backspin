@@ -57,13 +57,15 @@ export const cookieOptions = {
   sameSite: "lax" as const,
   path: "/",
 };
-export async function session() {
-  const value = (await cookies()).get("mdj_session")?.value;
+export function readDiscogsSession(value: string | undefined) {
   if (!value) return null;
   const result = sessionSchema.safeParse(unseal(value));
   return result.success && result.data.expires > Date.now()
     ? result.data
     : null;
+}
+export async function session() {
+  return readDiscogsSession((await cookies()).get("mdj_session")?.value);
 }
 export function origin() {
   const u = new URL(process.env.APP_URL || "http://localhost:3000");

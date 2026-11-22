@@ -16,21 +16,25 @@ export default function PrivacyPage() {
       <h2>Discogs</h2>
       <p>
         Backspin reads your authorized collection and release details to browse
-        your records and make album picks. Collection responses use a
-        short-lived, account-scoped cache and are not saved to the application
-        database. Shared original release years are cached separately. Personal
-        year corrections are saved with your Discogs user ID and can be reset in
-        record details.
+        your records and make album picks. Collection responses use a five-hour,
+        account-scoped cache and are not saved to the application database.
+        Original release years are cached separately using Discogs master data.
       </p>
       <h2>Spotify</h2>
       <p>
         Connecting Spotify reads your display name for Settings and requests
         access to recent plays. When you ask for Spotify picks, Backspin fetches
-        up to 50 recent plays and sends album names, artists, album identifiers,
-        cover artwork URLs, and play timestamps to your browser to match against
-        your collection. Backspin processes this information for the request and
-        keeps it in page memory for the results. It does not save listening
-        history to disk or send your Discogs collection to Spotify.
+        up to 50 recent plays and matches them against your collection on the
+        server. Backspin can reuse completed picks for up to ten minutes in a
+        connection-scoped server cache. Explore keeps the returned
+        recommendations and the listening metadata that explains them in memory
+        for this browser tab. Backspin does not save listening history to disk
+        or send your Discogs collection to Spotify.
+      </p>
+      <p>
+        For albums that do not match a record on your shelf, Backspin searches
+        the Discogs catalog by album title and artist. The search sends those
+        names to Discogs without your Spotify account details or play times.
       </p>
       <h2>Cookies and stored data</h2>
       <p>
@@ -42,12 +46,12 @@ export default function PrivacyPage() {
         localStorage is not used for credentials.
       </p>
       <p>
-        The database contains original release years, personal year corrections,
-        and expiring one-use authorization attempt IDs. It does not contain
-        service access tokens, refresh tokens, or passwords. Pending
-        authorization cookies and attempt IDs expire after ten minutes. Expired
-        attempt IDs are cleaned up during authorization processing. Database
-        backups, if made by the operator, can retain earlier year corrections.
+        The database contains original release years and expiring one-use
+        authorization attempt IDs. It does not contain service access tokens,
+        refresh tokens, or passwords. Pending authorization cookies and attempt
+        IDs expire after ten minutes. Expired attempt IDs are cleaned up during
+        authorization processing. Older databases and backups may retain legacy
+        year corrections.
       </p>
       <h2>Disconnecting and removing access</h2>
       <p>

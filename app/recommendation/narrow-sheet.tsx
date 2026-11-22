@@ -140,8 +140,8 @@ export function NarrowSheet({
         </select>
       </label>
       <p className={styles.hint}>
-        Era includes records with a synced original year or a year you’ve
-        corrected. Unknown years stay out of an era-specific pick.
+        Era includes records with an original year from Discogs. Unknown years
+        stay out of an era-specific pick.
       </p>
       <YearStatus
         lookup={lookup}

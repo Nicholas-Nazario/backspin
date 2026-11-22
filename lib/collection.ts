@@ -16,15 +16,13 @@ export type Entry = {
 };
 export type Year = {
   year: number | null;
-  source: "personal" | "master" | "unknown";
+  source: "master" | "unknown";
 };
 export function originalYear(
   entry: Entry,
-  corrections: Record<number, number>,
+
   masters: Record<number, number | null>,
 ): Year {
-  if (corrections[entry.id])
-    return { year: corrections[entry.id], source: "personal" };
   const year = masters[entry.basic_information.master_id || 0];
   return year ? { year, source: "master" } : { year: null, source: "unknown" };
 }
@@ -74,13 +72,13 @@ export function workKey(entry: Entry) {
 export function explore(
   entries: Entry[],
   f: Filters,
-  corrections: Record<number, number>,
+
   masters: Record<number, number | null>,
 ) {
   const query = f.query.trim().toLocaleLowerCase();
   const filtered = entries.filter((e) => {
     const b = e.basic_information,
-      y = originalYear(e, corrections, masters).year;
+      y = originalYear(e, masters).year;
     return (
       (!query ||
         [
@@ -110,8 +108,8 @@ export function explore(
     f.sort === "artist"
       ? compareArtists(a, b)
       : f.sort === "year"
-        ? (originalYear(a, corrections, masters).year ?? 9999) -
-          (originalYear(b, corrections, masters).year ?? 9999)
+        ? (originalYear(a, masters).year ?? 9999) -
+          (originalYear(b, masters).year ?? 9999)
         : f.sort === "added"
           ? (b.date_added || "").localeCompare(a.date_added || "")
           : a.basic_information.title.localeCompare(b.basic_information.title),

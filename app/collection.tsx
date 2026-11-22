@@ -17,7 +17,7 @@ export default function Collection({
   mode?: "sets" | "collection";
 }) {
   const collection = useCollection();
-  const { entries, years, loading } = collection;
+  const { entries, loading } = collection;
   const lookup = useMasterYears(entries, loading);
   const [filters, setFilters] = useState(initialFilters),
     [focused, setFocused] = useState(false),
@@ -25,7 +25,7 @@ export default function Collection({
     [selected, setSelected] = useState<Entry[] | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const prompt = useSearchPrompt(entries, focused || !!filters.query);
-  const groups = explore(entries, filters, years, lookup.masters);
+  const groups = explore(entries, filters, lookup.masters);
   useEffect(() => {
     setLimit(60);
   }, [filters]);
@@ -115,7 +115,7 @@ export default function Collection({
           <CollectionFilters
             showDisplayOptions={mode === "collection"}
             entries={entries}
-            years={years}
+
             lookup={lookup}
             folders={collection.folders}
             filters={filters}
@@ -130,7 +130,7 @@ export default function Collection({
           standalone
           yearLookup={lookup}
           entries={entries}
-          corrections={years}
+
           masters={lookup.masters}
           disabled={loading || !!collection.error}
           collectionError={collection.error}
@@ -175,7 +175,7 @@ export default function Collection({
                     : group[0].instance_id
                 }
                 group={group}
-                year={originalYear(group[0], years, lookup.masters).year}
+                year={originalYear(group[0], lookup.masters).year}
                 onGenre={addGenre}
                 onOpen={(records, element) => {
                   trigger.current = element;
@@ -197,10 +197,9 @@ export default function Collection({
       {selected && (
         <RecordDetails
           group={selected}
-          years={years}
+
           masters={lookup.masters}
           onClose={close}
-          onSave={collection.saveYear}
         />
       )}
     </section>

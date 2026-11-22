@@ -27,7 +27,7 @@ export default function Recommendation({ tagline }: { tagline: string }) {
   const [filters, setFilters] = useState(emptyRecommendationFilters);
   const [sheetOpen, setSheetOpen] = useState(false);
   const filterTrigger = useRef<HTMLButtonElement>(null);
-  const years = { corrections: collection.years, masters: lookup.masters };
+  const years = { masters: lookup.masters };
   const pool = recommendationPool(collection.entries, filters, years);
   const initialLoading = collection.loading && !collection.refreshing;
   const enabled = !collection.loading && !collection.error;
@@ -44,9 +44,7 @@ export default function Recommendation({ tagline }: { tagline: string }) {
     ),
   ].sort();
   const knownYears = collection.entries
-    .map(
-      (record) => originalYear(record, collection.years, lookup.masters).year,
-    )
+    .map((record) => originalYear(record, lookup.masters).year)
     .filter((year): year is number => year !== null);
   const eras = [
     ...new Set(knownYears.map((year) => Math.floor(year / 10) * 10)),
@@ -55,8 +53,7 @@ export default function Recommendation({ tagline }: { tagline: string }) {
   const hasFilters = Object.values(filters).some(Boolean);
   const shuffling = phase === "shuffling";
   const result = entry && (phase === "ready" || shuffling);
-  const year =
-    entry && originalYear(entry, collection.years, lookup.masters).year;
+  const year = entry && originalYear(entry, lookup.masters).year;
   const reason = entry ? recommendationReason(entry, filters) : "";
   return (
     <section

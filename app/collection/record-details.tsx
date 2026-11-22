@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { Entry, originalYear } from "../../lib/collection";
 import styles from "./collection.module.css";
-import interaction from "../components/interaction.module.css";
 import { api } from "./api";
 import { Cover } from "./record-card";
 type Detail = {
@@ -16,21 +15,18 @@ type Detail = {
 };
 export function RecordDetails({
   group,
-  years,
+
   masters,
   onClose,
-  onSave,
 }: {
   group: Entry[];
-  years: Record<number, number>;
+
   masters: Record<number, number | null>;
   onClose: () => void;
-  onSave: (releaseId: number, year: number | null) => Promise<void>;
 }) {
   const [active, setActive] = useState<Entry>(group[0]),
     [detail, setDetail] = useState<Detail | null>(null),
     [detailError, setDetailError] = useState(""),
-    [yearInput, setYearInput] = useState(""),
     [detailReload, setDetailReload] = useState(0);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -42,7 +38,7 @@ export function RecordDetails({
     let timer: ReturnType<typeof setTimeout>;
     setDetail(null);
     setDetailError("");
-    setYearInput(years[active.id]?.toString() || "");
+
     api("/api/discogs?kind=release&id=" + active.id, controller.signal)
       .then((b) => {
         setDetail(b.data);
@@ -63,14 +59,8 @@ export function RecordDetails({
       controller.abort();
       clearTimeout(timer);
     };
-  }, [active, detailReload, years]);
-  async function saveYear(year: number | null) {
-    try {
-      await onSave(active.id, year);
-    } catch (e) {
-      setDetailError(e instanceof Error ? e.message : "Unable to save year");
-    }
-  }
+  }, [active, detailReload]);
+  const year = originalYear(active, masters).year;
   return (
     <dialog
       className={styles.dialog}
@@ -114,18 +104,9 @@ export function RecordDetails({
                 {active.basic_information.artists.map((a) => a.name).join(", ")}
               </p>
               <p>
-                Original release:{" "}
-                <strong>
-                  {originalYear(active, years, masters).year || "Unknown"}
-                </strong>{" "}
+                Original release: <strong>{year ?? "Unknown"}</strong>{" "}
                 <small>
-                  (
-                  {originalYear(active, years, masters).source === "personal"
-                    ? "your correction"
-                    : originalYear(active, years, masters).source === "master"
-                      ? "Discogs master"
-                      : "not resolved"}
-                  )
+                  {year === null ? "(not resolved)" : "(Discogs master)"}
                 </small>
               </p>
               <div className={styles["chips"]}>
@@ -164,34 +145,6 @@ export function RecordDetails({
                   </ul>
                 </>
               )}
-              <form
-                className={styles["year-form"]}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  saveYear(Number(yearInput));
-                }}
-              >
-                <label>
-                  Correct original release year
-                  <input
-                    type="number"
-                    min="1800"
-                    max="2200"
-                    required
-                    value={yearInput}
-                    onChange={(e) => setYearInput(e.target.value)}
-                  />
-                </label>
-                <button className={interaction.filled}>Save year</button>
-                <button
-                  type="button"
-                  className={interaction.quiet}
-                  onClick={() => saveYear(null)}
-                >
-                  Reset
-                </button>
-                <small>Saved only in Mystery DJ for your account.</small>
-              </form>
               {group.length > 1 && (
                 <label>
                   Owned editions

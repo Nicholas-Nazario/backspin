@@ -1,78 +1,134 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowRightIcon, VinylRecordIcon } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
 import {
-  recentRecommendations,
-  type RecentPlay,
-} from "../../lib/recent-recommendation";
-import { Cover } from "../collection/record-card";
+  ArrowClockwiseIcon,
+  StopIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import type { spotifyRecommendations } from "../../lib/spotify-recommendations";
+import { originalYear } from "../../lib/collection";
+import { YearStatus } from "../collection/year-status";
 import { useCollection } from "../collection/use-collection";
 import { useMasterYears } from "../collection/use-master-years";
+import { useTypedText } from "../components/use-typed-text";
+import { ExploreHelp } from "./explore-help";
+import { SpotifyResults } from "./spotify-results";
 import styles from "./spotify-picks.module.css";
 import interaction from "../components/interaction.module.css";
+
+type Results = Awaited<ReturnType<typeof spotifyRecommendations>>;
 
 type Status =
   | { phase: "idle" | "loading" }
   | { phase: "error"; message: string }
-  | { phase: "ready"; plays: RecentPlay[] };
+  | { phase: "ready"; results: Results; yearProgress: number };
 
-export function SpotifyPicks() {
+type Connection = { key: string; expires: number };
+
+// Keep one completed result in browser memory across navigation.
+let savedPicks: { key: string; results: Results } | undefined;
+
+export function SpotifyPicks({
+  connection,
+}: {
+  connection: Connection | null;
+}) {
   const collection = useCollection();
   const lookup = useMasterYears(collection.entries, collection.loading);
-  const [status, setStatus] = useState<Status>({ phase: "idle" });
+  const [status, setStatus] = useState<Status>(() =>
+    connection &&
+    connection.expires > Date.now() &&
+    savedPicks?.key === connection.key
+      ? { phase: "ready", results: savedPicks.results, yearProgress: 0 }
+      : { phase: "idle" },
+  );
+  useEffect(() => {
+    if (savedPicks?.key !== connection?.key) savedPicks = undefined;
+  }, [connection?.key]);
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
 
-  function dismiss() {
+  function stopSearch() {
     request.current?.abort();
     request.current = null;
     setStatus({ phase: "idle" });
   }
 
-  async function load() {
+  async function load(refresh = lookup.progress > 0) {
     if (request.current) return;
+    savedPicks = undefined;
     const controller = new AbortController();
     request.current = controller;
     setStatus({ phase: "loading" });
     try {
-      const response = await fetch("/api/spotify/recent", {
-        method: "POST",
-        cache: "no-store",
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        refresh ? "/api/spotify/recent?refresh=1" : "/api/spotify/recent",
+        {
+          method: "POST",
+          cache: "no-store",
+          signal: controller.signal,
+        },
+      );
       const data = await response.json();
       if (controller.signal.aborted) return;
-      if (response.ok) setStatus({ phase: "ready", plays: data.plays });
-      else setStatus({ phase: "error", message: data.error });
+      if (response.ok) {
+        if (connection && connection.expires > Date.now())
+          savedPicks = { key: connection.key, results: data };
+        setStatus({
+          phase: "ready",
+          results: data,
+          yearProgress: lookup.progress,
+        });
+      } else setStatus({ phase: "error", message: data.error });
     } catch {
       if (!controller.signal.aborted)
         setStatus({
           phase: "error",
-          message: "Couldn’t load recent plays. Try again.",
+          message: "Couldn’t load your picks. Try again.",
         });
     } finally {
       if (request.current === controller) request.current = null;
     }
   }
 
-  const picks =
-    status.phase === "ready"
-      ? recentRecommendations(collection.entries, status.plays, {
-          corrections: collection.years,
-          masters: lookup.masters,
-        })
-      : [];
+  const knownYears = collection.entries.filter(
+    (record) => originalYear(record, lookup.masters).year !== null,
+  ).length;
+  const results = status.phase === "ready" ? status.results : null;
+  const picksLoading = status.phase === "loading";
+  const canPick =
+    !collection.loading && !collection.error && collection.entries.length > 0;
 
   return (
-    <section className={styles.spotifyPicks} aria-labelledby="explore-title">
-      <h2 id="explore-title">Explore</h2>
-      <p>
-        Find records on your shelf with artists, styles, or eras in common with
-        what you’ve been playing.
-      </p>
-      {collection.loading && !collection.refreshing && (
+    <section
+      className={styles.spotifyPicks}
+      data-results={!!results}
+      aria-labelledby="explore-title"
+    >
+      <div className={styles.exploreHeader}>
+        <div className={styles.exploreHeading}>
+          <h2 id="explore-title">Explore</h2>
+          <ExploreHelp />
+        </div>
+        {results && (
+          <button
+            className={`${interaction.quiet} ${styles.refreshPicks}`}
+            onClick={() => load(true)}
+            disabled={!canPick}
+          >
+            <ArrowClockwiseIcon size={18} aria-hidden="true" />
+            Refresh picks
+          </button>
+        )}
+      </div>
+      {!results && (
+        <p className={styles.exploreIntro}>
+          Find your next spin from recent plays.
+        </p>
+      )}
+      {!results && collection.loading && !collection.refreshing && (
         <p role="status">Opening your Discogs collection…</p>
       )}
       {collection.error && (
@@ -88,126 +144,110 @@ export function SpotifyPicks() {
         !collection.entries.length && (
           <p>Add records to your Discogs collection to get Spotify picks.</p>
         )}
-      <div className={styles.spotifyActions}>
-        <button
-          className={interaction.filled}
-          onClick={load}
-          disabled={
-            status.phase === "loading" ||
-            collection.loading ||
-            !!collection.error ||
-            !collection.entries.length
-          }
-        >
-          {status.phase === "ready"
-            ? "Refresh Spotify picks"
-            : "Pick from recent Spotify plays"}
-        </button>
-        {status.phase !== "idle" && (
-          <button className={interaction.filled} onClick={dismiss}>
-            {status.phase === "loading" ? "Cancel" : "Dismiss"}
-          </button>
-        )}
-      </div>
+      {!results && (
+        <div className={styles.pickStage} data-testid="explore-pick-stage">
+          <div className={styles.tuner} data-tuning={picksLoading}>
+            <div className={styles.tunerDial} aria-hidden="true">
+              <TunerReadout tuning={picksLoading} />
+              <span className={styles.tunerSignal}>
+                <span />
+                <span />
+                <span />
+                <span />
+              </span>
+            </div>
+            <div className={styles.tunerDials} aria-hidden="true">
+              <span className={styles.tunerKnob} />
+              <span
+                className={`${styles.tunerKnob} ${styles.tunerKnobSmall}`}
+              />
+            </div>
+            <div className={styles.tunerControls}>
+              <button
+                className={styles.tunerButton}
+                type="button"
+                disabled={!canPick || picksLoading}
+                aria-busy={picksLoading || undefined}
+                aria-label="Find my picks from recent Spotify plays"
+                onClick={() => load()}
+              >
+                Find my picks
+              </button>
+              <button
+                className={styles.tunerStop}
+                type="button"
+                disabled={!picksLoading}
+                aria-label="Stop search"
+                onClick={stopSearch}
+              >
+                <StopIcon size={20} weight="fill" aria-hidden="true" />
+              </button>
+            </div>
+            {picksLoading && (
+              <span className={styles.loadingAnnouncement} role="status">
+                Finding your picks
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       <div aria-live="polite">
-        {status.phase === "loading" && (
-          <p>Checking your recent Spotify plays…</p>
-        )}
         {status.phase === "error" && <p>{status.message}</p>}
-        {status.phase === "ready" && !picks.length && (
+        {results?.warning && <p>{results.warning}</p>}
+        {results && !results.recommended.length && !results.onShelf.length && (
           <p>
-            {status.plays.length
+            {results.hasRecentPlays
               ? "No strong matches in your collection."
               : "Spotify returned no recent plays."}{" "}
             <Link href="/">Try Surprise Me</Link>.
           </p>
         )}
-        {picks.length > 0 && (
-          <ol className={styles.spotifyResults}>
-            {picks.map((pick) => (
-              <li key={pick.key}>
-                <SpotifyConnection pick={pick} />
-              </li>
-            ))}
-          </ol>
-        )}
+        {results && <SpotifyResults {...results} />}
       </div>
+      {!collection.error && collection.entries.length > 0 && (
+        <details className={styles.yearLookup}>
+          <summary>
+            <span>Original release years</span>
+            {lookup.pendingCount > 0 && !lookup.resolving && (
+              <span className={styles.yearAlert}>
+                <WarningCircleIcon size={16} weight="fill" aria-hidden="true" />
+                {lookup.pendingCount}{" "}
+                {lookup.pendingCount === 1 ? "album" : "albums"} to check
+              </span>
+            )}
+          </summary>
+          <YearStatus
+            lookup={lookup}
+            known={knownYears}
+            count={collection.entries.length}
+            loading={collection.loading}
+            resolveLabel="Resolve missing years"
+          />
+          {status.phase === "ready" &&
+            lookup.status === "done" &&
+            lookup.progress !== status.yearProgress && (
+              <p>Refresh picks to include newly resolved years.</p>
+            )}
+        </details>
+      )}
     </section>
   );
 }
 
-type Pick = ReturnType<typeof recentRecommendations>[number];
+const tuningMessages = [
+  "Reading plays",
+  "Scanning shelf",
+  "Checking Discogs",
+  "Matching styles",
+  "Linking records",
+  "Ranking picks",
+];
 
-function SpotifyArtwork({ artworkUrl }: { artworkUrl?: string }) {
-  const [failed, setFailed] = useState(false);
+function TunerReadout({ tuning }: { tuning: boolean }) {
+  const text = useTypedText(tuningMessages, "Seeking…", !tuning, true);
   return (
-    <div className={styles.spotifyArtwork}>
-      {artworkUrl && !failed ? (
-        <img
-          src={artworkUrl}
-          alt=""
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <VinylRecordIcon
-          size={36}
-          weight="duotone"
-          aria-label="No artwork available"
-          role="img"
-        />
-      )}
-    </div>
-  );
-}
-
-function SpotifyConnection({
-  pick: { entry, play, connection },
-}: {
-  pick: Pick;
-}) {
-  const label =
-    connection.kind === "style"
-      ? connection.styles.slice(0, 2).join(" · ")
-      : connection.kind === "artist"
-        ? connection.artists.join(", ")
-        : "Same album";
-  return (
-    <article
-      className={styles.spotifyConnection}
-      aria-label={`Why we picked ${entry.basic_information.title}`}
-    >
-      <div className={styles.spotifyAlbum}>
-        <p className={styles.spotifyCaption}>Recently played · Spotify</p>
-        <a href={`https://open.spotify.com/album/${play.albumId}`}>
-          <SpotifyArtwork key={play.artworkUrl} artworkUrl={play.artworkUrl} />
-          <strong>{play.album}</strong>
-        </a>
-        <p>{play.artists.join(", ")}</p>
-      </div>
-      <div className={styles.spotifyBridge}>
-        {connection.kind === "style" && (
-          <p className={styles.spotifyCaption}>Shared Discogs style</p>
-        )}
-        {connection.kind === "artist" && (
-          <p className={styles.spotifyCaption}>Same artist</p>
-        )}
-        <strong>{label}</strong>
-        <ArrowRightIcon
-          className={styles.spotifyArrow}
-          size={24}
-          aria-hidden="true"
-        />
-      </div>
-      <div className={styles.spotifyAlbum}>
-        <p className={styles.spotifyCaption}>Your Discogs shelf</p>
-        <Cover entry={entry} />
-        <h3>{entry.basic_information.title}</h3>
-        <p>
-          {entry.basic_information.artists.map(({ name }) => name).join(", ")}
-        </p>
-      </div>
-    </article>
+    <span className={styles.tunerReadout} data-testid="tuner-readout">
+      {tuning ? text : "Ready to tune"}
+    </span>
   );
 }

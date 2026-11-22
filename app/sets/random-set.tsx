@@ -23,7 +23,7 @@ import styles from "./random-set.module.css";
 export function RandomSet({
   standalone = false,
   entries,
-  corrections,
+
   masters,
   yearLookup,
   disabled,
@@ -33,7 +33,7 @@ export function RandomSet({
 }: {
   standalone?: boolean;
   entries: Entry[];
-  corrections: Record<number, number>;
+
   masters: Record<number, number | null>;
   yearLookup: ReturnType<typeof useMasterYears>;
   disabled: boolean;
@@ -46,7 +46,7 @@ export function RandomSet({
   const [motionEnabled, setMotionEnabled] = useState(true);
   const [roomOpen, setRoomOpen] = useState(false);
   const [open, setOpen] = useState(standalone);
-  const mix = useMix(entries, corrections, masters, disabled, open);
+  const mix = useMix(entries, masters, disabled, open);
   const {
     count,
     setCount,
@@ -95,7 +95,7 @@ export function RandomSet({
           )}
           <MixModePicker
             entries={entries}
-            corrections={corrections}
+
             masters={masters}
             target={mix.target}
             onChange={mix.setTarget}
@@ -274,7 +274,7 @@ export function RandomSet({
                 onListen={listening.start}
                 pinned={pinned}
                 canSwap={mix.canSwap}
-                corrections={corrections}
+
                 masters={masters}
                 onOpen={onOpen}
                 onPin={mix.pin}
@@ -294,7 +294,7 @@ export function RandomSet({
           motionEnabled={motionEnabled}
           onMotionChange={setMotionEnabled}
           listening={listening}
-          corrections={corrections}
+
           masters={masters}
           busy={disabled && !collectionError}
           error={collectionError}

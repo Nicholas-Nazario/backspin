@@ -349,23 +349,6 @@
 .credits li span {
   color: var(--color-muted);
 }
-.year-form {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 24px 0;
-  padding: 18px;
-  background: #eee6cf;
-  border-radius: 12px;
-  align-items: end;
-}
-.year-form label {
-  flex: 1;
-  min-width: 140px;
-}
-.year-form small {
-  width: 100%;
-}
 .year-resolution {
   min-width: 260px;
   flex: 1;

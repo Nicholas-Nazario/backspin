@@ -6,7 +6,7 @@ import { YearStatus } from "../collection/year-status";
 import styles from "./mix-mode.module.css";
 export function MixModePicker({
   entries,
-  corrections,
+
   masters,
   target,
   onChange,
@@ -14,7 +14,7 @@ export function MixModePicker({
   disabled,
 }: {
   entries: Entry[];
-  corrections: Record<number, number>;
+
   masters: Record<number, number | null>;
   target: MixTarget;
   onChange: (target: MixTarget) => void;
@@ -31,9 +31,7 @@ export function MixModePicker({
       entries.flatMap((entry) => entry.basic_information.styles || []),
     ),
   ].sort();
-  const years = entries.map(
-    (entry) => originalYear(entry, corrections, masters).year,
-  );
+  const years = entries.map((entry) => originalYear(entry, masters).year);
   const decades = [
     ...new Set(
       years

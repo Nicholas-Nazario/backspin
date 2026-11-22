@@ -24,7 +24,6 @@ export const initialFilters: Filters = {
 };
 export function CollectionFilters({
   entries,
-  years,
   lookup,
   folders,
   filters,
@@ -34,7 +33,6 @@ export function CollectionFilters({
   addGenre,
 }: {
   entries: Entry[];
-  years: Record<number, number>;
   lookup: ReturnType<typeof useMasterYears>;
   folders: { id: number; name: string }[];
   filters: Filters;
@@ -64,13 +62,13 @@ export function CollectionFilters({
   const eras = [
     ...new Set(
       entries
-        .map((e) => originalYear(e, years, masters).year)
+        .map((e) => originalYear(e, masters).year)
         .filter((y): y is number => y !== null)
         .map((y) => Math.floor(y / 10) * 10),
     ),
   ].sort();
   const known = entries.filter(
-    (e) => originalYear(e, years, masters).year !== null,
+    (e) => originalYear(e, masters).year !== null,
   ).length;
   function select(
     field: keyof Filters,

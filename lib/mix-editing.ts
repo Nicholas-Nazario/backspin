@@ -6,7 +6,7 @@ export function reshuffleMix(
   currentIds: number[],
   pinnedIds: number[],
   options: SetOptions,
-  corrections: Record<number, number> = {},
+
   masters: Record<number, number | null> = {},
 ) {
   const current = currentIds.flatMap((id) => {
@@ -20,7 +20,7 @@ export function reshuffleMix(
   const fresh = randomSet(
     entries.filter((e) => !excluded.has(workKey(e))),
     { ...options, count: options.count - pins.length },
-    corrections,
+
     masters,
     pins,
   );
@@ -45,7 +45,7 @@ export function swapMixRecord(
   currentIds: number[],
   instanceId: number,
   options: SetOptions,
-  corrections: Record<number, number> = {},
+
   masters: Record<number, number | null> = {},
 ) {
   const current = currentIds.flatMap((id) => {
@@ -57,7 +57,7 @@ export function swapMixRecord(
     randomSet(
       entries.filter((entry) => !excluded.has(workKey(entry))),
       { ...options, count: 1 },
-      corrections,
+
       masters,
       current.filter((entry) => entry.instance_id !== instanceId),
     )[0] || null

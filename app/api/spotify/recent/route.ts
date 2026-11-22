@@ -1,6 +1,18 @@
+import { database } from "../../../../lib/db";
+import { discogsCollection } from "../../../../lib/discogs-collection";
+import { UpstreamError } from "../../../../lib/discogs";
 import { sameOrigin, session } from "../../../../lib/session";
 import { spotifyRecentPlays } from "../../../../lib/spotify";
-import { spotifySession } from "../../../../lib/spotify-session";
+import {
+  cacheSpotifyPicks,
+  readSpotifyPicks,
+} from "../../../../lib/spotify-picks-cache";
+import { spotifyRecommendations } from "../../../../lib/spotify-recommendations";
+import {
+  spotifyConnectionScope,
+  spotifySession,
+} from "../../../../lib/spotify-session";
+import { cachedMasterYears } from "../../../../lib/year-data";
 
 function reply(body: object, status = 200) {
   return Response.json(body, {
@@ -19,30 +31,83 @@ export async function POST(request: Request) {
   if (!spotify)
     return reply({ error: "Connect Spotify in Settings first." }, 401);
 
+  const scope = spotifyConnectionScope(discogs, spotify);
+  if (new URL(request.url).searchParams.get("refresh") !== "1") {
+    const cached = readSpotifyPicks(scope);
+    if (cached) return reply(cached);
+  }
+
+  const signal = request.signal;
+  let recent: Awaited<ReturnType<typeof spotifyRecentPlays>>;
   try {
-    const result = await spotifyRecentPlays(
-      spotify.accessToken,
-      request.signal,
+    recent = await spotifyRecentPlays(spotify.accessToken, signal);
+  } catch {
+    return reply(
+      { error: "Spotify couldn’t load your recent plays. Try again." },
+      502,
     );
-    if (result.ok) return reply({ plays: result.plays });
-    if (result.status === 401 || result.status === 403)
+  }
+  if (!recent.ok) {
+    if (recent.status === 401 || recent.status === 403)
       return reply(
         {
           error:
             "Reconnect Spotify in Settings. Your account also needs access to the Spotify development app.",
         },
-        result.status,
+        recent.status,
       );
-    if (result.status === 429)
+    if (recent.status === 429)
       return reply(
         { error: "Spotify is limiting requests. Wait a moment and try again." },
         429,
       );
-  } catch {
-    // Keep upstream response bodies and authorization data out of errors.
+    return reply(
+      { error: "Spotify couldn’t load your recent plays. Try again." },
+      502,
+    );
   }
-  return reply(
-    { error: "Spotify couldn’t load your recent plays. Try again." },
-    502,
-  );
+
+  try {
+    const { entries, expiresAt } = recent.plays.length
+      ? await discogsCollection(discogs.username, discogs.token, signal)
+      : { entries: [], expiresAt: Infinity };
+    const ids = [
+      ...new Set(
+        entries.flatMap(({ basic_information }) =>
+          basic_information.master_id ? [basic_information.master_id] : [],
+        ),
+      ),
+    ];
+    const masters = Object.fromEntries(
+      cachedMasterYears(database(), ids).map(({ masterId, year }) => [
+        masterId,
+        year,
+      ]),
+    );
+    const picks = await spotifyRecommendations(
+      entries,
+      recent.plays,
+      { masters },
+      discogs.token,
+      signal,
+    );
+    signal.throwIfAborted();
+    cacheSpotifyPicks(
+      { ...scope, expires: Math.min(scope.expires, expiresAt) },
+      picks,
+    );
+    return reply(picks);
+  } catch (error) {
+    if (error instanceof UpstreamError && error.status === 429)
+      return reply(
+        { error: "Discogs is limiting requests. Wait a moment and try again." },
+        429,
+      );
+    return reply(
+      {
+        error: "Backspin couldn’t build picks from your collection. Try again.",
+      },
+      502,
+    );
+  }
 }

@@ -1,3 +1,4 @@
+import { setTimeout as delay } from "node:timers/promises";
 import OAuth from "oauth-1.0a";
 import { createHmac } from "node:crypto";
 export type Token = { key: string; secret: string };
@@ -20,10 +21,12 @@ export async function request(
   method = "GET",
   extra: Record<string, string> = {},
   fetcher: typeof fetch = fetch,
+  signal?: AbortSignal,
 ): Promise<Response> {
   const work = async () => {
     const wait = nextRequest - Date.now();
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    signal?.throwIfAborted();
+    if (wait > 0) await delay(wait, undefined, { signal });
     const key = process.env.DISCOGS_CONSUMER_KEY,
       secret = process.env.DISCOGS_CONSUMER_SECRET;
     if (!key || !secret)
@@ -37,6 +40,7 @@ export async function request(
     const url = "https://api.discogs.com" + path;
     const signed = oauth.authorize({ url, method, data: extra }, token);
     const auth = oauth.toHeader({ ...signed, ...extra });
+    const timeout = AbortSignal.timeout(20000);
     const response = await fetcher(url, {
       method,
       headers: {
@@ -45,7 +49,7 @@ export async function request(
         Accept: "application/vnd.discogs.v2.discogs+json",
       },
       cache: "no-store",
-      signal: AbortSignal.timeout(20000),
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     });
     const limit = Number(response.headers.get("x-discogs-ratelimit")) || 60;
     nextRequest = Date.now() + Math.max(1100, Math.ceil(60000 / limit));
@@ -85,20 +89,37 @@ const cache = new Map<
   string,
   { expires: number; fetchedAt: number; value: unknown }
 >();
-export async function json(path: string, token: Token, refresh = false) {
+export async function json(
+  path: string,
+  token: Token,
+  {
+    refresh = false,
+    signal,
+    fetcher = fetch,
+    ttl = 5 * 60 * 1000,
+  }: {
+    refresh?: boolean;
+    signal?: AbortSignal;
+    fetcher?: typeof fetch;
+    ttl?: number;
+  } = {},
+) {
+  signal?.throwIfAborted();
   const id = token.key + ":" + path;
   const old = cache.get(id);
   if (!refresh && old && old.expires > Date.now())
     return { value: old.value, expires: old.expires, fetchedAt: old.fetchedAt };
-  const value = await (await request(path, token)).json();
+  const value = await (
+    await request(path, token, "GET", {}, fetcher, signal)
+  ).json();
   const now = Date.now();
   for (const [k, v] of cache) if (v.expires <= now) cache.delete(k);
   if (cache.size >= 100) cache.delete(cache.keys().next().value!);
-  const expires = now + 5 * 60 * 1000;
+  const expires = now + ttl;
   cache.set(id, { expires, fetchedAt: now, value });
   return { value, expires, fetchedAt: now };
 }
-export function clearCache(token: Token) {
+export function clearCache(token: Token, pathPrefix = "") {
   for (const k of cache.keys())
-    if (k.startsWith(token.key + ":")) cache.delete(k);
+    if (k.startsWith(token.key + ":" + pathPrefix)) cache.delete(k);
 }

@@ -1,14 +1,19 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { collectionFixture } from "./browser-fixture";
+const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
 const browser = await chromium.launch();
 try {
-  const { page, rememberYear, clearYears } = await collectionFixture(browser);
+  const { page, rememberYear, clearYears } = await collectionFixture(
+    browser,
+    baseURL,
+  );
   let fail = true,
     delay = false,
     started = false;
   const calls: number[] = [];
   const forced: number[] = [];
+  let collectionForced = false;
   await page.route("**/api/discogs?*", async (r) => {
     const q = new URL(r.request().url()).searchParams;
     let data: unknown;
@@ -34,7 +39,8 @@ try {
       }
       rememberYear(id, 1971);
       data = { year: 1971 };
-    } else
+    } else {
+      collectionForced ||= q.get("refresh") === "1";
       data = {
         pagination: { pages: 1, items: 2 },
         releases: [100, 200].map((id) => ({
@@ -47,11 +53,12 @@ try {
           },
         })),
       };
+    }
     await r
       .fulfill({ json: { data, expiresAt: Date.now() + 300000 } })
       .catch(() => {});
   });
-  await page.goto("http://localhost:3000/collection");
+  await page.goto(baseURL + "/collection");
   await page.getByRole("button", { name: "View Album 100" }).waitFor();
   await page.getByTestId("filter-panel").locator("summary").click();
   await page
@@ -94,6 +101,7 @@ try {
   await page
     .getByText("2 of 2 original years known.", { exact: false })
     .waitFor();
+  assert.equal(collectionForced, true);
   console.log(
     "Recovery checks passed: failed album does not stop batch, retry skips completed masters, collection refresh resumes lookup.",
   );

@@ -1,24 +1,4 @@
 import type Database from "better-sqlite3";
-export function personalYears(db: Database.Database, userId: number) {
-  return db
-    .prepare("SELECT release_id,year FROM original_years WHERE user_id=?")
-    .all(userId);
-}
-export function correctYear(
-  db: Database.Database,
-  userId: number,
-  releaseId: number,
-  year: number | null,
-) {
-  if (year === null)
-    db.prepare(
-      "DELETE FROM original_years WHERE user_id=? AND release_id=?",
-    ).run(userId, releaseId);
-  else
-    db.prepare(
-      "INSERT INTO original_years VALUES(?,?,?) ON CONFLICT(user_id,release_id) DO UPDATE SET year=excluded.year",
-    ).run(userId, releaseId, year);
-}
 export type MasterYear = {
   masterId: number;
   year: number | null;

@@ -24,9 +24,6 @@ export async function collectionFixture(
       sameSite: "Lax",
     },
   ]);
-  await page.route("**/api/years", (route) =>
-    route.fulfill({ json: { years: [] } }),
-  );
   await page.route("**/api/master-years?*", (route) => {
     const ids = (new URL(route.request().url()).searchParams.get("ids") || "")
       .split(",")

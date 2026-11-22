@@ -16,7 +16,7 @@ export function MixQueue({
   onListen,
   pinned,
   canSwap,
-  corrections,
+
   masters,
   onOpen,
   onPin,
@@ -29,7 +29,7 @@ export function MixQueue({
   onListen: (id: number) => void;
   pinned: number[];
   canSwap: boolean;
-  corrections: Record<number, number>;
+
   masters: Record<number, number | null>;
   onOpen: (group: Entry[], trigger: HTMLElement) => void;
   onPin: (id: number) => void;
@@ -58,7 +58,7 @@ export function MixQueue({
           const id = entry.instance_id,
             title = entry.basic_information.title,
             isPinned = pinned.includes(id),
-            year = originalYear(entry, corrections, masters).year;
+            year = originalYear(entry, masters).year;
           return (
             <li
               key={id}
