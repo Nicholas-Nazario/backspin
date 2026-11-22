@@ -5,6 +5,15 @@
   border-radius: 24px;
   transition: background-color 140ms ease;
 }
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
 .filled,
 .navigation[aria-current="page"],
 .quiet[aria-pressed="true"] {

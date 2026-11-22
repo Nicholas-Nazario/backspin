@@ -20,6 +20,8 @@ Use the shared styles in `app/components/interaction.module.css` for action cont
 - Filled actions use blue, deepen slightly on hover, and deepen again while pressed. Use this for finding release years, confirming filters, and trying another record.
 - Quiet actions have a transparent background, light blue on hover, and blue while pressed. Use this for Settings, opening filters, refreshing the collection, and dismissing or clearing controls. Selected mood choices keep their blue fill.
 
+Settings and Refresh collection are icon-only quiet controls with accessible names, tooltips, and 44px targets. The Settings panel closes when tapping outside or pressing Escape; Escape returns focus to the cog. Tapping inside the panel keeps it open.
+
 Standalone actions share rounded corners, a minimum 44px height, and a dark blue keyboard focus ring. Collection metadata pills keep compact, matching heights while clickable genres share the filled action colors. Hover feedback applies to devices that support hovering; disabled controls keep their disabled appearance. Color changes replace skewing, lifting, and shifting shadows on action controls. The vinyl keeps its own record animation and stable blue label.
 
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.

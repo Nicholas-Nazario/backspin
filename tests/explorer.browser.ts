@@ -80,14 +80,14 @@ try {
       .isVisible(),
     false,
   );
-  await page.getByText("Settings", { exact: true }).click();
+  await page.getByLabel("Settings", { exact: true }).click();
   assert.equal(
     await page
       .getByRole("button", { name: "Disconnect", exact: true })
       .isVisible(),
     true,
   );
-  await page.getByText("Settings", { exact: true }).click();
+  await page.getByLabel("Settings", { exact: true }).click();
   await page.getByLabel("Find a record").fill("First");
   assert.equal(
     await page.getByTestId("record-grid").locator("article").count(),

@@ -25,10 +25,7 @@
   composes: filled from "../components/interaction.module.css";
 }
 .refresh {
-  composes: quiet from "../components/interaction.module.css";
-  min-height: 44px;
-  font-size: 12px;
-  padding: 8px 12px;
+  composes: quiet icon from "../components/interaction.module.css";
 }
 .notice {
   background: var(--color-yellow-soft);
@@ -474,9 +471,6 @@
   .explorer h2 {
     font-size: 24px;
     gap: 10px;
-  }
-  .section-title > .secondary {
-    padding: 7px 0;
   }
   .search-row {
     margin-top: 16px;

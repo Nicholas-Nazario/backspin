@@ -167,8 +167,21 @@ try {
       path: `/tmp/backspin-mobile-result-${viewport.width}.png`,
       fullPage: true,
     });
-    await page.getByText("Settings", { exact: true }).tap();
+    await page.getByLabel("Settings", { exact: true }).tap();
     await fits(`settings ${viewport.width}`);
+    const disconnect = page.getByRole("button", {
+      name: "Disconnect",
+      exact: true,
+    });
+    await expect(disconnect).toBeVisible();
+    await page.getByText(/Connected as/).tap();
+    await expect(disconnect).toBeVisible();
+    await page.getByRole("heading", { name: "Backspin", exact: true }).tap();
+    await expect(disconnect).toBeHidden();
+    await page.getByLabel("Settings", { exact: true }).tap();
+    await page.keyboard.press("Escape");
+    await expect(disconnect).toBeHidden();
+    await expect(page.getByLabel("Settings", { exact: true })).toBeFocused();
     await page.goto(baseURL + "/collection");
     await expect(page.getByText(/Last updated/)).toBeVisible();
     await fits(`collection ${viewport.width}`);

@@ -70,9 +70,13 @@ export default function Collection({
             </span>
           )}
         </h2>
-        <button className={styles.refresh} onClick={collection.refresh}>
-          <ArrowClockwiseIcon size={16} aria-hidden="true" />
-          Refresh collection
+        <button
+          className={styles.refresh}
+          aria-label="Refresh collection"
+          title="Refresh collection"
+          onClick={collection.refresh}
+        >
+          <ArrowClockwiseIcon size={18} aria-hidden="true" />
         </button>
       </div>
       {loading && !collection.refreshing && (

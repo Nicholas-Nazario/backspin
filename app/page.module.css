@@ -27,14 +27,8 @@
   z-index: 5;
 }
 .settings summary {
-  min-height: 44px;
   list-style: none;
   cursor: pointer;
-  font-size: 13px;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 .settings summary::-webkit-details-marker {
   display: none;

@@ -1,13 +1,10 @@
 import styles from "../page.module.css";
-import {
-  GearSixIcon,
-  ArrowUpRightIcon,
-  SignOutIcon,
-} from "@phosphor-icons/react/ssr";
+import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import { session } from "../../lib/session";
 import Link from "next/link";
 import { BrandMark } from "./brand-mark";
 import interaction from "./interaction.module.css";
+import { SettingsMenu } from "./settings-menu";
 export async function AppShell({
   children,
   active,
@@ -52,27 +49,7 @@ export async function AppShell({
             </Link>
           </nav>
         )}
-        {s && (
-          <details className={styles["settings"]}>
-            <summary className={interaction.quiet}>
-              <GearSixIcon size={18} aria-hidden="true" /> Settings
-            </summary>
-            <div className={styles["settings-menu"]}>
-              <p>
-                Connected as <strong>{s.username}</strong>
-              </p>
-              <form action="/api/auth/disconnect" method="post">
-                <button className={interaction.filled}>
-                  <SignOutIcon size={18} aria-hidden="true" /> Disconnect
-                </button>
-              </form>
-              <p className={styles["small"]}>
-                Disconnect signs you out here. Revoke app access in Discogs
-                settings to remove its authorization.
-              </p>
-            </div>
-          </details>
-        )}
+        {s && <SettingsMenu username={s.username} />}
       </header>
       {error && (
         <p role="alert" className={styles["notice"]}>
