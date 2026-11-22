@@ -36,7 +36,7 @@
   padding: 16px 12px;
   border: 3px solid #302b24;
   border-radius: 50%;
-  background: #ec8e73;
+  background: #d8e9ef;
   color: #302b24;
   font:
     550 clamp(1.1rem, 6vw, 1.65rem) / 1.05 "Backspin Display",
@@ -45,13 +45,6 @@
 }
 .labelText {
   animation: label-in 280ms ease-out both;
-}
-.button[data-loading="true"] .label {
-  background: #fff6df;
-}
-.button:not(:disabled):hover .label,
-.button:not(:disabled):focus-visible .label {
-  background: #f2a28a;
 }
 .button[data-loading="true"],
 .button[data-motion="spinning"],
