@@ -195,6 +195,18 @@ try {
     );
     await fits(`collection search ${viewport.width}`);
   }
+  await page.getByRole("link", { name: "Backspin", exact: true }).tap();
+  await expect(
+    page.getByRole("link", { name: "Discover", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "Collection", exact: true }).tap();
+  await page
+    .getByRole("link", { name: "Backspin", exact: true })
+    .locator("img")
+    .tap();
+  await expect(
+    page.getByRole("link", { name: "Discover", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   assert.deepEqual(errors, []);
   console.log(
     "Mobile browser checks passed: 320–430px phones, landscape, all taglines, touch, long titles, artwork, filter sheet, rerolls, and settings.",

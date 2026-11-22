@@ -1,5 +1,9 @@
 import styles from "../page.module.css";
-import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
+import {
+  ArrowUpRightIcon,
+  CompassIcon,
+  StackIcon,
+} from "@phosphor-icons/react/ssr";
 import { session } from "../../lib/session";
 import Link from "next/link";
 import { BrandMark } from "./brand-mark";
@@ -26,10 +30,10 @@ export async function AppShell({
     <main>
       <header className={styles.header}>
         <h1 className={styles.title}>
-          Backspin
-          <span>
+          <Link href="/" className={styles.brandLink} title="Back to Discover">
+            Backspin
             <BrandMark size={36} />
-          </span>
+          </Link>
         </h1>
         {s && (
           <nav className={styles.navigation} aria-label="Main navigation">
@@ -38,6 +42,7 @@ export async function AppShell({
               href="/"
               aria-current={active === "discover" ? "page" : undefined}
             >
+              <CompassIcon size={19} aria-hidden="true" />
               Discover
             </Link>
             <Link
@@ -45,6 +50,7 @@ export async function AppShell({
               href="/collection"
               aria-current={active === "collection" ? "page" : undefined}
             >
+              <StackIcon size={19} aria-hidden="true" />
               Collection
             </Link>
           </nav>

@@ -1,14 +1,15 @@
 .header {
   min-width: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
   padding: 0 0 18px;
   border-bottom: 1px solid #ded4bc;
   position: relative;
 }
 .title {
+  justify-self: start;
   font-family: "Backspin Display", sans-serif;
   font-weight: 550;
   font-size: 28px;
@@ -16,12 +17,16 @@
   margin: 0;
   line-height: 1.2;
 }
-.title span {
-  margin-left: 10px;
+.brandLink {
+  composes: quiet from "./components/interaction.module.css";
   display: inline-flex;
-  vertical-align: middle;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-ink);
+  text-decoration: none;
 }
 .settings {
+  justify-self: end;
   min-width: 0;
   position: relative;
   z-index: 5;
@@ -105,17 +110,28 @@
   }
 }
 .navigation {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 30px;
+  background: var(--color-surface);
 }
 .navigation a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
   text-decoration: none;
-  font-size: 13px;
-  padding: 9px 13px;
+  font-family: "Backspin Display", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 18px;
+}
+.navigation svg {
+  flex-shrink: 0;
 }
 @media (max-width: 700px) {
   .header {
@@ -126,7 +142,6 @@
   .navigation {
     grid-column: 1 / -1;
     grid-row: 2;
-    flex-wrap: wrap;
     width: 100%;
     margin: 0;
   }
