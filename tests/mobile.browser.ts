@@ -216,7 +216,7 @@ try {
   }
   await page.getByRole("link", { name: "Backspin", exact: true }).tap();
   await expect(
-    page.getByRole("link", { name: "Discover", exact: true }),
+    page.getByRole("link", { name: "Surprise Me", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   await page.getByRole("link", { name: "Collection", exact: true }).tap();
   await page
@@ -224,7 +224,7 @@ try {
     .locator("img")
     .tap();
   await expect(
-    page.getByRole("link", { name: "Discover", exact: true }),
+    page.getByRole("link", { name: "Surprise Me", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   assert.deepEqual(errors, []);
   console.log(

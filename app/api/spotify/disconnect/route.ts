@@ -10,6 +10,7 @@ import {
   SPOTIFY_HANDSHAKE_COOKIE,
   SPOTIFY_SESSION_COOKIE,
   spotifyHandshakeSchema,
+  spotifyReturnPath,
 } from "../../../../lib/spotify-session";
 
 export async function POST(req: NextRequest) {
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
   const raw = req.cookies.get(SPOTIFY_HANDSHAKE_COOKIE)?.value;
   const pending = spotifyHandshakeSchema.safeParse(raw ? unseal(raw) : null);
   if (pending.success) consumeAttempt(pending.data.id);
-  const path = form.get("returnTo") === "/collection" ? "/collection" : "/";
+  const path = spotifyReturnPath.safeParse(form.get("returnTo")).data ?? "/";
   const response = NextResponse.redirect(
     origin() + path + "?spotify=disconnected",
     303,

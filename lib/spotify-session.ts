@@ -4,11 +4,14 @@ import { unseal } from "./session";
 
 export const SPOTIFY_SESSION_COOKIE = "backspin_spotify";
 export const SPOTIFY_HANDSHAKE_COOKIE = "backspin_spotify_handshake";
+export const spotifyReturnPath = z.enum(["/", "/collection", "/spotify"]);
+export type SpotifyReturnPath = z.infer<typeof spotifyReturnPath>;
+
 export const spotifyHandshakeSchema = z.object({
   purpose: z.literal("spotify-handshake"),
   id: z.string().uuid(),
   state: z.string().min(32).max(128),
-  returnTo: z.enum(["/", "/collection"]),
+  returnTo: spotifyReturnPath,
   expires: z.number(),
 });
 export const spotifySessionSchema = z.object({
