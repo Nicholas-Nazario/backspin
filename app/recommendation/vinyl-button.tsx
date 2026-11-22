@@ -1,4 +1,4 @@
-import { FlowerIcon } from "@phosphor-icons/react";
+import { BrandMark } from "../components/brand-mark";
 import styles from "./vinyl-button.module.css";
 
 export function VinylButton({
@@ -40,7 +40,7 @@ export function VinylButton({
       >
         <span className={styles.label}>
           {loading ? (
-            <FlowerIcon size={38} weight="duotone" />
+            <BrandMark size={72} />
           ) : (
             <span className={styles.labelText}>Drop the needle</span>
           )}

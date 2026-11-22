@@ -1,12 +1,14 @@
 import styles from "../page.module.css";
 import {
-  FlowerIcon,
-  GearSixIcon,
   ArrowUpRightIcon,
-  SignOutIcon,
+  CompassIcon,
+  StackIcon,
 } from "@phosphor-icons/react/ssr";
 import { session } from "../../lib/session";
 import Link from "next/link";
+import { BrandMark } from "./brand-mark";
+import interaction from "./interaction.module.css";
+import { SettingsMenu } from "./settings-menu";
 export async function AppShell({
   children,
   active,
@@ -28,48 +30,32 @@ export async function AppShell({
     <main>
       <header className={styles.header}>
         <h1 className={styles.title}>
-          Backspin
-          <span>
-            <FlowerIcon size={28} weight="duotone" aria-hidden="true" />
-          </span>
+          <Link href="/" className={styles.brandLink} title="Back to Discover">
+            Backspin
+            <BrandMark size={36} />
+          </Link>
         </h1>
         {s && (
           <nav className={styles.navigation} aria-label="Main navigation">
             <Link
+              className={interaction.navigation}
               href="/"
               aria-current={active === "discover" ? "page" : undefined}
             >
+              <CompassIcon size={19} aria-hidden="true" />
               Discover
             </Link>
             <Link
+              className={interaction.navigation}
               href="/collection"
               aria-current={active === "collection" ? "page" : undefined}
             >
+              <StackIcon size={19} aria-hidden="true" />
               Collection
             </Link>
           </nav>
         )}
-        {s && (
-          <details className={styles["settings"]}>
-            <summary>
-              <GearSixIcon size={18} aria-hidden="true" /> Settings
-            </summary>
-            <div className={styles["settings-menu"]}>
-              <p>
-                Connected as <strong>{s.username}</strong>
-              </p>
-              <form action="/api/auth/disconnect" method="post">
-                <button>
-                  <SignOutIcon size={18} aria-hidden="true" /> Disconnect
-                </button>
-              </form>
-              <p className={styles["small"]}>
-                Disconnect signs you out here. Revoke app access in Discogs
-                settings to remove its authorization.
-              </p>
-            </div>
-          </details>
-        )}
+        {s && <SettingsMenu username={s.username} />}
       </header>
       {error && (
         <p role="alert" className={styles["notice"]}>
@@ -90,7 +76,7 @@ export async function AppShell({
           </p>
           {configured ? (
             <form action="/api/auth/connect" method="post">
-              <button>
+              <button className={interaction.filled}>
                 Connect Discogs{" "}
                 <ArrowUpRightIcon size={18} aria-hidden="true" />
               </button>

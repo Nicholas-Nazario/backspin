@@ -167,11 +167,43 @@ try {
       path: `/tmp/backspin-mobile-result-${viewport.width}.png`,
       fullPage: true,
     });
-    await page.getByText("Settings", { exact: true }).tap();
+    await page.getByLabel("Settings", { exact: true }).tap();
     await fits(`settings ${viewport.width}`);
+    const disconnect = page.getByRole("button", {
+      name: "Disconnect",
+      exact: true,
+    });
+    await expect(disconnect).toBeVisible();
+    await page.getByText(/Connected as/).tap();
+    await expect(disconnect).toBeVisible();
+    await page.getByRole("heading", { name: "Backspin", exact: true }).tap();
+    await expect(disconnect).toBeHidden();
+    await page.getByLabel("Settings", { exact: true }).tap();
+    await page.keyboard.press("Escape");
+    await expect(disconnect).toBeHidden();
+    await expect(page.getByLabel("Settings", { exact: true })).toBeFocused();
     await page.goto(baseURL + "/collection");
     await expect(page.getByText(/Last updated/)).toBeVisible();
     await fits(`collection ${viewport.width}`);
+    const collectionHeading = await page
+      .getByRole("heading", { name: "Collection", exact: true })
+      .boundingBox();
+    const refreshControl = await page
+      .getByRole("button", { name: "Refresh collection", exact: true })
+      .boundingBox();
+    assert.ok(collectionHeading && refreshControl);
+    assert.ok(
+      Math.abs(
+        collectionHeading.y +
+          collectionHeading.height / 2 -
+          (refreshControl.y + refreshControl.height / 2),
+      ) < 1,
+      `Collection heading and refresh should align at ${viewport.width}px`,
+    );
+    assert.ok(
+      refreshControl.x >= collectionHeading.x + collectionHeading.width,
+      `Refresh should stay beside the heading at ${viewport.width}px`,
+    );
     const search = page.getByRole("searchbox");
     await search.tap();
     await search.fill("Johnny");
@@ -182,6 +214,18 @@ try {
     );
     await fits(`collection search ${viewport.width}`);
   }
+  await page.getByRole("link", { name: "Backspin", exact: true }).tap();
+  await expect(
+    page.getByRole("link", { name: "Discover", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "Collection", exact: true }).tap();
+  await page
+    .getByRole("link", { name: "Backspin", exact: true })
+    .locator("img")
+    .tap();
+  await expect(
+    page.getByRole("link", { name: "Discover", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   assert.deepEqual(errors, []);
   console.log(
     "Mobile browser checks passed: 320–430px phones, landscape, all taglines, touch, long titles, artwork, filter sheet, rerolls, and settings.",

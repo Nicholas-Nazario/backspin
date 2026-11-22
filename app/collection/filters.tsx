@@ -6,6 +6,7 @@ import {
 import { Entry, Filters, originalYear } from "../../lib/collection";
 import { Toggle } from "../components/toggle";
 import styles from "./collection.module.css";
+import interaction from "../components/interaction.module.css";
 import { YearStatus } from "./year-status";
 import type { useMasterYears } from "./use-master-years";
 import type { Dispatch, SetStateAction } from "react";
@@ -99,7 +100,7 @@ export function CollectionFilters({
   return (
     <>
       <details className={styles["filter-panel"]} data-testid="filter-panel">
-        <summary>
+        <summary className={interaction.quiet}>
           <span className={styles["filter-icon"]} aria-hidden="true">
             <SlidersHorizontalIcon size={20} aria-hidden="true" />
           </span>{" "}
@@ -201,6 +202,7 @@ export function CollectionFilters({
         {(filters.genres || []).map((g) => (
           <button
             key={g}
+            className={interaction.filled}
             onClick={() =>
               setFilters((f) => ({
                 ...f,

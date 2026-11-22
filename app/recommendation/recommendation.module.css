@@ -47,31 +47,16 @@
   margin: 10px auto 28px;
 }
 .primary {
+  composes: filled from "../components/interaction.module.css";
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  background: #276b51;
-  border: 2px solid #174b38;
-  border-radius: 32px;
-  color: #fffaf0;
-  box-shadow: 0 5px 0 #174b38;
   min-height: 58px;
   width: min(100%, 340px);
   padding: 14px 24px;
   font-size: 18px;
   font-weight: 700;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
-}
-.primary:not(:disabled):hover {
-  transform: translateY(-2px) rotate(-1deg);
-  box-shadow: 0 7px 0 #174b38;
-}
-.primary:not(:disabled):active {
-  transform: translateY(4px);
-  box-shadow: 0 1px 0 #174b38;
 }
 .actions > .quiet,
 .again {
@@ -79,19 +64,16 @@
 }
 .quiet,
 .again {
-  background: transparent;
-  color: #4a5d45;
   padding: 10px 14px;
   min-height: 44px;
   font-weight: 700;
 }
-.again {
-  background: #e4eacb;
-  min-width: 200px;
+.quiet {
+  composes: quiet from "../components/interaction.module.css";
 }
-.quiet:hover,
-.again:hover {
-  background: #ece5d1;
+.again {
+  composes: filled from "../components/interaction.module.css";
+  min-width: 200px;
 }
 .chips {
   display: flex;
@@ -103,17 +85,12 @@
   display: none;
 }
 .chips > button {
-  background: #f7dfb6;
-  color: #59432c;
   font-size: 13px;
   padding: 10px 14px;
   min-height: 44px;
 }
-.chips > .quiet {
-  background: transparent;
-}
 .hint {
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 12px;
   line-height: 1.6;
   margin: 0;
@@ -132,7 +109,7 @@
   max-width: 310px;
   margin: 18px auto 24px;
   padding: 12px;
-  background: #fffaf0;
+  background: var(--color-surface);
   border: 1px solid #ded4bc;
   border-radius: 15px;
   box-shadow: 0 8px 0 #e6d8b8;
@@ -171,11 +148,11 @@
 .identity > p:first-child {
   font-size: 16px;
   margin: 0;
-  color: #655e50;
+  color: var(--color-muted);
   overflow-wrap: anywhere;
 }
 .metadata {
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 13px;
 }
 .reason {
@@ -216,7 +193,7 @@
   }
 }
 .notice {
-  background: #f7dfb6;
+  background: var(--color-yellow-soft);
   padding: 16px;
   border-radius: 20px;
   line-height: 1.6;
@@ -226,8 +203,8 @@
   scroll-padding-block: 24px;
   border: 1px solid #d9ccb0;
   border-radius: 28px;
-  background: #fffaf0;
-  color: #302b24;
+  background: var(--color-surface);
+  color: var(--color-ink);
   padding: 24px;
   width: min(520px, calc(100% - 32px));
   max-height: calc(100dvh - 40px);
@@ -254,7 +231,7 @@
   margin: 0;
 }
 .sheet > p {
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -270,7 +247,7 @@
 .field small,
 .moods small {
   display: block;
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 12px;
   font-weight: 400;
   margin-top: 3px;
@@ -290,23 +267,19 @@
   gap: 8px;
 }
 .moods button {
-  border: 1px solid #c8bda6;
-  background: transparent;
-  color: #655e50;
+  border: 1px solid var(--color-border);
   min-height: 44px;
   padding: 10px 14px;
   font-size: 14px;
 }
 .moods button[aria-pressed="true"] {
-  background: #d8e6d0;
-  border-color: #276b51;
-  color: #174b38;
-  box-shadow: inset 0 0 0 1px #276b51;
+  border-color: var(--color-accent-ink);
+  box-shadow: inset 0 0 0 1px var(--color-accent-ink);
 }
 .moods p {
   font-size: 12px;
   line-height: 1.6;
-  color: #655e50;
+  color: var(--color-muted);
 }
 .sheet > .primary {
   display: flex;
@@ -359,12 +332,5 @@
   .result,
   .sheet[open] {
     animation: none;
-  }
-  .primary {
-    transition: none;
-  }
-  .primary:not(:disabled):hover,
-  .primary:not(:disabled):active {
-    transform: none;
   }
 }

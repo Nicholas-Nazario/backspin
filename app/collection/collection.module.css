@@ -1,39 +1,36 @@
 .explorer h2 {
   min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
   font-size: 26px;
+  line-height: 1.2;
   letter-spacing: -0.035em;
   margin: 0;
 }
 .section-title {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 44px;
   align-items: center;
-  gap: 16px;
+  gap: 4px 16px;
   padding: 26px 0 0;
 }
 .record-count {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
   font-size: 13px;
   letter-spacing: 0;
   font-weight: 400;
   color: #817764;
 }
 .secondary {
-  background: #e6ddc6;
-  color: #302b24;
+  composes: filled from "../components/interaction.module.css";
 }
-.section-title > .secondary {
-  min-height: 44px;
-  font-size: 12px;
-  background: transparent;
-  padding: 8px 0;
-  color: #655e50;
+.refresh {
+  composes: quiet icon from "../components/interaction.module.css";
+  grid-column: -2;
+  grid-row: 1;
 }
 .notice {
-  background: #f9dfad;
+  background: var(--color-yellow-soft);
   padding: 18px;
   border-radius: 12px;
 }
@@ -49,7 +46,7 @@
   font-size: 17px;
   padding: 18px 22px 18px 52px;
   border: 1px solid #cfc5af;
-  background: #fffaf0;
+  background: var(--color-surface);
   border-radius: 16px;
   box-shadow: 0 3px 0 #e9dfc8;
   width: 100%;
@@ -78,27 +75,18 @@
   list-style: none;
   cursor: pointer;
   font-size: 14px;
-  color: #655e50;
-  padding: 8px 0;
+  padding: 8px 12px;
 }
 .filter-panel summary::-webkit-details-marker {
   display: none;
-}
-.filter-panel summary:hover {
-  color: #276b51;
-}
-.filter-panel summary:focus-visible {
-  outline: 3px solid #276b51;
-  outline-offset: 5px;
-  border-radius: 5px;
 }
 .filter-icon {
   line-height: 1;
   display: flex;
 }
 .filter-count:not(:empty) {
-  background: #d8e6d0;
-  color: #265d45;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
   font-size: 11px;
   padding: 3px 7px;
   border-radius: 12px;
@@ -133,16 +121,16 @@
   background-repeat: no-repeat;
   background-position: right 12px center;
   border: 0;
-  border-bottom: 1px solid #c8bda6;
+  border-bottom: 1px solid var(--color-border);
   border-radius: 0;
   padding: 10px 30px 10px 0;
   font-size: 16px;
-  color: #302b24;
+  color: var(--color-ink);
   letter-spacing: normal;
   cursor: pointer;
 }
 .toolbar select:hover {
-  border-color: #276b51;
+  border-color: var(--color-accent-ink);
 }
 .browse-options {
   display: flex;
@@ -167,11 +155,9 @@
   margin-bottom: 8px;
 }
 .text-button {
-  background: none;
-  color: inherit;
-  padding: 0;
+  composes: quiet from "../components/interaction.module.css";
+  padding: 4px 8px;
   text-align: left;
-  border-radius: 0;
   font-weight: bold;
 }
 .applied-filters {
@@ -189,12 +175,12 @@
   padding: 7px 12px;
 }
 .applied-filters small {
-  color: #655e50;
+  color: var(--color-muted);
 }
 .collection-attribution {
   display: inline-block;
   font-size: 12px;
-  color: #276b51;
+  color: var(--color-accent-ink);
   margin-top: 4px;
 }
 .grid {
@@ -233,8 +219,9 @@
   text-align: inherit;
   color: inherit;
 }
-.cover-button:hover {
-  transform: translateY(-3px);
+.cover-button:not(:disabled):hover {
+  outline: 3px solid var(--color-accent-border);
+  outline-offset: 3px;
 }
 .cover-fallback {
   height: 100%;
@@ -248,19 +235,23 @@
   font-size: 12px;
 }
 .artist {
-  color: #655e50;
+  color: var(--color-muted);
   margin: 8px 0;
 }
 .chips {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px;
   margin: 12px 0;
 }
 .chips span {
+  display: inline-flex;
+  align-items: center;
   font-size: 11px;
-  background: #eadfbf;
-  color: #554c36;
+  line-height: 1.4;
+  background: var(--color-yellow-soft);
+  color: var(--color-ink);
   border-radius: 20px;
   padding: 5px 9px;
 }
@@ -269,19 +260,16 @@
   background: none;
 }
 .styles span {
-  background: #d8e6d0;
-  color: #265d45;
+  background: var(--color-peach-soft);
+  color: var(--color-ink);
 }
 .genre-tag {
+  composes: filled from "../components/interaction.module.css";
+  /* Metadata pills share action colors without the standalone button height. */
+  min-height: 0;
   font-size: 11px;
-  background: #d8e6d0;
-  color: #265d45;
-  border-radius: 20px;
+  line-height: 1.4;
   padding: 5px 9px;
-}
-.genre-tag:hover {
-  background: #276b51;
-  color: #fff;
 }
 .empty {
   padding: 50px 20px;
@@ -290,12 +278,13 @@
   border-radius: 18px;
 }
 .load-more {
+  composes: filled from "../components/interaction.module.css";
   display: block;
   margin: 35px auto;
 }
 .attribution {
   font-size: 12px;
-  color: #276b51;
+  color: var(--color-accent-ink);
   display: block;
   margin: 10px 0;
 }
@@ -305,8 +294,8 @@
   border: 0;
   border-radius: 22px;
   padding: 40px;
-  background: #fff6df;
-  color: #302b24;
+  background: var(--color-background);
+  color: var(--color-ink);
   box-shadow: 0 20px 100px #0005;
 }
 .dialog::backdrop {
@@ -325,11 +314,10 @@
   gap: 32px;
 }
 .close {
+  composes: quiet from "../components/interaction.module.css";
   position: absolute;
   right: 12px;
   top: 12px;
-  background: #eadfbf;
-  color: #302b24;
   padding: 8px 12px;
 }
 .detail-layout h2 {
@@ -339,7 +327,7 @@
 }
 .detail-artist {
   font-size: 20px;
-  color: #655e50;
+  color: var(--color-muted);
 }
 .eyebrow {
   text-transform: uppercase;
@@ -359,7 +347,7 @@
   font-size: 13px;
 }
 .credits li span {
-  color: #655e50;
+  color: var(--color-muted);
 }
 .year-form {
   display: flex;
@@ -400,15 +388,11 @@
 .year-progress-heading strong {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: #276b51;
-}
-.year-progress-heading .text-button {
-  padding: 0;
-  color: #716957;
+  color: var(--color-accent-ink);
 }
 .loading-spin {
   animation: loading-spin 0.8s linear infinite;
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 .progress-track {
   display: block;
@@ -420,18 +404,18 @@
   border-radius: 5px;
   overflow: hidden;
   margin: 10px 0 7px;
-  accent-color: #276b51;
+  accent-color: var(--color-accent-ink);
 }
 .progress-track::-webkit-progress-bar {
   background: #dfd6bf;
   border-radius: 5px;
 }
 .progress-track::-webkit-progress-value {
-  background: #276b51;
+  background: var(--color-accent-ink);
   border-radius: 5px;
 }
 .progress-track::-moz-progress-bar {
-  background: #276b51;
+  background: var(--color-accent-ink);
   border-radius: 5px;
 }
 .progress-label {
@@ -451,7 +435,7 @@
   padding: 8px 0;
 }
 .year-result.success {
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 .year-result > div {
   display: flex;
@@ -470,15 +454,9 @@
 .year-result > svg {
   flex-shrink: 0;
 }
-.year-result .year-refresh-icon {
-  background: transparent;
-  color: #817764;
+.year-refresh-icon {
+  composes: quiet from "../components/interaction.module.css";
   padding: 9px;
-  border-radius: 50%;
-}
-.year-result .year-refresh-icon:hover {
-  background: #e6ddc6;
-  color: #276b51;
 }
 
 @keyframes loading-spin {
@@ -488,16 +466,15 @@
 }
 @media (max-width: 700px) {
   .section-title {
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr) 44px;
     padding-top: 22px;
-    align-items: start;
   }
   .explorer h2 {
     font-size: 24px;
-    gap: 10px;
   }
-  .section-title > .secondary {
-    padding: 7px 0;
+  .record-count {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
   .search-row {
     margin-top: 16px;
@@ -535,9 +512,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cover-button:hover {
-    transform: none;
-  }
   .filter-chevron {
     transition: none;
   }

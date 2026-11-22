@@ -7,6 +7,7 @@ import {
 import { YearStatus } from "../collection/year-status";
 import type { useMasterYears } from "../collection/use-master-years";
 import styles from "./recommendation.module.css";
+import interaction from "../components/interaction.module.css";
 
 export function NarrowSheet({
   filters,
@@ -90,6 +91,7 @@ export function NarrowSheet({
         </legend>
         <div>
           <button
+            className={interaction.quiet}
             aria-pressed={!filters.mood}
             onClick={() => onChange({ ...filters, mood: "" })}
           >
@@ -98,6 +100,7 @@ export function NarrowSheet({
           {(Object.keys(moodHints) as (keyof typeof moodHints)[]).map(
             (mood) => (
               <button
+                className={interaction.quiet}
                 key={mood}
                 aria-pressed={filters.mood === mood}
                 onClick={() => onChange({ ...filters, mood })}

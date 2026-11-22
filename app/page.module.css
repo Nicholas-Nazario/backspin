@@ -1,14 +1,15 @@
 .header {
   min-width: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
   padding: 0 0 18px;
   border-bottom: 1px solid #ded4bc;
   position: relative;
 }
 .title {
+  justify-self: start;
   font-family: "Backspin Display", sans-serif;
   font-weight: 550;
   font-size: 28px;
@@ -16,42 +17,48 @@
   margin: 0;
   line-height: 1.2;
 }
-.title span {
-  color: #ef7257;
-  margin-left: 10px;
+.brandLink {
   display: inline-flex;
-  vertical-align: middle;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 24px;
+  gap: 10px;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .brandLink img {
+    animation: rotate-brand 12s linear infinite;
+    animation-play-state: paused;
+  }
+  .brandLink:hover img {
+    animation-play-state: running;
+  }
+}
+@keyframes rotate-brand {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .settings {
+  justify-self: end;
   min-width: 0;
   position: relative;
   z-index: 5;
 }
 .settings summary {
-  min-height: 44px;
   list-style: none;
   cursor: pointer;
-  border-radius: 22px;
-  color: #655e50;
-  font-size: 13px;
-  padding: 8px 0 8px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 .settings summary::-webkit-details-marker {
   display: none;
-}
-.settings summary:focus-visible {
-  outline: 3px solid #276b51;
-  outline-offset: 3px;
 }
 .settings-menu {
   position: absolute;
   right: 0;
   width: min(300px, calc(100vw - 36px));
-  background: #fffaf0;
-  border: 1px solid #c8bda6;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 10px 30px #302b2420;
@@ -83,7 +90,7 @@
   border-radius: 50%;
   background: repeating-radial-gradient(#282822 0 3px, #39392f 4px 5px);
   margin: auto;
-  color: #edb74b;
+  color: var(--brand-orange);
   display: grid;
   place-items: center;
   font-size: 65px;
@@ -98,15 +105,15 @@
   line-height: 1.6;
 }
 .notice {
-  background: #f9dfad;
+  background: var(--color-yellow-soft);
   padding: 18px;
   border-radius: 12px;
 }
 .footer {
-  border-top: 1px solid #c8bda6;
+  border-top: 1px solid var(--color-border);
   margin-top: 50px;
   padding-top: 20px;
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -118,27 +125,28 @@
   }
 }
 .navigation {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 30px;
+  background: var(--color-surface);
 }
 .navigation a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
-  color: #817764;
   text-decoration: none;
-  font-size: 13px;
-  padding: 9px 13px;
-  border-radius: 20px;
+  font-family: "Backspin Display", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 18px;
 }
-.navigation a[aria-current="page"] {
-  background: #d8e6d0;
-  color: #265d45;
-  font-weight: 600;
-}
-.navigation a:hover {
-  color: #276b51;
+.navigation svg {
+  flex-shrink: 0;
 }
 @media (max-width: 700px) {
   .header {
@@ -149,7 +157,6 @@
   .navigation {
     grid-column: 1 / -1;
     grid-row: 2;
-    flex-wrap: wrap;
     width: 100%;
     margin: 0;
   }

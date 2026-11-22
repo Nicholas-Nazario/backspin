@@ -4,7 +4,27 @@ Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustra
 
 ## Visual language
 
-Cream backgrounds, dark espresso text, and confident coral, leafy green, marigold, and sky-blue accents. Rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes. Reserve a quieter dark evening theme for long listening sessions.
+The Backspin brand mark is a soft, curled six-petal bloom with orange, yellow, and peach petal pairs and a small color swirl around its center hole. Use the transparent SVG at `public/brand/citrus-bloom.svg` beside the title and on the vinyl’s soft sky-blue label, which keeps the same fill during loading, idle, hover, and playback transitions. The background, center hole, and curled cutouts stay transparent on any surface. Keep the existing record motion and reduced-motion behavior.
+
+The core brand triad is Citrus yellow (`#FFCB00`), orange (`#FF6500`), and peach (`#FF9164`). Use it for the logo, shuffled record sleeves, and warm decorative highlights. Yellow and peach tints support notices and metadata without competing with album artwork.
+
+Soft sky blue (`#A8D5F2`) is the UI accent: navigation, buttons, selected filters, and the vinyl label. Use deeper blue for links, focus indicators, progress, and text on blue controls so they stay readable. Cream backgrounds and dark espresso text ground the palette. Shared colors live in `app/style.css`; feature styles reference those variables. Keep the vinyl label the same blue through loading, idle, hover, and animation.
+
+Use rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes.
+
+## Interaction styles
+
+The header groups Discover and Collection into one rounded navigation bar with Phosphor icons and a blue current-page fill. Center it on desktop and give it a full-width second row on mobile. The Backspin name and Citrus logo form one home link to Discover. Hovering the brand link slowly rotates only the logo, with no background fill. Leaving hover pauses at the current angle; hovering again resumes from there, and a fresh page load resets it. Reduced motion keeps the logo still.
+
+Use the shared styles in `app/components/interaction.module.css` for action controls:
+
+- Navigation keeps a blue fill for the current page. Other destinations use a light blue hover background.
+- Filled actions use blue, deepen slightly on hover, and deepen again while pressed. Use this for finding release years, confirming filters, and trying another record.
+- Quiet actions have a transparent background, light blue on hover, and blue while pressed. Use this for Settings, opening filters, refreshing the collection, and dismissing or clearing controls. Selected mood choices keep their blue fill.
+
+Settings and Refresh collection are icon-only quiet controls with accessible names, tooltips, and 44px targets. The Settings panel closes when tapping outside or pressing Escape; Escape returns focus to the cog. Tapping inside the panel keeps it open.
+
+Standalone actions share rounded corners, a minimum 44px height, and a dark blue keyboard focus ring. Collection metadata pills keep compact, matching heights while clickable genres share the filled action colors. Hover feedback applies to devices that support hovering; disabled controls keep their disabled appearance. Color changes replace skewing, lifting, and shifting shadows on action controls. The vinyl keeps its own record animation and stable blue label.
 
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.
 
