@@ -1,8 +1,9 @@
-import { chromium, expect } from "@playwright/test";
+import { chromium, webkit, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { collectionFixture } from "./browser-fixture";
 const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
-const browser = await chromium.launch();
+const engine = process.env.MOBILE_BROWSER === "webkit" ? webkit : chromium;
+const browser = await engine.launch();
 try {
   const { page, rememberYear, clearYears } = await collectionFixture(
     browser,
@@ -12,7 +13,7 @@ try {
   page.on("pageerror", (error) => errors.push(error.message));
   let fail = false;
   let clockOffset = 0;
-  let holdRefresh = false;
+  let holdRefresh = true;
   let releaseRefresh: (() => void) | undefined;
   const releases = [1, 2, 3].map((id) => ({
     id,
@@ -52,41 +53,62 @@ try {
   await page.clock.install();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseURL);
+  const loadingPlayer = page.getByRole("button", {
+    name: "Getting your records ready",
+    exact: true,
+  });
+  await expect(loadingPlayer).toBeVisible();
+  await expect(loadingPlayer).toBeDisabled();
+  await expect(page.getByRole("status")).toHaveText(
+    "Getting your records ready…",
+  );
+  assert.equal(
+    await loadingPlayer.evaluate((node) => getComputedStyle(node).opacity),
+    "1",
+  );
+  await expect(
+    page.getByText("Opening your crates…", { exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByTestId("shuffle-deck")).toHaveCount(0);
+  const loadingDisc = page.getByTestId("vinyl-disc");
+  const loadingBounds = await loadingPlayer.boundingBox();
+  const initialRotation = await loadingDisc.evaluate(
+    (node) => getComputedStyle(node).transform,
+  );
+  await expect
+    .poll(() =>
+      loadingDisc.evaluate((node) => getComputedStyle(node).transform),
+    )
+    .not.toBe(initialRotation);
+  await page.screenshot({
+    path: "/tmp/backspin-collection-loading.png",
+    fullPage: true,
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(
+    await loadingDisc.evaluate((node) => getComputedStyle(node).animationName),
+    "none",
+  );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  holdRefresh = false;
+  releaseRefresh!();
+  releaseRefresh = undefined;
+
   const drop = page.getByRole("button", {
     name: "Drop the needle",
     exact: true,
   });
   await expect(drop).toBeEnabled();
+  await expect(loadingPlayer).toHaveCount(0);
   await expect(page.getByTestId("shuffle-deck")).toHaveCount(0);
-  const disc = drop.locator(":scope > span");
-  const arm = drop.locator("svg g");
-  const discBounds = await disc.boundingBox();
-  const restingArm = await arm.evaluate(
-    (node) => getComputedStyle(node).transform,
-  );
-  await drop.hover();
-  await expect
-    .poll(() =>
-      arm.evaluate((node) => {
-        const matrix = new DOMMatrix(getComputedStyle(node).transform);
-        return (Math.atan2(matrix.b, matrix.a) * 180) / Math.PI;
-      }),
-    )
-    .toBeCloseTo(15, 1);
-  assert.deepEqual(await disc.boundingBox(), discBounds);
+  const disc = page.getByTestId("vinyl-disc");
+  assert.deepEqual(await drop.boundingBox(), loadingBounds);
   assert.equal(
-    await drop.evaluate((node) => getComputedStyle(node).transform),
+    await disc.evaluate((node) => getComputedStyle(node).animationName),
     "none",
   );
-  await page.screenshot({
-    path: "/tmp/backspin-player-hover.png",
-    fullPage: true,
-  });
-  await page.mouse.move(0, 0);
-  await expect
-    .poll(() => arm.evaluate((node) => getComputedStyle(node).transform))
-    .toBe(restingArm);
-
+  await expect(drop).toHaveText("Drop the needle");
+  await expect(drop.locator("svg")).toHaveCount(0);
   await page.screenshot({
     path: "/tmp/backspin-vinyl-button.png",
     fullPage: true,
@@ -96,20 +118,128 @@ try {
     page.getByRole("link", { name: "Make a set", exact: true }),
   ).toHaveCount(0);
   await drop.click();
-  await expect(page.getByTestId("shuffle-deck")).toBeVisible();
+  await expect(drop).toHaveAttribute("data-motion", "spinning");
+  await expect(drop).toBeDisabled();
+  await expect(page.getByTestId("shuffle-deck")).toHaveCount(0);
   await expect(
     page.getByRole("article", { name: "Your album recommendation" }),
   ).toHaveCount(0);
-  await page.clock.fastForward(1500);
-  await expect(page.getByTestId("shuffle-deck")).toBeVisible();
+  // Finish actual CSS animations to verify the phase handoff, rather than a parallel JS timer.
+  await disc.evaluate((node) =>
+    node.getAnimations().forEach((animation) => animation.finish()),
+  );
+  await expect(drop).toHaveAttribute("data-motion", "rolling");
+  await drop.evaluate((node) =>
+    node.getAnimations().forEach((animation) => {
+      animation.pause();
+      animation.currentTime = 350;
+    }),
+  );
+  assert.equal(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+    true,
+  );
+  await page.screenshot({
+    path: "/tmp/backspin-vinyl-roll.png",
+    fullPage: true,
+  });
+  await drop.evaluate((node) =>
+    node.getAnimations().forEach((animation) => animation.finish()),
+  );
 
   const result = page.getByRole("article", {
     name: "Your album recommendation",
   });
   await expect(result).toBeVisible();
   const first = await result.getByRole("heading").innerText();
+  await result.evaluate((node) =>
+    node.getAnimations().forEach((animation) => animation.finish()),
+  );
+  const artwork = page.getByTestId("recommendation-artwork");
+  const artworkBounds = await artwork.boundingBox();
+  const againBounds = await page
+    .getByRole("button", { name: "Try another", exact: true })
+    .boundingBox();
+  const narrowBounds = await page
+    .getByRole("button", { name: "Narrow it down", exact: true })
+    .boundingBox();
+
   await page.getByRole("button", { name: "Try another", exact: true }).click();
+  await expect(page.getByTestId("shuffle-deck")).toBeVisible();
+  await expect(page.getByTestId("vinyl-button")).toHaveCount(0);
+  const frontRecords = await page
+    .getByTestId("shuffle-deck")
+    .evaluate((node) => {
+      const sleeves = [...node.children];
+      const fronts = [0, 650, 1250].map((time) => {
+        sleeves.forEach((sleeve) =>
+          sleeve.getAnimations().forEach((animation) => {
+            animation.pause();
+            animation.currentTime = time;
+          }),
+        );
+        const layers = sleeves.map((sleeve) =>
+          Number(getComputedStyle(sleeve).zIndex),
+        );
+        return layers.indexOf(Math.max(...layers));
+      });
+      sleeves.forEach((sleeve) =>
+        sleeve.getAnimations().forEach((animation) => animation.play()),
+      );
+      return fronts;
+    });
+  assert.equal(
+    new Set(frontRecords).size,
+    3,
+    "Each colored record should take a turn at the front",
+  );
+
   await expect(result).toBeVisible();
+  await expect(result.getByRole("heading")).toHaveCount(0);
+  await expect(page.getByTestId("recommendation-identity")).toHaveAttribute(
+    "aria-hidden",
+    "true",
+  );
+  assert.equal(
+    await page
+      .getByTestId("recommendation-identity")
+      .locator("p")
+      .first()
+      .evaluate((node) => getComputedStyle(node).color),
+    "rgba(0, 0, 0, 0)",
+  );
+  assert.notEqual(
+    await page
+      .getByTestId("recommendation-identity")
+      .locator("h3")
+      .evaluate((node) => getComputedStyle(node, "::after").animationName),
+    "none",
+  );
+  await expect(page.getByRole("heading", { level: 2 })).toHaveCount(0);
+  assert.deepEqual(await artwork.boundingBox(), artworkBounds);
+  assert.deepEqual(
+    await page
+      .getByRole("button", { name: "Try another", exact: true })
+      .boundingBox(),
+    againBounds,
+  );
+  assert.deepEqual(
+    await page
+      .getByRole("button", { name: "Narrow it down", exact: true })
+      .boundingBox(),
+    narrowBounds,
+  );
+  await expect(
+    page.getByRole("button", { name: "Try another", exact: true }),
+  ).toBeDisabled();
+  await page.screenshot({
+    path: "/tmp/backspin-stable-shuffle.png",
+    fullPage: true,
+  });
+  await page.clock.fastForward(2200);
+  await expect(result.getByRole("heading")).not.toHaveText(first);
   assert.notEqual(await result.getByRole("heading").innerText(), first);
   await page
     .getByRole("button", { name: "Narrow it down", exact: true })
@@ -125,6 +255,7 @@ try {
   await drop.click();
   await expect(result).toBeVisible();
   await page.getByRole("button", { name: "Try another", exact: true }).click();
+  await expect(page.getByTestId("shuffle-deck")).toHaveCount(0);
   await expect(result).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Remove genre filter" }),
@@ -155,6 +286,7 @@ try {
   ).toHaveText("1970s");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Try another", exact: true }).click();
+  await expect(page.getByTestId("shuffle-deck")).toHaveCount(0);
   await expect(result).toBeVisible();
   assert.equal(
     await result.evaluate((node) => getComputedStyle(node).animationName),
