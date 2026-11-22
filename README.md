@@ -33,7 +33,13 @@ The **Collection** tab offers:
 
 Collection snapshots refresh on a five-minute cache cycle. Background refresh keeps the current view in place while the replacement loads; new picks pause until it finishes. Failed refreshes offer a retry. Original master years use a shared SQLite cache, while personal corrections remain separate.
 
-The Backspin name and Citrus icon return you to Discover. The cog opens Settings, where you can disconnect your Discogs account. Settings closes on an outside tap or Escape.
+The Backspin name and Citrus icon return you to Discover. The cog opens Settings, where Discogs and Spotify have separate connection status and connect/disconnect controls. Settings closes on an outside tap or Escape.
+
+## Optional Spotify connection
+
+Connect Spotify from Settings to identify your Spotify profile alongside Discogs. Spotify handles sign-in and consent. This stage connects the account only; it does not play music or use listening history, playlists, or saved music to make picks.
+
+Spotify setup requires a developer app, registered callback URLs, and app credentials. Follow the [Spotify setup guide](docs/SPOTIFY.md) for dashboard steps, development-mode user limits, local `127.0.0.1` URLs, and production configuration. The app serves its [privacy and connection details](https://backspin.fly.dev/privacy) at `/privacy` once this integration is deployed.
 
 ## Run locally
 
@@ -50,13 +56,15 @@ cp .env.example .env.local
 2. Set its callback URL to `http://localhost:3000/api/auth/callback`.
 3. Fill in `.env.local`:
 
-   | Variable                  | Value                                                    |
-   | ------------------------- | -------------------------------------------------------- |
-   | `APP_URL`                 | `http://localhost:3000`; must match your browser origin. |
-   | `DISCOGS_CONSUMER_KEY`    | Your Discogs application's consumer key.                 |
-   | `DISCOGS_CONSUMER_SECRET` | Your Discogs application's consumer secret.              |
-   | `SESSION_KEY`             | Generate locally with `openssl rand -hex 32`.            |
-   | `DATABASE_PATH`           | Defaults to `./data/mystery.sqlite`.                     |
+   | Variable                  | Value                                                                   |
+   | ------------------------- | ----------------------------------------------------------------------- |
+   | `APP_URL`                 | `http://localhost:3000`; must match your browser origin.                |
+   | `DISCOGS_CONSUMER_KEY`    | Your Discogs application's consumer key.                                |
+   | `DISCOGS_CONSUMER_SECRET` | Your Discogs application's consumer secret.                             |
+   | `SESSION_KEY`             | Generate locally with `openssl rand -hex 32`.                           |
+   | `SPOTIFY_CLIENT_ID`       | Optional Spotify app Client ID; see the [setup guide](docs/SPOTIFY.md). |
+   | `SPOTIFY_CLIENT_SECRET`   | Optional Spotify app secret; keep server-side.                          |
+   | `DATABASE_PATH`           | Defaults to `./data/mystery.sqlite`.                                    |
 
    Keep credentials in your local environment; `.env.local` is ignored by Git. The database directory and schema are created automatically.
 
@@ -95,12 +103,12 @@ The main implementation lives in:
 - `app/recommendation/` — the one-album discovery flow and filter sheet.
 - `app/collection/` — collection browsing, details, filters, and year lookup.
 - `app/components/` — shared branding, navigation, Settings, and interaction styles.
-- `lib/` — selection and filtering rules, Discogs transport, sessions, and persistence.
+- `lib/` — selection and filtering rules, Discogs/Spotify transport, sessions, and persistence.
 - `public/brand/` — the transparent Citrus SVG; PNG wordmarks for this README are in `docs/assets/`.
 
 ## Data and authorization
 
-You authorize Backspin through Discogs; Backspin does not receive your Discogs password. OAuth access credentials are held in an encrypted, HttpOnly session cookie for up to eight hours and are not stored in SQLite. Collection snapshots are short-lived and scoped to the authenticated account.
+You authorize each provider through its own sign-in screen; Backspin does not receive your Discogs or Spotify password. Access credentials are held in separate encrypted, HttpOnly session cookies and are not stored in SQLite or localStorage. Discogs sessions last up to eight hours. Spotify connections expire with the access token, usually after an hour; refresh tokens are not retained. Collection snapshots are short-lived and scoped to the authenticated account.
 
 SQLite stores cached original master years, account-scoped year corrections, and expiring OAuth attempt IDs. Disconnecting clears your local session; revoke the application's authorization in Discogs settings to remove its access there.
 
@@ -110,6 +118,6 @@ Album artwork and catalog data come from Discogs. Artwork is displayed without r
 
 The hosted app is [backspin.fly.dev](https://backspin.fly.dev). The repository includes a Dockerfile for the standalone Next.js server and a Fly configuration with persistent storage under `/data`. The current request scheduler and collection cache are designed for one application process. Production secrets, database backups, and recovery procedures are covered in the [development and operations guide](docs/DEVELOPMENT.md).
 
-Backspin helps you choose a record; it does not play audio or save listening history. Picks and discovery filters last for the current page visit. Mood hints use catalog metadata, not audio analysis or a learned recommendation model. Spotify integration is not implemented.
+Backspin helps you choose a record; it does not play audio or save listening history. Picks and discovery filters last for the current page visit. Mood hints use catalog metadata, not audio analysis or a learned recommendation model. Spotify account connection is available, while Spotify playback and listening-history recommendations remain outside the current flow.
 
 The older multi-album set builder and illustrated listening room remain in the repository as legacy code, outside the current Discover and Collection experience.

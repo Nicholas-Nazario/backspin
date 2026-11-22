@@ -6,12 +6,17 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; spotify?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, spotify } = await searchParams;
   const tagline = taglines[randomInt(taglines.length)];
   return (
-    <AppShell active="discover" error={error} tagline={tagline}>
+    <AppShell
+      active="discover"
+      error={error}
+      tagline={tagline}
+      spotifyResult={spotify}
+    >
       <Recommendation tagline={tagline} />
     </AppShell>
   );

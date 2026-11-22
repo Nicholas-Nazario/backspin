@@ -76,14 +76,14 @@ try {
   await page.getByRole("button", { name: "Remove genre Jazz" }).click();
   assert.equal(
     await page
-      .getByRole("button", { name: "Disconnect", exact: true })
+      .getByRole("button", { name: "Disconnect Discogs", exact: true })
       .isVisible(),
     false,
   );
   await page.getByLabel("Settings", { exact: true }).click();
   assert.equal(
     await page
-      .getByRole("button", { name: "Disconnect", exact: true })
+      .getByRole("button", { name: "Disconnect Discogs", exact: true })
       .isVisible(),
     true,
   );

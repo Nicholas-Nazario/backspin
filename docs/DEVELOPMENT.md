@@ -12,6 +12,10 @@ Register an application at https://www.discogs.com/settings/developers and put i
 
 `npm test`, `npm run typecheck`, and `npm run build` verify the foundation. No mocked collection is presented as a real connection. Check private collection access with your authorized account. Click a record title to fetch release genres/styles. Collection pages load progressively (50 instances per upstream request); the grid shows 60 cards initially with a show-more control. Collection snapshots reload after five minutes.
 
+## Spotify connection
+
+See [Spotify setup](SPOTIFY.md) for app registration, exact redirect URLs, local loopback origins, credentials, provider limits, branding, and verification. Spotify is optional and its connection is separate from Discogs. Authorization credentials remain in separate encrypted, HttpOnly cookies; no Spotify account or token table is added. The current Spotify session expires with the access token and does not store a refresh token.
+
 ## Recommendation browser verification
 
 Run `node --env-file=.env.local --import tsx tests/recommendation.browser.ts` against the local server. Set `BACKSPIN_TEST_URL` for an isolated production server. These fixture checks cover one-album picks, rerolls with retained filters, genre/era limits, synced years, mood fallback, quiet background refresh, collection timestamps, keyboard focus, reduced motion, mobile layout, and import error recovery. They intercept Discogs calls and do not establish live-account recommendation quality.
@@ -40,7 +44,7 @@ The single-process scheduler spaces upstream calls and honors observed rate-limi
 
 Original years are stored in a shared SQLite `master_years` table keyed by Discogs master ID, with source, fetched-at, and expiry timestamps. Fresh entries are restored automatically on collection load, including results originally fetched for another user. Only missing/expired masters require Discogs requests. The five-hour TTL (`MASTER_YEAR_TTL` in `lib/year-data.ts`) refreshes before the six-hour freshness boundary. Expired rows are removed when the cache is read and expired browser results are removed too. Missing years are cached as unknown; failed requests are not cached. The refresh icon bypasses the cache. No collection membership, artwork, credentials, or user identifiers are stored in this shared table. Personal corrections remain in `original_years`, scoped by user and release, and take precedence over shared years.
 
-`app/collection.tsx` composes focused components and hooks under `app/collection/`. Pure filtering/year rules live in `lib/collection.ts`; SQL lives in focused data modules with ordered migrations. Global CSS covers base elements; page and collection CSS Modules scope feature styles. No inline CSS is used, including for the native progress indicator. `npm run format` and `npm run format:check` maintain readable formatting.
+`app/collection.tsx` composes focused components and hooks under `app/collection/`. Pure filtering/year rules live in `lib/collection.ts`; SQL lives in focused data modules with ordered migrations. Global CSS covers base elements; page and collection CSS Modules scope feature styles. No inline CSS is authored for application controls, including the native progress indicator. Provider brand assets remain unmodified. `npm run format` and `npm run format:check` maintain readable formatting.
 
 Run browser fixtures against the dev server with `node --env-file=.env.local --import tsx tests/explorer.browser.ts` and `node --env-file=.env.local --import tsx tests/year-recovery.browser.ts`. They isolate account data and intercept Discogs calls. Cache persistence/expiry and correction isolation are also covered by `npm test`.
 

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
 import { oauthToken } from "../../../../lib/discogs";
 import {
   cookieOptions,
@@ -7,7 +6,7 @@ import {
   sameOrigin,
   seal,
 } from "../../../../lib/session";
-import { database } from "../../../../lib/db";
+import { createAttempt } from "../../../../lib/oauth-attempts";
 export async function POST(req: Request) {
   if (!sameOrigin(req)) {
     console.info("Connect origin check rejected", {
@@ -32,11 +31,8 @@ export async function POST(req: Request) {
     const token = await oauthToken("/oauth/request_token", undefined, {
       oauth_callback: origin() + "/api/auth/callback",
     });
-    const id = randomUUID(),
-      expires = Date.now() + 10 * 60 * 1000;
-    const db = database();
-    db.prepare("DELETE FROM oauth_attempts WHERE expires <= ?").run(Date.now());
-    db.prepare("INSERT INTO oauth_attempts VALUES (?,?)").run(id, expires);
+    const expires = Date.now() + 10 * 60 * 1000;
+    const id = createAttempt(expires);
     const response = NextResponse.redirect(
       "https://www.discogs.com/oauth/authorize?oauth_token=" +
         encodeURIComponent(token.key),
