@@ -1,0 +1,123 @@
+.button {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow:
+    0 4px 0 #1e1c18,
+    0 10px 0 #e6d8b8;
+}
+.disc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border: 6px solid #302b24;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    #302b24 0 3px,
+    #3d382f 4px 5px,
+    #302b24 6px 8px
+  );
+}
+.label {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 56%;
+  height: 56%;
+  padding: 16px 12px;
+  border: 3px solid #302b24;
+  border-radius: 50%;
+  background: #ec8e73;
+  color: #302b24;
+  font:
+    550 clamp(1.1rem, 6vw, 1.65rem) / 1.05 "Backspin Display",
+    sans-serif;
+  box-shadow: 0 0 0 5px #302b24;
+}
+.labelText {
+  animation: label-in 280ms ease-out both;
+}
+.button:not(:disabled):hover .label,
+.button:not(:disabled):focus-visible .label {
+  background: #f2a28a;
+}
+.button[data-loading="true"],
+.button[data-motion="spinning"],
+.button[data-motion="rolling"] {
+  opacity: 1;
+  cursor: progress;
+}
+.button[data-loading="true"] .disc {
+  animation: spin-record 3s linear infinite;
+}
+.button[data-motion="spinning"] .disc {
+  animation: accelerate-record 1500ms ease-in both;
+}
+.button[data-motion="rolling"] {
+  animation: roll-away 700ms ease-in both;
+}
+.button[data-motion="rolling"] .disc {
+  animation: roll-record 700ms linear both;
+}
+.loadingMessage {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@keyframes spin-record {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes accelerate-record {
+  to {
+    transform: rotate(1080deg);
+  }
+}
+@keyframes roll-away {
+  to {
+    transform: translateX(calc(50vw + 100%));
+  }
+}
+@keyframes roll-record {
+  to {
+    transform: rotate(540deg);
+  }
+}
+@keyframes label-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 600px) {
+  .button {
+    max-width: min(280px, 42svh);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button[data-loading="true"] .disc,
+  .button[data-motion="spinning"] .disc,
+  .button[data-motion="rolling"],
+  .button[data-motion="rolling"] .disc,
+  .labelText {
+    animation: none;
+  }
+}

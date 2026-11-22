@@ -5,6 +5,7 @@
   margin-bottom: 8px;
 }
 .deck > div {
+  --sleeve-color: #e9b74f;
   width: 112px;
   height: 112px;
   border: 2px solid #302b24;
@@ -12,51 +13,82 @@
   position: absolute;
   left: 24px;
   top: 16px;
-  background: #e9b74f;
-  transform: rotate(-12deg);
-  animation: shuffle-back 1s ease-in-out infinite;
-}
-.deck > div:nth-child(2) {
-  background: #ec8e73;
-  transform: rotate(10deg);
-  animation-direction: reverse;
-  animation-delay: -0.3s;
-}
-.deck > div:nth-child(3) {
-  background: #c2d8b5;
+  background: var(--sleeve-color);
+  color: color-mix(in oklab, var(--sleeve-color) 45%, #302b24);
   display: grid;
   place-items: center;
+  transform: translate(-8%, 3%) rotate(-9deg);
+  z-index: 1;
+  animation:
+    cycle-record 1.8s ease-in-out infinite,
+    cycle-layer 1.8s steps(1, end) infinite;
+  animation-delay: -1200ms;
+}
+.deck > div:nth-child(2) {
+  --sleeve-color: #ec8e73;
+  transform: translate(8%, 4%) rotate(8deg);
+  z-index: 2;
+  animation-delay: -600ms;
+}
+.deck > div:nth-child(3) {
+  --sleeve-color: #c2d8b5;
   transform: rotate(-3deg);
-  animation: shuffle-front 1s ease-in-out infinite;
-  color: #276b51;
+  z-index: 3;
+  animation-delay: 0ms;
 }
-.sparkle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  color: #d68c30;
-  animation: twinkle 0.8s ease-in-out infinite alternate;
+.deck[data-size="artwork"] {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 160 / 145;
+  margin-bottom: 0;
 }
-@keyframes shuffle-back {
-  50% {
-    transform: translateX(-16px) rotate(-20deg);
+.deck[data-size="artwork"] > div {
+  width: 70%;
+  height: auto;
+  aspect-ratio: 1;
+  left: 15%;
+  top: 11%;
+}
+.deck[data-size="artwork"] > div > svg {
+  width: 65%;
+  height: 65%;
+}
+@keyframes cycle-record {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-3deg);
+  }
+  33.333% {
+    transform: translate(8%, 4%) rotate(8deg);
+  }
+  66.667% {
+    transform: translate(-8%, 3%) rotate(-9deg);
+  }
+  76%,
+  82% {
+    transform: translate(-26%, -12%) rotate(-20deg);
   }
 }
-@keyframes shuffle-front {
-  50% {
-    transform: translateY(-10px) rotate(5deg);
+/* Change layers only once the back sleeve has cleared the stack. */
+@keyframes cycle-layer {
+  0%,
+  100% {
+    z-index: 3;
+  }
+  33.333% {
+    z-index: 2;
+  }
+  66.667%,
+  76% {
+    z-index: 1;
+  }
+  82% {
+    z-index: 4;
   }
 }
-@keyframes twinkle {
-  to {
-    transform: scale(1.25) rotate(20deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .deck > div,
-  .deck > div:nth-child(3),
-  .sparkle {
+  .deck > div:nth-child(3) {
     animation: none;
   }
 }

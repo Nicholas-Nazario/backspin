@@ -1,14 +1,22 @@
-import { VinylRecordIcon, SparkleIcon } from "@phosphor-icons/react/ssr";
+import { VinylRecordIcon } from "@phosphor-icons/react/ssr";
 import styles from "./shuffle-deck.module.css";
-export function ShuffleDeck() {
+export function ShuffleDeck({
+  size = "default",
+}: {
+  size?: "default" | "artwork";
+}) {
   return (
-    <div className={styles.deck} aria-hidden="true" data-testid="shuffle-deck">
-      <div />
-      <div />
-      <div>
-        <VinylRecordIcon size={72} weight="duotone" />
-      </div>
-      <SparkleIcon className={styles.sparkle} size={28} weight="fill" />
+    <div
+      className={styles.deck}
+      data-size={size}
+      aria-hidden="true"
+      data-testid="shuffle-deck"
+    >
+      {[0, 1, 2].map((record) => (
+        <div key={record}>
+          <VinylRecordIcon size={72} weight="duotone" />
+        </div>
+      ))}
     </div>
   );
 }

@@ -12,7 +12,9 @@ Use a characterful display face alongside a highly readable body face; select ac
 
 Tagline: **Less time choosing, more time listening.** A mobile-first home screen foregrounds **Drop the needle**, with a quiet **Narrow it down** action for Genre, Mood, and Era. Reveal one album with a brief, grounded explanation, then offer **Try another**. Avoid generic recommendation filler and repeated outbound record links. Album artwork remains unaltered, uncropped, and attributed to Discogs.
 
-Keep the warm palette, rounded controls, self-hosted Fredoka and Nunito Sans, and Phosphor icons. The user specifically chose the existing shuffle-deck loading animation as the reference for further motion: gently offset sleeves, small lifts and rotations, and a sparkle. Reuse that deck, with brief springy reveals and tactile button responses. Respect reduced motion; the revealed album stays still. Do not add an ambient room or queues to this experience.
+Use a standalone vinyl as the home-screen focus: spin while loading, reveal **Drop the needle** on the stopped label, and accelerate after a tap, then roll off-screen as the selected album fades in. Keep its position and size stable. Do not add a deck, tonearm, or extra CTA pop-over.
+
+Keep the warm palette, rounded controls, self-hosted Fredoka and Nunito Sans, and Phosphor icons. The user specifically chose the existing shuffle-deck loading animation as the reference for further motion: gently offset sleeves, small lifts and rotations, and a sparkle. Carry that playful feel into the vinyl acceleration and roll-away, with a quiet fade for the album reveal. Respect reduced motion; the revealed album stays still. Do not add an ambient room or queues to this experience.
 
 Genre and Era visibly constrain the pool. Mood is a softer preference and must not imply that tags establish an album’s actual emotional character. Spotify, listening history, and richer models are future exploration, not current capabilities.
 
