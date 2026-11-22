@@ -1,12 +1,12 @@
 import styles from "../page.module.css";
 import {
-  FlowerIcon,
   GearSixIcon,
   ArrowUpRightIcon,
   SignOutIcon,
 } from "@phosphor-icons/react/ssr";
 import { session } from "../../lib/session";
 import Link from "next/link";
+import { BrandMark } from "./brand-mark";
 export async function AppShell({
   children,
   active,
@@ -30,7 +30,7 @@ export async function AppShell({
         <h1 className={styles.title}>
           Backspin
           <span>
-            <FlowerIcon size={28} weight="duotone" aria-hidden="true" />
+            <BrandMark size={36} />
           </span>
         </h1>
         {s && (

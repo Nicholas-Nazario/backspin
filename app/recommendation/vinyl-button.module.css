@@ -46,6 +46,9 @@
 .labelText {
   animation: label-in 280ms ease-out both;
 }
+.button[data-loading="true"] .label {
+  background: #fff6df;
+}
 .button:not(:disabled):hover .label,
 .button:not(:disabled):focus-visible .label {
   background: #f2a28a;

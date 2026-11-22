@@ -4,6 +4,8 @@ Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustra
 
 ## Visual language
 
+The Backspin brand mark is a soft, curled six-petal bloom with orange, yellow, and peach petal pairs and a small color swirl around its center hole. Use the same Citrus mark beside the title and on the loading vinyl’s cream label. Keep the existing record motion and reduced-motion behavior.
+
 Cream backgrounds, dark espresso text, and confident coral, leafy green, marigold, and sky-blue accents. Rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes. Reserve a quieter dark evening theme for long listening sessions.
 
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.
