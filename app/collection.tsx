@@ -46,30 +46,26 @@ export default function Collection({
   return (
     <section className={styles["explorer"]}>
       <div className={styles["section-title"]}>
-        <h2>
-          {mode === "sets" ? "Make a set" : "Collection"}{" "}
-          {mode === "collection" && (
-            <span className={styles["record-count"]}>
-              {loading && !collection.refreshing
-                ? entries.length + " / " + collection.total
-                : entries.length}{" "}
-              records
-              {collection.lastUpdated && (
-                <span className={styles.lastUpdated}>
-                  {" · Last updated "}
-                  <time
-                    dateTime={new Date(collection.lastUpdated).toISOString()}
-                  >
-                    {new Date(collection.lastUpdated).toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </time>
-                </span>
-              )}
-            </span>
-          )}
-        </h2>
+        <h2>{mode === "sets" ? "Make a set" : "Collection"}</h2>
+        {mode === "collection" && (
+          <p className={styles["record-count"]}>
+            {loading && !collection.refreshing
+              ? entries.length + " / " + collection.total
+              : entries.length}{" "}
+            records
+            {collection.lastUpdated && (
+              <span className={styles.lastUpdated}>
+                {" · Last updated "}
+                <time dateTime={new Date(collection.lastUpdated).toISOString()}>
+                  {new Date(collection.lastUpdated).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </time>
+              </span>
+            )}
+          </p>
+        )}
         <button
           className={styles.refresh}
           aria-label="Refresh collection"

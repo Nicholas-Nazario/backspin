@@ -185,6 +185,25 @@ try {
     await page.goto(baseURL + "/collection");
     await expect(page.getByText(/Last updated/)).toBeVisible();
     await fits(`collection ${viewport.width}`);
+    const collectionHeading = await page
+      .getByRole("heading", { name: "Collection", exact: true })
+      .boundingBox();
+    const refreshControl = await page
+      .getByRole("button", { name: "Refresh collection", exact: true })
+      .boundingBox();
+    assert.ok(collectionHeading && refreshControl);
+    assert.ok(
+      Math.abs(
+        collectionHeading.y +
+          collectionHeading.height / 2 -
+          (refreshControl.y + refreshControl.height / 2),
+      ) < 1,
+      `Collection heading and refresh should align at ${viewport.width}px`,
+    );
+    assert.ok(
+      refreshControl.x >= collectionHeading.x + collectionHeading.width,
+      `Refresh should stay beside the heading at ${viewport.width}px`,
+    );
     const search = page.getByRole("searchbox");
     await search.tap();
     await search.fill("Johnny");
