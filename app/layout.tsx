@@ -9,6 +9,9 @@ export const viewport: Viewport = {
 export const metadata = {
   title: "Backspin",
   description: "Less time choosing, more time listening.",
+  icons: {
+    icon: "/brand/citrus-bloom.svg",
+  },
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
