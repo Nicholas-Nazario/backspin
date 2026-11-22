@@ -8,7 +8,7 @@ primary_region = 'ewr'
 
 [build]
 [env]
-  APP_URL = 'https://mystery-dj-change-me.fly.dev'
+  APP_URL = 'https://backspin.fly.dev'
   DATABASE_PATH = '/data/mystery.sqlite'
   PORT = '3000'
 
