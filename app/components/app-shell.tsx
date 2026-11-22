@@ -7,6 +7,7 @@ import {
 import { session } from "../../lib/session";
 import Link from "next/link";
 import { BrandMark } from "./brand-mark";
+import interaction from "./interaction.module.css";
 export async function AppShell({
   children,
   active,
@@ -36,12 +37,14 @@ export async function AppShell({
         {s && (
           <nav className={styles.navigation} aria-label="Main navigation">
             <Link
+              className={interaction.navigation}
               href="/"
               aria-current={active === "discover" ? "page" : undefined}
             >
               Discover
             </Link>
             <Link
+              className={interaction.navigation}
               href="/collection"
               aria-current={active === "collection" ? "page" : undefined}
             >
@@ -51,7 +54,7 @@ export async function AppShell({
         )}
         {s && (
           <details className={styles["settings"]}>
-            <summary>
+            <summary className={interaction.quiet}>
               <GearSixIcon size={18} aria-hidden="true" /> Settings
             </summary>
             <div className={styles["settings-menu"]}>
@@ -59,7 +62,7 @@ export async function AppShell({
                 Connected as <strong>{s.username}</strong>
               </p>
               <form action="/api/auth/disconnect" method="post">
-                <button>
+                <button className={interaction.filled}>
                   <SignOutIcon size={18} aria-hidden="true" /> Disconnect
                 </button>
               </form>
@@ -90,7 +93,7 @@ export async function AppShell({
           </p>
           {configured ? (
             <form action="/api/auth/connect" method="post">
-              <button>
+              <button className={interaction.filled}>
                 Connect Discogs{" "}
                 <ArrowUpRightIcon size={18} aria-hidden="true" />
               </button>

@@ -30,20 +30,14 @@
   min-height: 44px;
   list-style: none;
   cursor: pointer;
-  border-radius: 22px;
-  color: var(--color-muted);
   font-size: 13px;
-  padding: 8px 0 8px 12px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .settings summary::-webkit-details-marker {
   display: none;
-}
-.settings summary:focus-visible {
-  outline: 3px solid var(--color-accent-ink);
-  outline-offset: 3px;
 }
 .settings-menu {
   position: absolute;
@@ -125,19 +119,9 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: #817764;
   text-decoration: none;
   font-size: 13px;
   padding: 9px 13px;
-  border-radius: 20px;
-}
-.navigation a[aria-current="page"] {
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
-  font-weight: 600;
-}
-.navigation a:hover {
-  color: var(--color-accent-ink);
 }
 @media (max-width: 700px) {
   .header {

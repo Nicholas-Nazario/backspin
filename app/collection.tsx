@@ -9,6 +9,7 @@ import { CollectionFilters, initialFilters } from "./collection/filters";
 import { RecordCard } from "./collection/record-card";
 import { RecordDetails } from "./collection/record-details";
 import { RandomSet } from "./sets/random-set";
+import interaction from "./components/interaction.module.css";
 import styles from "./collection/collection.module.css";
 export default function Collection({
   mode = "collection",
@@ -69,7 +70,7 @@ export default function Collection({
             </span>
           )}
         </h2>
-        <button className={styles["secondary"]} onClick={collection.refresh}>
+        <button className={styles.refresh} onClick={collection.refresh}>
           <ArrowClockwiseIcon size={16} aria-hidden="true" />
           Refresh collection
         </button>
@@ -83,7 +84,9 @@ export default function Collection({
       {collection.error && (
         <p role="alert" className={styles["notice"]}>
           {collection.error}
-          <button onClick={collection.refresh}>Retry import</button>
+          <button className={interaction.filled} onClick={collection.refresh}>
+            Retry import
+          </button>
         </p>
       )}
       {mode === "collection" && (

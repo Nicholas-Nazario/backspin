@@ -47,32 +47,16 @@
   margin: 10px auto 28px;
 }
 .primary {
+  composes: filled from "../components/interaction.module.css";
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  background: var(--color-accent);
-  border: 2px solid var(--color-accent-border);
-  border-radius: 32px;
-  color: var(--color-ink);
-  box-shadow: 0 5px 0 var(--color-accent-border);
   min-height: 58px;
   width: min(100%, 340px);
   padding: 14px 24px;
   font-size: 18px;
   font-weight: 700;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
-}
-.primary:not(:disabled):hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-2px) rotate(-1deg);
-  box-shadow: 0 7px 0 var(--color-accent-border);
-}
-.primary:not(:disabled):active {
-  transform: translateY(4px);
-  box-shadow: 0 1px 0 var(--color-accent-border);
 }
 .actions > .quiet,
 .again {
@@ -80,19 +64,16 @@
 }
 .quiet,
 .again {
-  background: transparent;
-  color: var(--color-accent-ink);
   padding: 10px 14px;
   min-height: 44px;
   font-weight: 700;
 }
-.again {
-  background: var(--color-accent);
-  min-width: 200px;
+.quiet {
+  composes: quiet from "../components/interaction.module.css";
 }
-.quiet:hover,
-.again:hover {
-  background: var(--color-accent-soft);
+.again {
+  composes: filled from "../components/interaction.module.css";
+  min-width: 200px;
 }
 .chips {
   display: flex;
@@ -104,14 +85,9 @@
   display: none;
 }
 .chips > button {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-ink);
   font-size: 13px;
   padding: 10px 14px;
   min-height: 44px;
-}
-.chips > .quiet {
-  background: transparent;
 }
 .hint {
   color: var(--color-muted);
@@ -292,16 +268,12 @@
 }
 .moods button {
   border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-muted);
   min-height: 44px;
   padding: 10px 14px;
   font-size: 14px;
 }
 .moods button[aria-pressed="true"] {
-  background: var(--color-accent);
   border-color: var(--color-accent-ink);
-  color: var(--color-accent-ink);
   box-shadow: inset 0 0 0 1px var(--color-accent-ink);
 }
 .moods p {
@@ -360,12 +332,5 @@
   .result,
   .sheet[open] {
     animation: none;
-  }
-  .primary {
-    transition: none;
-  }
-  .primary:not(:disabled):hover,
-  .primary:not(:disabled):active {
-    transform: none;
   }
 }

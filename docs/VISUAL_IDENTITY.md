@@ -12,6 +12,16 @@ Soft sky blue (`#A8D5F2`) is the UI accent: navigation, buttons, selected filter
 
 Use rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes.
 
+## Interaction styles
+
+Use the shared styles in `app/components/interaction.module.css` for action controls:
+
+- Navigation keeps a blue fill for the current page. Other destinations use a light blue hover background.
+- Filled actions use blue, deepen slightly on hover, and deepen again while pressed. Use this for finding release years, confirming filters, and trying another record.
+- Quiet actions have a transparent background, light blue on hover, and blue while pressed. Use this for Settings, opening filters, refreshing the collection, and dismissing or clearing controls. Selected mood choices keep their blue fill.
+
+Actions share rounded corners, a minimum 44px height, and a dark blue keyboard focus ring. Hover feedback applies to devices that support hovering; disabled controls keep their disabled appearance. Color changes replace skewing, lifting, and shifting shadows on action controls. The vinyl keeps its own record animation and stable blue label.
+
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.
 
 ## Current product direction — November 20, 2026

@@ -26,6 +26,7 @@ html {
   --color-border: #c8bda6;
   --color-accent: #a8d5f2;
   --color-accent-hover: #91c8eb;
+  --color-accent-pressed: #7ebce4;
   --color-accent-soft: #e0f0fa;
   --color-accent-ink: #1f5275;
   --color-accent-border: #568bb0;
@@ -69,7 +70,8 @@ button:disabled {
   cursor: default;
 }
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+summary:focus-visible {
   outline: 3px solid var(--color-accent-ink);
   outline-offset: 4px;
 }

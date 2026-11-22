@@ -19,6 +19,7 @@ import { NarrowSheet } from "./narrow-sheet";
 import { VinylButton } from "./vinyl-button";
 import { useRecommendation } from "./use-recommendation";
 import styles from "./recommendation.module.css";
+import interaction from "../components/interaction.module.css";
 
 export default function Recommendation({ tagline }: { tagline: string }) {
   const collection = useCollection();
@@ -117,7 +118,9 @@ export default function Recommendation({ tagline }: { tagline: string }) {
       {collection.error && (
         <div className={styles.notice} role="alert">
           <p>We couldn’t open your collection. {collection.error}</p>
-          <button onClick={collection.refresh}>Try loading again</button>
+          <button className={interaction.filled} onClick={collection.refresh}>
+            Try loading again
+          </button>
         </div>
       )}
       {enabled && !collection.entries.length && (
@@ -135,7 +138,10 @@ export default function Recommendation({ tagline }: { tagline: string }) {
             No records match those limits. Try another genre or era, or open up
             your whole collection.
           </p>
-          <button onClick={() => setFilters(emptyRecommendationFilters)}>
+          <button
+            className={interaction.filled}
+            onClick={() => setFilters(emptyRecommendationFilters)}
+          >
             Clear filters
           </button>
         </div>
@@ -146,6 +152,7 @@ export default function Recommendation({ tagline }: { tagline: string }) {
             .filter((key) => filters[key])
             .map((key) => (
               <button
+                className={interaction.filled}
                 key={key}
                 aria-label={`Remove ${key} filter`}
                 onClick={() => setFilters({ ...filters, [key]: "" })}

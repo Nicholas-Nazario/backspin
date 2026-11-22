@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { Entry, originalYear } from "../../lib/collection";
 import styles from "./collection.module.css";
+import interaction from "../components/interaction.module.css";
 import { api } from "./api";
 import { Cover } from "./record-card";
 type Detail = {
@@ -181,10 +182,10 @@ export function RecordDetails({
                     onChange={(e) => setYearInput(e.target.value)}
                   />
                 </label>
-                <button>Save year</button>
+                <button className={interaction.filled}>Save year</button>
                 <button
                   type="button"
-                  className={styles["secondary"]}
+                  className={interaction.quiet}
                   onClick={() => saveYear(null)}
                 >
                   Reset
