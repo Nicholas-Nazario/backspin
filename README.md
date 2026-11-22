@@ -1,29 +1,115 @@
-# Backspin
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/backspin-wordmark-dark.png">
+  <img src="docs/assets/backspin-wordmark.png" alt="Backspin" width="360">
+</picture>
 
-Less time choosing, more time listening.
+**Less time choosing, more time listening.**
 
-Backspin helps you choose one album from the records you already own. Connect your Discogs collection and **Drop the needle** for a pick. Mood explanations appear when they add specific context.
+Backspin helps you decide what to play from the records you already own. Connect your Discogs collection, drop the needle, and get one album to put on next.
 
-## Three moments
+[Open Backspin](https://backspin.fly.dev) · [Development guide](docs/DEVELOPMENT.md) · [Visual identity](docs/VISUAL_IDENTITY.md)
 
-1. **Open.** Drop the needle immediately, or choose **Narrow it down**.
-2. **Discover.** See one album, its artwork, and a grounded reason to give it a spin.
-3. **Decide.** Put on the record, or choose **Try another** within the same pool.
+## Discover your next record
 
-The optional filter sheet contains **Genre**, **Mood**, and **Era**. Genre and era are firm limits. Mood uses simple genre/style hints to give matching records more weight; it never excludes an otherwise eligible album. Explanations disclose when there is no clear mood match. These hints are an initial recommendation approach, not audio analysis or a learned model.
+The home screen starts with a spinning vinyl while your collection loads. Once it is ready, **Drop the needle** picks one album, with its artwork, artist, original year when known, and a short explanation when a mood hint influenced the pick. **Try another** shuffles within the same pool without repeating the current album when alternatives exist.
 
-Era uses synced original release years and personal corrections, never pressing dates. Sync original years from the sheet; unknown years stay out of era-specific picks. Cached years restore automatically, and a paused or partial sync can resume. An empty pool offers filter changes rather than silently relaxing your limits.
+Use **Narrow it down** for three optional filters:
 
-Try another avoids the current album when alternatives exist. Extra owned copies do not give an album extra chances. Filters and picks last for the current page visit. Backspin does not play audio or persist listening history. Spotify integration and learned recommendations are not implemented yet.
+- **Genre** limits the eligible records to that genre.
+- **Mood** gives matching genre and style tags more weight. Choose Mellow, Upbeat, Focused, or Adventurous, or leave it at Surprise me.
+- **Era** limits the pool by original release decade, using synced years and your personal corrections rather than pressing dates.
 
-## Explore your collection
+Mood is a nudge, not a rule: it never removes an otherwise eligible record. Extra owned copies do not give an album extra chances. Unknown original years stay out of era-specific picks, and an empty pool asks you to adjust the filters instead of silently relaxing them.
 
-The collection browser remains available for artwork, search, filters, record details, and personal original-year corrections. Multi-album sets and the visual listening room are retired from the main experience; their previous implementation remains in the repository pending a separate cleanup.
+## Browse your collection
 
-## Connect your collection
+The **Collection** tab offers:
 
-Backspin uses Discogs authorization, so you sign in with Discogs without giving Backspin your password. Your collection loads progressively. Disconnecting clears your local session; you can revoke Backspin’s authorization in Discogs settings.
+- Search, sorting, and filters for genres, styles, artists, formats, eras, and Discogs folders.
+- Artwork and record details, with optional grouping of owned editions.
+- Original-release-year lookup with visible progress, pause, resume, retry, and refresh controls.
+- Personal year corrections that stay scoped to your account.
+- A last-updated timestamp and an icon to refresh the collection.
 
-To run Backspin locally, follow the [development and operations guide](docs/DEVELOPMENT.md), which covers setup, verification, security, backups, and deployment preparation.
+Collection snapshots refresh on a five-minute cache cycle. Background refresh keeps the current view in place while the replacement loads; new picks pause until it finishes. Failed refreshes offer a retry. Original master years use a shared SQLite cache, while personal corrections remain separate.
 
-Collection snapshots refresh at the five-minute cache expiry. Routine refreshes keep the current view in place and publish the complete collection together. The collection count includes the last Discogs fetch time. New picks pause during refresh; failed refreshes clear unavailable records and offer a retry.
+The Backspin name and Citrus icon return you to Discover. The cog opens Settings, where you can disconnect your Discogs account. Settings closes on an outside tap or Escape.
+
+## Run locally
+
+Use **Node.js 24** and npm.
+
+```sh
+git clone https://github.com/Nicholas-Nazario/backspin.git
+cd backspin
+npm ci
+cp .env.example .env.local
+```
+
+1. Register an application in [Discogs developer settings](https://www.discogs.com/settings/developers).
+2. Set its callback URL to `http://localhost:3000/api/auth/callback`.
+3. Fill in `.env.local`:
+
+   | Variable                  | Value                                                    |
+   | ------------------------- | -------------------------------------------------------- |
+   | `APP_URL`                 | `http://localhost:3000`; must match your browser origin. |
+   | `DISCOGS_CONSUMER_KEY`    | Your Discogs application's consumer key.                 |
+   | `DISCOGS_CONSUMER_SECRET` | Your Discogs application's consumer secret.              |
+   | `SESSION_KEY`             | Generate locally with `openssl rand -hex 32`.            |
+   | `DATABASE_PATH`           | Defaults to `./data/mystery.sqlite`.                     |
+
+   Keep credentials in your local environment; `.env.local` is ignored by Git. The database directory and schema are created automatically.
+
+```sh
+npm run dev
+```
+
+Open [localhost:3000](http://localhost:3000) and connect Discogs. If you use another port, update both `APP_URL` and the Discogs callback URL to match.
+
+## Development
+
+Backspin uses Next.js App Router, React, TypeScript, and SQLite through `better-sqlite3`. Discogs OAuth and API requests run on the server. Fonts are self-hosted; UI icons come from Phosphor.
+
+| Command                                    | Purpose                                                |
+| ------------------------------------------ | ------------------------------------------------------ |
+| `npm run dev`                              | Start the local development server.                    |
+| `npm test`                                 | Run unit and persistence tests.                        |
+| `npm run typecheck`                        | Check TypeScript.                                      |
+| `npm run build`                            | Build and package the standalone production server.    |
+| `npm start`                                | Run the packaged server after a build.                 |
+| `npm run format:check`                     | Check formatting of application code and tests.        |
+| `npm run backup -- backups/mystery.sqlite` | Back up SQLite; create the `backups/` directory first. |
+
+With the local server running, verify the current recommendation flow and mobile layouts:
+
+```sh
+npx playwright install chromium
+node --env-file=.env.local --import tsx tests/recommendation.browser.ts
+node --env-file=.env.local --import tsx tests/mobile.browser.ts
+```
+
+These Playwright fixtures use isolated accounts and intercept Discogs requests. They cover filtering, refresh and error recovery, loading and reveal animations, keyboard interaction, reduced motion, and mobile layout. They do not establish live Discogs behavior. See the [development guide](docs/DEVELOPMENT.md) for collection/year-recovery checks, browser setup, backups, and operational details.
+
+The main implementation lives in:
+
+- `app/recommendation/` — the one-album discovery flow and filter sheet.
+- `app/collection/` — collection browsing, details, filters, and year lookup.
+- `app/components/` — shared branding, navigation, Settings, and interaction styles.
+- `lib/` — selection and filtering rules, Discogs transport, sessions, and persistence.
+- `public/brand/` — the transparent Citrus SVG; PNG wordmarks for this README are in `docs/assets/`.
+
+## Data and authorization
+
+You authorize Backspin through Discogs; Backspin does not receive your Discogs password. OAuth access credentials are held in an encrypted, HttpOnly session cookie for up to eight hours and are not stored in SQLite. Collection snapshots are short-lived and scoped to the authenticated account.
+
+SQLite stores cached original master years, account-scoped year corrections, and expiring OAuth attempt IDs. Disconnecting clears your local session; revoke the application's authorization in Discogs settings to remove its access there.
+
+Album artwork and catalog data come from Discogs. Artwork is displayed without recoloring or cropping. See [third-party notices](THIRD_PARTY_NOTICES.md) for icon and font licenses.
+
+## Deployment and current scope
+
+The hosted app is [backspin.fly.dev](https://backspin.fly.dev). The repository includes a Dockerfile for the standalone Next.js server and a Fly configuration with persistent storage under `/data`. The current request scheduler and collection cache are designed for one application process. Production secrets, database backups, and recovery procedures are covered in the [development and operations guide](docs/DEVELOPMENT.md).
+
+Backspin helps you choose a record; it does not play audio or save listening history. Picks and discovery filters last for the current page visit. Mood hints use catalog metadata, not audio analysis or a learned recommendation model. Spotify integration is not implemented.
+
+The older multi-album set builder and illustrated listening room remain in the repository as legacy code, outside the current Discover and Collection experience.

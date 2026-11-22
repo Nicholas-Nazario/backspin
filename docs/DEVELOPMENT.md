@@ -2,7 +2,7 @@
 
 Setup, verification, architecture, credential handling, and operational guidance for Backspin. For the product overview, see the [README](../README.md). Engineering conventions live in [AGENTS.md](../AGENTS.md).
 
-The app currently runs locally. No infrastructure has been provisioned or deployed.
+The hosted app is available at [backspin.fly.dev](https://backspin.fly.dev). This guide covers local development and operations for the single-process Fly deployment.
 
 ## Run locally
 
@@ -86,7 +86,7 @@ To restore: stop the app, preserve the existing database/WAL/SHM together for ro
 
 ## Fly deployment preparation
 
-Dockerfile builds a standalone Next server running as the node user. `fly.toml` is a template: set a unique app name and HTTPS APP_URL, provision one volume, ensure the mounted directory is writable by the node user, and set consumer credentials and SESSION_KEY via Fly Secrets. Use exactly one Machine; separate volume copies do not share data. Do not run database migrations in a Fly release command because the volume is not mounted there. Start with 512MB only as a measurement target. No deployment has been performed. The production image intentionally excludes TypeScript tooling; run backups with an appropriate operational tool/container using SQLite's backup API and arrange off-machine transfer before public use.
+Dockerfile builds a standalone Next server running as the node user. `fly.toml` configures the `backspin` app in `ewr`, with HTTPS APP_URL `https://backspin.fly.dev`, a persistent volume mounted at `/data`, and a 512MB Machine. Set consumer credentials and SESSION_KEY via Fly Secrets. Keep the mounted directory writable by the node user. Use exactly one Machine; separate volume copies do not share data. Do not run database migrations in a Fly release command because the volume is not mounted there. Validate memory requirements under actual collection loads. The production image intentionally excludes TypeScript tooling; run backups with an appropriate operational tool/container using SQLite's backup API and arrange off-machine transfer before public use.
 
 ## Remaining live checks
 
