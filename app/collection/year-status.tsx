@@ -12,11 +12,13 @@ export function YearStatus({
   known,
   count,
   loading,
+  resolveLabel = "Find original release years",
 }: {
   lookup: ReturnType<typeof useMasterYears>;
   known: number;
   count: number;
   loading: boolean;
+  resolveLabel?: string;
 }) {
   const {
     resolving,
@@ -112,8 +114,7 @@ export function YearStatus({
           disabled={loading || !count}
           onClick={() => resolveYears()}
         >
-          <CalendarBlankIcon size={18} aria-hidden="true" /> Find original
-          release years
+          <CalendarBlankIcon size={18} aria-hidden="true" /> {resolveLabel}
         </button>
       )}
     </div>

@@ -5,6 +5,7 @@ import { api } from "./api";
 type CachedYear = { masterId: number; year: number | null; expiresAt: number };
 export function useMasterYears(entries: Entry[], loading: boolean) {
   const [records, setRecords] = useState<Record<number, CachedYear>>({});
+  const [checkedCacheKey, setCheckedCacheKey] = useState<string | null>(null);
   const [status, setStatus] = useState<
     "idle" | "running" | "done" | "partial" | "paused"
   >("idle");
@@ -78,6 +79,8 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
           setStatus(missing.length ? "idle" : ids.length ? "done" : "idle");
       } catch {
         if (active) setStatus("idle");
+      } finally {
+        if (active) setCheckedCacheKey(idsKey);
       }
     })();
     return () => {
@@ -142,8 +145,13 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
     controller.current = null;
     setStatus("paused");
   }
+  const pendingCount =
+    !loading && checkedCacheKey === idsKey
+      ? ids.filter((id) => !Object.hasOwn(masters, id)).length
+      : 0;
   return {
     masters,
+    pendingCount,
     status,
     progress,
     total,

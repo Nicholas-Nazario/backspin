@@ -23,6 +23,7 @@
 - Write normally formatted, readable TypeScript and JSX. Do not compress components, handlers, tests, or CSS into long single lines. Use descriptive names and comments explaining non-obvious decisions.
 - Do not use inline CSS: no React `style` props, HTML style attributes, or embedded style blocks. Use CSS classes and component CSS Modules. For dynamic values, prefer semantic elements such as native progress indicators or state/attribute-driven classes; do not introduce inline styles as an exception.
 - Maintain CSS rules at their source rather than repeatedly appending overrides. Keep global styles for actual global concerns; use feature/component styles for local behavior as the UI grows. Reuse established colors, spacing, and Phosphor conventions.
+- Keep layouts stable during loading, pagination, and content changes. Reserve space for artwork, text lines, and repeated rows at each breakpoint, including missing values and short final pages. Use aspect ratios, minimum sizes, or fixed grid tracks as appropriate. Check that nearby content and controls stay in place across these transitions.
 - Give asynchronous workflows explicit idle, loading, partial/error, paused, and completed states where relevant. Make cancellation and retries observable, preserve valid progress, and avoid duplicate timers or overlapping state owners.
 - Keep product language about the user's task; leave technical implementation details in documentation unless they help the user make a decision.
 

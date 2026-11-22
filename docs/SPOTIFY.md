@@ -1,6 +1,6 @@
 # Spotify connection setup
 
-Backspin connects to Spotify through its server-side authorization-code flow. Spotify handles login and consent. Settings identifies the connected profile. The Explore tab can fetch recent plays on demand and match them against the owned Discogs collection in the browser. Backspin temporarily handles the recent-play response on its server and keeps only the album metadata and timestamps in page memory for the picks.
+Backspin connects to Spotify through its server-side authorization-code flow. Spotify handles login and consent. Settings identifies the connected profile. The Explore tab asks Backspin to fetch recent plays on demand and rank records from the authenticated Discogs collection. The browser receives the ranked picks and their supporting releases in one response. Backspin can reuse a completed result for up to ten minutes per connection. **Refresh picks** fetches Spotify again while reusing fresh Discogs catalog data.
 
 ## Manual dashboard setup
 
@@ -47,7 +47,8 @@ This setup does not configure a Spotify application, change your Fly secrets, or
 
 ## Authorization and storage
 
-- Backspin requests `user-read-private` for the profile display name and `user-read-recently-played` for [recent plays](https://developer.spotify.com/documentation/web-api/reference/get-recently-played). Accounts connected before the recent-play scope was added must disconnect and reconnect. Choose **Pick from recent Spotify plays** on the Explore tab to make a request. The existing picker remains available.
+- Backspin requests `user-read-private` for the profile display name and `user-read-recently-played` for [recent plays](https://developer.spotify.com/documentation/web-api/reference/get-recently-played). Accounts connected before the recent-play scope was added must disconnect and reconnect. Choose **Find my picks** on the Explore tab to make a request. The existing picker remains available.
+- Explore uses owned records first and checks the Discogs master catalog for other recent releases. Backspin sends album titles and artist names for these searches. Backspin checks eligible unmatched releases behind the same request using the shared Discogs rate limiter. Explore shows a warning if a provider interruption leaves the results incomplete.
 - A random state binds the callback to a ten-minute encrypted, HttpOnly handshake cookie and a one-use attempt ID. The existing SQLite attempt table stores only the ID and expiry, never authorization codes, Spotify profile data, or credentials.
 - The access token and display name live only in a separate encrypted, HttpOnly browser cookie. There is no auth localStorage or Spotify account table. The app holds token data transiently while completing authorization. Token values are not passed to client components or written to callback logs.
 - The connection expires with Spotify's access token, usually after one hour, with an eight-hour upper bound. Refresh tokens returned by Spotify are discarded. Reconnect through Spotify when the connection expires; automatic token refresh is unavailable.

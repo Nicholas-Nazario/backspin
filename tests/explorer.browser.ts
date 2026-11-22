@@ -2,9 +2,10 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { collectionFixture } from "./browser-fixture";
+const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
 const browser = await chromium.launch();
 try {
-  const { page, rememberYear } = await collectionFixture(browser);
+  const { page, rememberYear } = await collectionFixture(browser, baseURL);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   let masterCalls = 0;
@@ -56,7 +57,7 @@ try {
               };
     return route.fulfill({ json: { data, expiresAt: Date.now() + 300000 } });
   });
-  await page.goto("http://localhost:3000/collection");
+  await page.goto(baseURL + "/collection");
   await page
     .getByRole("button", { name: "View First Album", exact: true })
     .waitFor();

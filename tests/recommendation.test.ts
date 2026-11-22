@@ -28,8 +28,8 @@ const entries = [
   record(2, "Rock", "Hard Rock"),
   record(3, "Jazz", "Free Jazz"),
 ];
-const years = { corrections: { 1: 1982 }, masters: { 1: 1971, 2: 1975 } };
-test("genre and era are hard limits; personal original years take priority and unknown years stay out", () => {
+const years = { masters: { 1: 1982, 2: 1975 } };
+test("genre and era are hard limits; unknown Discogs original years stay out", () => {
   assert.deepEqual(
     recommendationPool(
       entries,

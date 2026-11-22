@@ -35,39 +35,33 @@ const options: SetOptions = {
 test("mode selection constrains genre/style/era and excludes unresolved original years", () => {
   assert.equal(targetReady({ mode: "genre", value: "" }), false);
   assert.deepEqual(
-    mixCandidates(entries, { mode: "genre", value: "" }, {}, masters),
+    mixCandidates(entries, { mode: "genre", value: "" }, masters),
     [],
   );
   assert.equal(
-    mixCandidates(entries, { mode: "random", value: "" }, {}, masters).length,
+    mixCandidates(entries, { mode: "random", value: "" }, masters).length,
     8,
   );
   assert.deepEqual(
-    mixCandidates(entries, { mode: "genre", value: "Pop" }, {}, masters).map(
+    mixCandidates(entries, { mode: "genre", value: "Pop" }, masters).map(
       (e) => e.id,
     ),
     [1, 2, 3, 4],
   );
   assert.deepEqual(
-    mixCandidates(
-      entries,
-      { mode: "style", value: "Hard Rock" },
-      {},
-      masters,
-    ).map((e) => e.id),
+    mixCandidates(entries, { mode: "style", value: "Hard Rock" }, masters).map(
+      (e) => e.id,
+    ),
     [5, 6, 7, 8],
   );
   assert.deepEqual(
-    mixCandidates(
-      entries,
-      { mode: "era", value: "1970" },
-      { 1: 1990 },
-      masters,
-    ).map((e) => e.id),
-    [2, 5],
+    mixCandidates(entries, { mode: "era", value: "1970" }, masters).map(
+      (e) => e.id,
+    ),
+    [1, 2, 5],
   );
   assert.deepEqual(
-    mixCandidates(entries, { mode: "genre", value: "Jazz" }, {}, masters),
+    mixCandidates(entries, { mode: "genre", value: "Jazz" }, masters),
     [],
   );
 });
@@ -77,19 +71,12 @@ test("generation, swap and pinned reshuffle only use the targeted pool", () => {
     { mode: "style", value: "Hard Rock" },
     { mode: "era", value: "1970" },
   ] as MixTarget[]) {
-    const pool = mixCandidates(entries, target, {}, masters),
+    const pool = mixCandidates(entries, target, masters),
       ids = new Set(pool.map((e) => e.instance_id));
-    const generated = randomSet(pool, { ...options, count: 2 }, {}, masters);
+    const generated = randomSet(pool, { ...options, count: 2 }, masters);
     assert.ok(generated.every((e) => ids.has(e.instance_id)));
     const current = generated.map((e) => e.instance_id),
-      replacement = swapMixRecord(
-        pool,
-        current,
-        current[0],
-        options,
-        {},
-        masters,
-      );
+      replacement = swapMixRecord(pool, current, current[0], options, masters);
     assert.ok(
       replacement &&
         ids.has(replacement.instance_id) &&
@@ -100,7 +87,6 @@ test("generation, swap and pinned reshuffle only use the targeted pool", () => {
       current,
       [current[0]],
       options,
-      {},
       masters,
     );
     assert.ok(shuffled.every((e) => ids.has(e.instance_id)));
@@ -109,13 +95,8 @@ test("generation, swap and pinned reshuffle only use the targeted pool", () => {
 });
 
 test("switching mode preserves a compatible pinned slot while dropping ineligible records", () => {
-  const pool = mixCandidates(
-    entries,
-    { mode: "genre", value: "Pop" },
-    {},
-    masters,
-  );
-  const result = reshuffleMix(pool, [5, 6, 1], [1], options, {}, masters);
+  const pool = mixCandidates(entries, { mode: "genre", value: "Pop" }, masters);
+  const result = reshuffleMix(pool, [5, 6, 1], [1], options, masters);
   assert.equal(result[2].instance_id, 1);
   assert.ok(
     result.every((entry) => entry.basic_information.genres?.includes("Pop")),

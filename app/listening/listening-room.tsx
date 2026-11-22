@@ -21,7 +21,7 @@ export function ListeningRoom({
   motionEnabled,
   onMotionChange,
   listening,
-  corrections,
+
   masters,
   busy,
   error,
@@ -34,7 +34,7 @@ export function ListeningRoom({
   motionEnabled: boolean;
   onMotionChange: (enabled: boolean) => void;
   listening: ReturnType<typeof useListening>;
-  corrections: Record<number, number>;
+
   masters: Record<number, number | null>;
   busy: boolean;
   error: string;
@@ -70,9 +70,7 @@ export function ListeningRoom({
   const info = current?.basic_information;
   const artist =
     info?.artists.map((artist) => artist.name).join(", ") || "Artist unknown";
-  const year = current
-    ? originalYear(current, corrections, masters).year
-    : null;
+  const year = current ? originalYear(current, masters).year : null;
   const labels = [...new Set(info?.genres || [])].slice(0, 2);
   const longIdentity = (info?.title.length || 0) > 48 || artist.length > 65;
 

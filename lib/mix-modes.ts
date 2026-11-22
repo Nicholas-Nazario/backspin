@@ -8,7 +8,7 @@ export function targetReady(target: MixTarget) {
 export function mixCandidates(
   entries: Entry[],
   target: MixTarget,
-  corrections: Record<number, number>,
+
   masters: Record<number, number | null>,
 ) {
   if (!targetReady(target)) return [];
@@ -18,7 +18,7 @@ export function mixCandidates(
       return entry.basic_information.genres?.includes(target.value);
     if (target.mode === "style")
       return entry.basic_information.styles?.includes(target.value);
-    const year = originalYear(entry, corrections, masters).year;
+    const year = originalYear(entry, masters).year;
     return year !== null && Math.floor(year / 10) * 10 === Number(target.value);
   });
 }

@@ -35,16 +35,15 @@ const records = [
   entry(2, 20, 100, "Second"),
   entry(3, 30, 0, "Third"),
 ];
-test("era uses master evidence and personal corrections, never pressing dates", () => {
+test("era uses Discogs master years and ignores pressing dates", () => {
   const e = {
     ...records[0],
     basic_information: { ...records[0].basic_information, year: 2020 },
   };
-  assert.deepEqual(originalYear(e, {}, {}), { year: null, source: "unknown" });
-  assert.equal(originalYear(e, {}, { 100: 1971 }).year, 1971);
-  assert.deepEqual(originalYear(e, { 1: 1969 }, { 100: 1971 }), {
-    year: 1969,
-    source: "personal",
+  assert.deepEqual(originalYear(e, {}), { year: null, source: "unknown" });
+  assert.deepEqual(originalYear(e, { 100: 1971 }), {
+    year: 1971,
+    source: "master",
   });
 });
 test("filters combine across query, taxonomy, format and original decade", () => {
@@ -60,21 +59,20 @@ test("filters combine across query, taxonomy, format and original decade", () =>
         era: "1970",
         folder: "2",
       },
-      {},
       { 100: 1971 },
     ).length,
     2,
   );
   assert.equal(
-    explore(records, { ...base, era: "unknown" }, {}, { 100: 1971 }).length,
+    explore(records, { ...base, era: "unknown" }, { 100: 1971 }).length,
     1,
   );
-  assert.equal(explore(records, { ...base, genre: "Rock" }, {}, {}).length, 0);
+  assert.equal(explore(records, { ...base, genre: "Rock" }, {}).length, 0);
 });
 test("grouping preserves owned instances and works without masters", () => {
   const copies = [...records, { ...records[2], instance_id: 31 }];
-  assert.equal(explore(copies, base, {}, {}).length, 4);
-  const groups = explore(copies, { ...base, group: true }, {}, {});
+  assert.equal(explore(copies, base, {}).length, 4);
+  const groups = explore(copies, { ...base, group: true }, {});
   assert.equal(groups.length, 2);
   assert.deepEqual(
     groups.map((g) => g.length),
@@ -83,8 +81,7 @@ test("grouping preserves owned instances and works without masters", () => {
 });
 test("unknown original dates sort last", () => {
   assert.equal(
-    explore(records, { ...base, sort: "year" }, {}, { 100: 1971 }).at(-1)?.[0]
-      .id,
+    explore(records, { ...base, sort: "year" }, { 100: 1971 }).at(-1)?.[0].id,
     3,
   );
 });
@@ -108,9 +105,7 @@ test("artist sort ignores leading articles and puts compilations before missing 
     make(8, "Zappa", "Album"),
   ];
   assert.deepEqual(
-    explore(items, { ...base, sort: "artist" }, {}, {}).map(
-      (group) => group[0].id,
-    ),
+    explore(items, { ...base, sort: "artist" }, {}).map((group) => group[0].id),
     [3, 1, 2, 8, 6, 5, 7, 4],
   );
   assert.equal(items[0].basic_information.artists[0].name, "The Beatles");

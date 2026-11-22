@@ -7,8 +7,6 @@ import { openDatabase } from "../lib/db";
 import {
   cachedMasterYears,
   resolveMasterYear,
-  correctYear,
-  personalYears,
   MASTER_YEAR_TTL,
 } from "../lib/year-data";
 test("master cache survives reopen, is shared, expires, and supports forced refresh", async () => {
@@ -48,15 +46,6 @@ test("master cache survives reopen, is shared, expires, and supports forced refr
       return 1969;
     });
     assert.equal(calls, 3);
-    correctYear(db, 1, 5, 1970);
-    correctYear(db, 2, 5, 1980);
-    assert.deepEqual(personalYears(db, 1), [{ release_id: 5, year: 1970 }]);
-    assert.deepEqual(personalYears(db, 2), [{ release_id: 5, year: 1980 }]);
-    await resolveMasterYear(db, 100, async () => 1971, true);
-    assert.deepEqual(personalYears(db, 1), [{ release_id: 5, year: 1970 }]);
-    correctYear(db, 1, 5, null);
-    assert.deepEqual(personalYears(db, 1), []);
-    assert.equal(personalYears(db, 2).length, 1);
   } finally {
     db.close();
     rmSync(dir, { recursive: true });

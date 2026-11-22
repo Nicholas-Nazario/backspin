@@ -79,16 +79,11 @@ test("artist and genre variety favor new values when available and allow repeats
     4,
   );
 });
-test("era variety uses original years and corrections, never pressing dates", () => {
+test("era variety uses Discogs original years, never pressing dates", () => {
   const entries = [record(1), record(2), record(3), record(4)];
   const masters = { 1: 1971, 2: 1972, 3: 1991, 4: 2001 };
   for (let seed = 0; seed < 20; seed++) {
-    const result = randomSet(
-      entries,
-      { ...options, seed, eras: 2 },
-      {},
-      masters,
-    );
+    const result = randomSet(entries, { ...options, seed, eras: 2 }, masters);
     assert.equal(
       new Set(
         result.map((e) =>
@@ -98,15 +93,8 @@ test("era variety uses original years and corrections, never pressing dates", ()
       3,
     );
   }
-  const correctionResult = randomSet(
-    entries,
-    { ...options, eras: 2 },
-    { 2: 1981 },
-    masters,
-  );
-  assert.equal(correctionResult.length, 3);
   assert.equal(
-    randomSet(entries, { ...options, count: 4, eras: 2 }, {}, {}).length,
+    randomSet(entries, { ...options, count: 4, eras: 2 }, {}).length,
     4,
   );
 });

@@ -37,7 +37,7 @@ function artistNames(entry: Entry) {
 export function randomSet(
   entries: Entry[],
   options: SetOptions,
-  corrections: Record<number, number> = {},
+
   masters: Record<number, number | null> = {},
   context: Entry[] = [],
 ): Entry[] {
@@ -64,7 +64,7 @@ export function randomSet(
     genres = new Set<string>(),
     eras = new Set<number>();
   const decade = (entry: Entry) => {
-    const year = originalYear(entry, corrections, masters).year;
+    const year = originalYear(entry, masters).year;
     return year === null ? null : Math.floor(year / 10) * 10;
   };
   const strength = (level: VarietyLevel) => [0, 0.55, 2][level];

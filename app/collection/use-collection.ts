@@ -9,9 +9,8 @@ export function useCollection() {
     [total, setTotal] = useState(0),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
-    [revision, refresh] = useState(0);
-  const [years, setYears] = useState<Record<number, number>>({}),
-    [folders, setFolders] = useState<{ id: number; name: string }[]>([]);
+    [{ revision, force }, setRequest] = useState({ revision: 0, force: false });
+  const [folders, setFolders] = useState<{ id: number; name: string }[]>([]);
   useEffect(() => {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
@@ -23,20 +22,12 @@ export function useCollection() {
       let expiry = Infinity;
       let fetchedAt = Infinity;
       try {
-        const annotations = await api("/api/years", controller.signal);
-        const nextYears = Object.fromEntries(
-          annotations.years.map((y: { release_id: number; year: number }) => [
-            y.release_id,
-            y.year,
-          ]),
-        );
-        if (!background) setYears(nextYears);
         let page = 1,
           pages = 1;
         const all = new Map<number, Entry>();
         do {
           const response = await api(
-            "/api/discogs?page=" + page,
+            "/api/discogs?page=" + page + (force ? "&refresh=1" : ""),
             controller.signal,
           );
           if (controller.signal.aborted) return;
@@ -46,7 +37,10 @@ export function useCollection() {
           timer = setTimeout(
             () => {
               controller.abort();
-              refresh((v) => v + 1);
+              setRequest(({ revision }) => ({
+                revision: revision + 1,
+                force: false,
+              }));
             },
             Math.max(0, expiry - Date.now()),
           );
@@ -64,7 +58,6 @@ export function useCollection() {
         if (controller.signal.aborted) return;
         setEntries([...all.values()]);
         setTotal(all.size);
-        setYears(nextYears);
         setLastUpdated(fetchedAt);
         hasSnapshot.current = true;
       } catch (e) {
@@ -80,7 +73,10 @@ export function useCollection() {
         if (!controller.signal.aborted) setLoading(false);
       }
     })();
-    api("/api/discogs?kind=folders", controller.signal)
+    api(
+      "/api/discogs?kind=folders" + (force ? "&refresh=1" : ""),
+      controller.signal,
+    )
       .then((b) => {
         if (!controller.signal.aborted) setFolders(b.data.folders || []);
       })
@@ -91,24 +87,7 @@ export function useCollection() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [revision]);
-  async function saveYear(releaseId: number, year: number | null) {
-    const response = await fetch("/api/years", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ releaseId, year }),
-    });
-    if (!response.ok) {
-      const body = await response.json();
-      throw new Error(body.error || "Unable to save year");
-    }
-    setYears((old) => {
-      const next = { ...old };
-      if (year === null) delete next[releaseId];
-      else next[releaseId] = year;
-      return next;
-    });
-  }
+  }, [revision, force]);
   return {
     entries,
     total,
@@ -116,10 +95,9 @@ export function useCollection() {
     refreshing: loading && hasSnapshot.current,
     lastUpdated,
     error,
-    years,
     folders,
-    saveYear,
     revision,
-    refresh: () => refresh((v) => v + 1),
+    refresh: () =>
+      setRequest(({ revision }) => ({ revision: revision + 1, force: true })),
   };
 }

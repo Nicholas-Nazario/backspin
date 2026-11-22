@@ -38,7 +38,6 @@ export const emptyRecommendationFilters: RecommendationFilters = {
   era: "",
 };
 export type YearContext = {
-  corrections: Record<number, number>;
   masters: Record<number, number | null>;
 };
 export function recommendationPool(
@@ -47,7 +46,7 @@ export function recommendationPool(
   years: YearContext,
 ) {
   return entries.filter((entry) => {
-    const year = originalYear(entry, years.corrections, years.masters).year;
+    const year = originalYear(entry, years.masters).year;
     return (
       (!filters.genre ||
         entry.basic_information.genres?.includes(filters.genre)) &&

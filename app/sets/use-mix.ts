@@ -17,7 +17,7 @@ type Generated = {
 };
 export function useMix(
   entries: Entry[],
-  corrections: Record<number, number>,
+
   masters: Record<number, number | null>,
   disabled: boolean,
   open: boolean,
@@ -39,7 +39,7 @@ export function useMix(
     timer.current = null;
     setRevealing(false);
   }
-  const candidates = mixCandidates(entries, target, corrections, masters);
+  const candidates = mixCandidates(entries, target, masters);
   const available = albumCount(candidates);
   const optionsKey = JSON.stringify({ count, ...variety, target });
   useEffect(() => {
@@ -66,7 +66,7 @@ export function useMix(
   const activeCandidates = mixCandidates(
     entries,
     generated?.target || target,
-    corrections,
+
     masters,
   );
   const usedWorks = new Set(selected.map(workKey));
@@ -89,7 +89,7 @@ export function useMix(
       generated?.ids || [],
       pinned,
       { count, seed, ...variety },
-      corrections,
+
       masters,
     );
     cancelReveal();
@@ -118,7 +118,7 @@ export function useMix(
         seed: crypto.getRandomValues(new Uint32Array(1))[0],
         ...variety,
       },
-      corrections,
+
       masters,
     );
     if (!replacement) {

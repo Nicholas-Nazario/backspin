@@ -1,6 +1,7 @@
+import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { unseal } from "./session";
+import { unseal, type Session } from "./session";
 
 export const SPOTIFY_SESSION_COOKIE = "backspin_spotify";
 export const SPOTIFY_HANDSHAKE_COOKIE = "backspin_spotify_handshake";
@@ -33,4 +34,24 @@ export async function spotifySession() {
   return readSpotifySession(
     (await cookies()).get(SPOTIFY_SESSION_COOKIE)?.value,
   );
+}
+
+export function spotifyConnectionScope(
+  discogs: Session,
+  spotify: z.infer<typeof spotifySessionSchema>,
+) {
+  return {
+    key: createHash("sha256")
+      .update(
+        JSON.stringify([
+          discogs.userId,
+          discogs.token.key,
+          discogs.expires,
+          spotify.accessToken,
+          spotify.expires,
+        ]),
+      )
+      .digest("base64url"),
+    expires: Math.min(discogs.expires, spotify.expires),
+  };
 }
