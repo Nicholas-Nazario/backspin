@@ -27,8 +27,12 @@
   text-decoration: none;
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .brandLink:hover img {
+  .brandLink img {
     animation: rotate-brand 12s linear infinite;
+    animation-play-state: paused;
+  }
+  .brandLink:hover img {
+    animation-play-state: running;
   }
 }
 @keyframes rotate-brand {

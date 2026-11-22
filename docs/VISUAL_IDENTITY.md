@@ -14,7 +14,7 @@ Use rounded panels, chunky controls, playful line drawings, restrained paper tex
 
 ## Interaction styles
 
-The header groups Discover and Collection into one rounded navigation bar with Phosphor icons and a blue current-page fill. Center it on desktop and give it a full-width second row on mobile. The Backspin name and Citrus logo form one home link to Discover. Hovering the brand link slowly rotates only the logo, with no background fill; reduced motion keeps the logo still.
+The header groups Discover and Collection into one rounded navigation bar with Phosphor icons and a blue current-page fill. Center it on desktop and give it a full-width second row on mobile. The Backspin name and Citrus logo form one home link to Discover. Hovering the brand link slowly rotates only the logo, with no background fill. Leaving hover pauses at the current angle; hovering again resumes from there, and a fresh page load resets it. Reduced motion keeps the logo still.
 
 Use the shared styles in `app/components/interaction.module.css` for action controls:
 
