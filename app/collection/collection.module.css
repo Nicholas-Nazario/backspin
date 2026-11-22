@@ -22,18 +22,18 @@
   color: #817764;
 }
 .secondary {
-  background: #e6ddc6;
-  color: #302b24;
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
 }
 .section-title > .secondary {
   min-height: 44px;
   font-size: 12px;
   background: transparent;
   padding: 8px 0;
-  color: #655e50;
+  color: var(--color-muted);
 }
 .notice {
-  background: #f9dfad;
+  background: var(--color-yellow-soft);
   padding: 18px;
   border-radius: 12px;
 }
@@ -49,7 +49,7 @@
   font-size: 17px;
   padding: 18px 22px 18px 52px;
   border: 1px solid #cfc5af;
-  background: #fffaf0;
+  background: var(--color-surface);
   border-radius: 16px;
   box-shadow: 0 3px 0 #e9dfc8;
   width: 100%;
@@ -78,17 +78,17 @@
   list-style: none;
   cursor: pointer;
   font-size: 14px;
-  color: #655e50;
+  color: var(--color-muted);
   padding: 8px 0;
 }
 .filter-panel summary::-webkit-details-marker {
   display: none;
 }
 .filter-panel summary:hover {
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 .filter-panel summary:focus-visible {
-  outline: 3px solid #276b51;
+  outline: 3px solid var(--color-accent-ink);
   outline-offset: 5px;
   border-radius: 5px;
 }
@@ -97,8 +97,8 @@
   display: flex;
 }
 .filter-count:not(:empty) {
-  background: #d8e6d0;
-  color: #265d45;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
   font-size: 11px;
   padding: 3px 7px;
   border-radius: 12px;
@@ -133,16 +133,16 @@
   background-repeat: no-repeat;
   background-position: right 12px center;
   border: 0;
-  border-bottom: 1px solid #c8bda6;
+  border-bottom: 1px solid var(--color-border);
   border-radius: 0;
   padding: 10px 30px 10px 0;
   font-size: 16px;
-  color: #302b24;
+  color: var(--color-ink);
   letter-spacing: normal;
   cursor: pointer;
 }
 .toolbar select:hover {
-  border-color: #276b51;
+  border-color: var(--color-accent-ink);
 }
 .browse-options {
   display: flex;
@@ -189,12 +189,12 @@
   padding: 7px 12px;
 }
 .applied-filters small {
-  color: #655e50;
+  color: var(--color-muted);
 }
 .collection-attribution {
   display: inline-block;
   font-size: 12px;
-  color: #276b51;
+  color: var(--color-accent-ink);
   margin-top: 4px;
 }
 .grid {
@@ -248,7 +248,7 @@
   font-size: 12px;
 }
 .artist {
-  color: #655e50;
+  color: var(--color-muted);
   margin: 8px 0;
 }
 .chips {
@@ -259,8 +259,8 @@
 }
 .chips span {
   font-size: 11px;
-  background: #eadfbf;
-  color: #554c36;
+  background: var(--color-yellow-soft);
+  color: var(--color-ink);
   border-radius: 20px;
   padding: 5px 9px;
 }
@@ -269,19 +269,19 @@
   background: none;
 }
 .styles span {
-  background: #d8e6d0;
-  color: #265d45;
+  background: var(--color-peach-soft);
+  color: var(--color-ink);
 }
 .genre-tag {
   font-size: 11px;
-  background: #d8e6d0;
-  color: #265d45;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
   border-radius: 20px;
   padding: 5px 9px;
 }
 .genre-tag:hover {
-  background: #276b51;
-  color: #fff;
+  background: var(--color-accent-hover);
+  color: var(--color-ink);
 }
 .empty {
   padding: 50px 20px;
@@ -295,7 +295,7 @@
 }
 .attribution {
   font-size: 12px;
-  color: #276b51;
+  color: var(--color-accent-ink);
   display: block;
   margin: 10px 0;
 }
@@ -305,8 +305,8 @@
   border: 0;
   border-radius: 22px;
   padding: 40px;
-  background: #fff6df;
-  color: #302b24;
+  background: var(--color-background);
+  color: var(--color-ink);
   box-shadow: 0 20px 100px #0005;
 }
 .dialog::backdrop {
@@ -329,7 +329,7 @@
   right: 12px;
   top: 12px;
   background: #eadfbf;
-  color: #302b24;
+  color: var(--color-ink);
   padding: 8px 12px;
 }
 .detail-layout h2 {
@@ -339,7 +339,7 @@
 }
 .detail-artist {
   font-size: 20px;
-  color: #655e50;
+  color: var(--color-muted);
 }
 .eyebrow {
   text-transform: uppercase;
@@ -359,7 +359,7 @@
   font-size: 13px;
 }
 .credits li span {
-  color: #655e50;
+  color: var(--color-muted);
 }
 .year-form {
   display: flex;
@@ -400,7 +400,7 @@
 .year-progress-heading strong {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 .year-progress-heading .text-button {
   padding: 0;
@@ -408,7 +408,7 @@
 }
 .loading-spin {
   animation: loading-spin 0.8s linear infinite;
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 .progress-track {
   display: block;
@@ -420,18 +420,18 @@
   border-radius: 5px;
   overflow: hidden;
   margin: 10px 0 7px;
-  accent-color: #276b51;
+  accent-color: var(--color-accent-ink);
 }
 .progress-track::-webkit-progress-bar {
   background: #dfd6bf;
   border-radius: 5px;
 }
 .progress-track::-webkit-progress-value {
-  background: #276b51;
+  background: var(--color-accent-ink);
   border-radius: 5px;
 }
 .progress-track::-moz-progress-bar {
-  background: #276b51;
+  background: var(--color-accent-ink);
   border-radius: 5px;
 }
 .progress-label {
@@ -451,7 +451,7 @@
   padding: 8px 0;
 }
 .year-result.success {
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 .year-result > div {
   display: flex;
@@ -478,7 +478,7 @@
 }
 .year-result .year-refresh-icon:hover {
   background: #e6ddc6;
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 
 @keyframes loading-spin {

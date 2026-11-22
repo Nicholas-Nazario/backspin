@@ -5,16 +5,16 @@
   margin-bottom: 8px;
 }
 .deck > div {
-  --sleeve-color: #e9b74f;
+  --sleeve-color: var(--brand-yellow);
   width: 112px;
   height: 112px;
-  border: 2px solid #302b24;
+  border: 2px solid var(--color-ink);
   border-radius: 12px;
   position: absolute;
   left: 24px;
   top: 16px;
   background: var(--sleeve-color);
-  color: color-mix(in oklab, var(--sleeve-color) 45%, #302b24);
+  color: color-mix(in oklab, var(--sleeve-color) 45%, var(--color-ink));
   display: grid;
   place-items: center;
   transform: translate(-8%, 3%) rotate(-9deg);
@@ -25,13 +25,13 @@
   animation-delay: -1200ms;
 }
 .deck > div:nth-child(2) {
-  --sleeve-color: #ec8e73;
+  --sleeve-color: var(--brand-orange);
   transform: translate(8%, 4%) rotate(8deg);
   z-index: 2;
   animation-delay: -600ms;
 }
 .deck > div:nth-child(3) {
-  --sleeve-color: #c2d8b5;
+  --sleeve-color: var(--brand-peach);
   transform: rotate(-3deg);
   z-index: 3;
   animation-delay: 0ms;

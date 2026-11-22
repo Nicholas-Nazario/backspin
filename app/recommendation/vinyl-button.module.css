@@ -18,13 +18,13 @@
   place-items: center;
   width: 100%;
   height: 100%;
-  border: 6px solid #302b24;
+  border: 6px solid var(--color-ink);
   border-radius: 50%;
   background: repeating-radial-gradient(
     circle,
-    #302b24 0 3px,
+    var(--color-ink) 0 3px,
     #3d382f 4px 5px,
-    #302b24 6px 8px
+    var(--color-ink) 6px 8px
   );
 }
 .label {
@@ -34,14 +34,14 @@
   width: 56%;
   height: 56%;
   padding: 16px 12px;
-  border: 3px solid #302b24;
+  border: 3px solid var(--color-ink);
   border-radius: 50%;
-  background: #a8d5f2;
-  color: #302b24;
+  background: var(--color-accent);
+  color: var(--color-ink);
   font:
     550 clamp(1.1rem, 6vw, 1.65rem) / 1.05 "Backspin Display",
     sans-serif;
-  box-shadow: 0 0 0 5px #302b24;
+  box-shadow: 0 0 0 5px var(--color-ink);
 }
 .labelText {
   animation: label-in 280ms ease-out both;

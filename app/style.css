@@ -16,13 +16,36 @@
   box-sizing: border-box;
 }
 html {
+  --brand-yellow: #ffcb00;
+  --brand-orange: #ff6500;
+  --brand-peach: #ff9164;
+  --color-background: #fff6df;
+  --color-surface: #fffaf0;
+  --color-ink: #302b24;
+  --color-muted: #655e50;
+  --color-border: #c8bda6;
+  --color-accent: #a8d5f2;
+  --color-accent-hover: #91c8eb;
+  --color-accent-soft: #e0f0fa;
+  --color-accent-ink: #1f5275;
+  --color-accent-border: #568bb0;
+  --color-yellow-soft: color-mix(
+    in srgb,
+    var(--brand-yellow) 25%,
+    var(--color-surface)
+  );
+  --color-peach-soft: color-mix(
+    in srgb,
+    var(--brand-peach) 25%,
+    var(--color-surface)
+  );
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 body {
   margin: 0;
-  background: #fff6df;
-  color: #302b24;
+  background: var(--color-background);
+  color: var(--color-ink);
   font-family: "Backspin Body", Arial, sans-serif;
 }
 main {
@@ -33,8 +56,8 @@ main {
   padding: 24px 28px 48px;
 }
 button {
-  background: #276b51;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-ink);
   border: 0;
   border-radius: 24px;
   padding: 12px 22px;
@@ -47,7 +70,7 @@ button:disabled {
 }
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #d86444;
+  outline: 3px solid var(--color-accent-ink);
   outline-offset: 4px;
 }
 button svg {
@@ -65,18 +88,21 @@ input,
 select {
   width: 100%;
   min-width: 0;
-  border: 1px solid #c8bda6;
+  border: 1px solid var(--color-border);
   border-radius: 9px;
   padding: 12px;
-  background: #fffaf0;
-  color: #302b24;
+  background: var(--color-surface);
+  color: var(--color-ink);
   font: inherit;
   font-size: 14px;
 }
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid #276b51;
+  outline: 3px solid var(--color-accent-ink);
   outline-offset: 2px;
+}
+a {
+  color: var(--color-accent-ink);
 }
 @media (max-width: 700px) {
   main {

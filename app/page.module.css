@@ -31,7 +31,7 @@
   list-style: none;
   cursor: pointer;
   border-radius: 22px;
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 13px;
   padding: 8px 0 8px 12px;
   display: flex;
@@ -42,15 +42,15 @@
   display: none;
 }
 .settings summary:focus-visible {
-  outline: 3px solid #276b51;
+  outline: 3px solid var(--color-accent-ink);
   outline-offset: 3px;
 }
 .settings-menu {
   position: absolute;
   right: 0;
   width: min(300px, calc(100vw - 36px));
-  background: #fffaf0;
-  border: 1px solid #c8bda6;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 10px 30px #302b2420;
@@ -82,7 +82,7 @@
   border-radius: 50%;
   background: repeating-radial-gradient(#282822 0 3px, #39392f 4px 5px);
   margin: auto;
-  color: #edb74b;
+  color: var(--brand-orange);
   display: grid;
   place-items: center;
   font-size: 65px;
@@ -97,15 +97,15 @@
   line-height: 1.6;
 }
 .notice {
-  background: #f9dfad;
+  background: var(--color-yellow-soft);
   padding: 18px;
   border-radius: 12px;
 }
 .footer {
-  border-top: 1px solid #c8bda6;
+  border-top: 1px solid var(--color-border);
   margin-top: 50px;
   padding-top: 20px;
-  color: #655e50;
+  color: var(--color-muted);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -132,12 +132,12 @@
   border-radius: 20px;
 }
 .navigation a[aria-current="page"] {
-  background: #d8e6d0;
-  color: #265d45;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
   font-weight: 600;
 }
 .navigation a:hover {
-  color: #276b51;
+  color: var(--color-accent-ink);
 }
 @media (max-width: 700px) {
   .header {

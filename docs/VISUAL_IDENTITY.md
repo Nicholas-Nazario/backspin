@@ -6,7 +6,11 @@ Direction: colorful, gently cartoonish, warm, tactile, and alive. Think illustra
 
 The Backspin brand mark is a soft, curled six-petal bloom with orange, yellow, and peach petal pairs and a small color swirl around its center hole. Use the transparent SVG at `public/brand/citrus-bloom.svg` beside the title and on the vinyl’s soft sky-blue label, which keeps the same fill during loading, idle, hover, and playback transitions. The background, center hole, and curled cutouts stay transparent on any surface. Keep the existing record motion and reduced-motion behavior.
 
-Cream backgrounds, dark espresso text, and confident coral, leafy green, marigold, and sky-blue accents. Rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes. Reserve a quieter dark evening theme for long listening sessions.
+The core brand triad is Citrus yellow (`#FFCB00`), orange (`#FF6500`), and peach (`#FF9164`). Use it for the logo, shuffled record sleeves, and warm decorative highlights. Yellow and peach tints support notices and metadata without competing with album artwork.
+
+Soft sky blue (`#A8D5F2`) is the UI accent: navigation, buttons, selected filters, and the vinyl label. Use deeper blue for links, focus indicators, progress, and text on blue controls so they stay readable. Cream backgrounds and dark espresso text ground the palette. Shared colors live in `app/style.css`; feature styles reference those variables. Keep the vinyl label the same blue through loading, idle, hover, and animation.
+
+Use rounded panels, chunky controls, playful line drawings, restrained paper textures, and occasional irregular shapes.
 
 Use a characterful display face alongside a highly readable body face; select actual fonts and verify licenses during design. Color must never be the sole indicator of state.
 
