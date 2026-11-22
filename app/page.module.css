@@ -18,12 +18,23 @@
   line-height: 1.2;
 }
 .brandLink {
-  composes: quiet from "./components/interaction.module.css";
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
+  border-radius: 24px;
   gap: 10px;
   color: var(--color-ink);
   text-decoration: none;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .brandLink:hover img {
+    animation: rotate-brand 12s linear infinite;
+  }
+}
+@keyframes rotate-brand {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .settings {
   justify-self: end;
