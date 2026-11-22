@@ -170,7 +170,7 @@ try {
     await page.getByLabel("Settings", { exact: true }).tap();
     await fits(`settings ${viewport.width}`);
     const disconnect = page.getByRole("button", {
-      name: "Disconnect",
+      name: "Disconnect Discogs",
       exact: true,
     });
     await expect(disconnect).toBeVisible();

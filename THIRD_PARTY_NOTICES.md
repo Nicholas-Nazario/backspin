@@ -1,5 +1,11 @@
 # Third-party notices
 
+## Spotify
+
+Spotify and the Spotify logo are trademarks of Spotify AB. Backspin is not affiliated with or endorsed by Spotify.
+
+`public/spotify/spotify-logo-black.svg` is the unmodified black RGB full logo from Spotify’s [official logo download](https://developer.spotify.com/images/guidelines/design/2024-spotify-full-logo.zip). It is used to identify the Spotify connection, subject to Spotify’s [Design and Branding Guidelines](https://developer.spotify.com/documentation/design) and [Developer Terms](https://developer.spotify.com/terms). This brand asset is not covered by the application’s MIT license. Use the black logo on Backspin’s light cream surfaces; preserve its proportions and clear space.
+
 ## Phosphor Icons
 
 Source: https://github.com/phosphor-icons/react

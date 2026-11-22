@@ -40,39 +40,6 @@
     transform: rotate(360deg);
   }
 }
-.settings {
-  justify-self: end;
-  min-width: 0;
-  position: relative;
-  z-index: 5;
-}
-.settings summary {
-  list-style: none;
-  cursor: pointer;
-}
-.settings summary::-webkit-details-marker {
-  display: none;
-}
-.settings-menu {
-  position: absolute;
-  right: 0;
-  width: min(300px, calc(100vw - 36px));
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 10px 30px #302b2420;
-  margin-top: 10px;
-}
-.settings-menu p {
-  font-size: 14px;
-  margin: 0 0 16px;
-  line-height: 1.6;
-}
-.settings-menu .small {
-  font-size: 12px;
-  margin: 16px 0 0;
-}
 .welcome h2 {
   font:
     550 clamp(36px, 6vw, 54px) / 1.1 "Backspin Display",
@@ -159,8 +126,5 @@
     grid-row: 2;
     width: 100%;
     margin: 0;
-  }
-  .settings {
-    margin-left: auto;
   }
 }

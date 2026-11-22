@@ -9,18 +9,23 @@ import Link from "next/link";
 import { BrandMark } from "./brand-mark";
 import interaction from "./interaction.module.css";
 import { SettingsMenu } from "./settings-menu";
+import { spotifySession } from "../../lib/spotify-session";
+import { spotifyConfiguration } from "../../lib/spotify";
 export async function AppShell({
   children,
   active,
   error,
   tagline = "Less time choosing, more time listening.",
+  spotifyResult,
 }: {
   children: React.ReactNode;
   active: "discover" | "collection";
   error?: string;
   tagline?: string;
+  spotifyResult?: string;
 }) {
   const s = await session();
+  const spotify = await spotifySession();
   const configured = !!(
     process.env.DISCOGS_CONSUMER_KEY &&
     process.env.DISCOGS_CONSUMER_SECRET &&
@@ -55,7 +60,14 @@ export async function AppShell({
             </Link>
           </nav>
         )}
-        {s && <SettingsMenu username={s.username} />}
+        <SettingsMenu
+          discogsUsername={s?.username ?? null}
+          discogsConfigured={configured}
+          spotifyDisplayName={spotify?.displayName ?? null}
+          spotifyConfigured={!!spotifyConfiguration()}
+          spotifyResult={spotifyResult}
+          returnTo={active === "collection" ? "/collection" : "/"}
+        />
       </header>
       {error && (
         <p role="alert" className={styles["notice"]}>
@@ -109,6 +121,14 @@ export async function AppShell({
           This application uses Discogs’ API but is not affiliated with,
           sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink
           Media, LLC.
+        </p>
+        <p>
+          Spotify and the Spotify logo are trademarks of Spotify AB. Backspin is
+          not affiliated with or endorsed by Spotify. Spotify authorization is
+          provided by <a href="https://www.spotify.com/">Spotify</a>.
+        </p>
+        <p>
+          <Link href="/privacy">Privacy and connections</Link>
         </p>
       </footer>
     </main>

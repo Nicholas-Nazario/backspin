@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
   output: "standalone",
-  logging: { incomingRequests: { ignore: [/\/api\/auth\/callback/] } },
+  logging: {
+    incomingRequests: { ignore: [/\/api\/(?:auth|spotify)\/callback/] },
+  },
   serverExternalPackages: ["better-sqlite3"],
   async headers() {
     return [
