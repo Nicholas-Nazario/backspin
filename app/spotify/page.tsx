@@ -1,3 +1,5 @@
+import { blockedAlbumKeys } from "../../lib/blocked-albums";
+import { database } from "../../lib/db";
 import { session } from "../../lib/session";
 import {
   spotifyConnectionScope,
@@ -18,8 +20,18 @@ export default async function SpotifyPage({
     session(),
     spotifySession(),
   ]);
-  const connection =
+  const scope =
     discogs && listening ? spotifyConnectionScope(discogs, listening) : null;
+  const connection =
+    scope && discogs
+      ? {
+          ...scope,
+          key: JSON.stringify([
+            scope.key,
+            blockedAlbumKeys(database(), discogs.userId),
+          ]),
+        }
+      : null;
   return (
     <AppShell active="spotify" spotifyResult={spotify}>
       <SpotifyPicks key={connection?.key} connection={connection} />

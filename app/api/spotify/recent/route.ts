@@ -1,3 +1,4 @@
+import { blockedAlbumKeys } from "../../../../lib/blocked-albums";
 import { database } from "../../../../lib/db";
 import { discogsCollection } from "../../../../lib/discogs-collection";
 import { UpstreamError } from "../../../../lib/discogs";
@@ -32,9 +33,20 @@ export async function POST(request: Request) {
     return reply({ error: "Connect Spotify in Settings first." }, 401);
 
   const scope = spotifyConnectionScope(discogs, spotify);
+  const userId = discogs.userId;
+  function eligiblePicks(
+    picks: Awaited<ReturnType<typeof spotifyRecommendations>>,
+  ) {
+    const blocked = new Set(blockedAlbumKeys(database(), userId));
+    return {
+      ...picks,
+      onShelf: picks.onShelf.filter(({ key }) => !blocked.has(key)),
+      recommended: picks.recommended.filter(({ key }) => !blocked.has(key)),
+    };
+  }
   if (new URL(request.url).searchParams.get("refresh") !== "1") {
     const cached = readSpotifyPicks(scope);
-    if (cached) return reply(cached);
+    if (cached) return reply(eligiblePicks(cached));
   }
 
   const signal = request.signal;
@@ -96,7 +108,7 @@ export async function POST(request: Request) {
       { ...scope, expires: Math.min(scope.expires, expiresAt) },
       picks,
     );
-    return reply(picks);
+    return reply(eligiblePicks(picks));
   } catch (error) {
     if (error instanceof UpstreamError && error.status === 429)
       return reply(

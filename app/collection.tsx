@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { MagnifyingGlassIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
-import { Entry, explore, originalYear } from "../lib/collection";
+import { Entry, explore, originalYear, workKey } from "../lib/collection";
 import { useSearchPrompt } from "./search-prompts";
 import { useCollection } from "./collection/use-collection";
 import { useMasterYears } from "./collection/use-master-years";
@@ -13,10 +13,13 @@ import interaction from "./components/interaction.module.css";
 import styles from "./collection/collection.module.css";
 export default function Collection({
   mode = "collection",
+  blockedKeys = [],
 }: {
+  blockedKeys?: string[];
   mode?: "sets" | "collection";
 }) {
   const collection = useCollection();
+  const blocked = new Set(blockedKeys);
   const { entries, loading } = collection;
   const lookup = useMasterYears(entries, loading);
   const [filters, setFilters] = useState(initialFilters),
@@ -129,7 +132,7 @@ export default function Collection({
         <RandomSet
           standalone
           yearLookup={lookup}
-          entries={entries}
+          entries={entries.filter((entry) => !blocked.has(workKey(entry)))}
 
           masters={lookup.masters}
           disabled={loading || !!collection.error}
@@ -175,6 +178,7 @@ export default function Collection({
                     : group[0].instance_id
                 }
                 group={group}
+                blocked={blocked.has(workKey(group[0]))}
                 year={originalYear(group[0], lookup.masters).year}
                 onGenre={addGenre}
                 onOpen={(records, element) => {

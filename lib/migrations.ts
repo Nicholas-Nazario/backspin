@@ -12,6 +12,14 @@ const migrations = [
     version: 3,
     sql: `CREATE TABLE master_years(master_id INTEGER PRIMARY KEY, year INTEGER CHECK(year BETWEEN 1800 AND 2200), source TEXT NOT NULL DEFAULT 'discogs-master', fetched_at INTEGER NOT NULL, expires_at INTEGER NOT NULL);`,
   },
+  {
+    version: 4,
+    sql: `CREATE TABLE blocked_albums (
+      user_id INTEGER NOT NULL,
+      work_key TEXT NOT NULL,
+      PRIMARY KEY (user_id, work_key)
+    );`,
+  },
 ];
 export function migrate(db: Database.Database) {
   db.exec(
