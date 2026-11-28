@@ -16,15 +16,28 @@ const resultSchema = z.object({
 
 const searches = createCatalogCache<CatalogAlbum | null>();
 
+export type CatalogTimings = {
+  snapshotMs: number;
+  liveDiscogsMs: number;
+  liveDiscogsRequests: number;
+};
+
 export async function findDiscogsAlbum(
   title: string,
   artists: string[],
   token: Token,
   signal: AbortSignal,
   fetcher: typeof fetch = fetch,
+  timings?: CatalogTimings,
 ): Promise<CatalogAlbum | null> {
   if (!artistKeys(artists).length) return null;
-  const indexed = snapshotCatalogAlbum(title, artists);
+  const snapshotStarted = performance.now();
+  let indexed: ReturnType<typeof snapshotCatalogAlbum>;
+  try {
+    indexed = snapshotCatalogAlbum(title, artists);
+  } finally {
+    if (timings) timings.snapshotMs += performance.now() - snapshotStarted;
+  }
   if (indexed !== undefined) return indexed;
   const album = albumTitle(title);
   const params = new URLSearchParams({
@@ -35,15 +48,21 @@ export async function findDiscogsAlbum(
   signal.throwIfAborted();
   const key = JSON.stringify([artists, album]);
   const { value } = await searches.load(key, async () => {
-    const response = await request(
-      "/database/search?" + params,
-      token,
-      "GET",
-      {},
-      fetcher,
-      signal,
-    );
-    return matchAlbum(await response.json(), album, artists);
+    const liveStarted = performance.now();
+    if (timings) timings.liveDiscogsRequests++;
+    try {
+      const response = await request(
+        "/database/search?" + params,
+        token,
+        "GET",
+        {},
+        fetcher,
+        signal,
+      );
+      return matchAlbum(await response.json(), album, artists);
+    } finally {
+      if (timings) timings.liveDiscogsMs += performance.now() - liveStarted;
+    }
   });
   return value;
 }

@@ -1,6 +1,6 @@
 import { albumKey } from "./album-matching";
 import type { Entry } from "./collection";
-import { findDiscogsAlbum } from "./discogs-album";
+import { findDiscogsAlbum, type CatalogTimings } from "./discogs-album";
 import { UpstreamError, type Token } from "./discogs";
 import {
   missingCatalogAlbums,
@@ -16,14 +16,22 @@ export async function spotifyRecommendations(
   years: YearContext,
   token: Token,
   signal: AbortSignal,
-  findAlbum = findDiscogsAlbum,
+  findAlbum?: typeof findDiscogsAlbum,
+  timings?: CatalogTimings,
 ) {
   const catalog = new Map<string, CatalogAlbum>();
   let warning: string | undefined;
   for (const play of missingCatalogAlbums(entries, plays)) {
     signal.throwIfAborted();
     try {
-      const album = await findAlbum(play.album, play.artists, token, signal);
+      const album = await (findAlbum ?? findDiscogsAlbum)(
+        play.album,
+        play.artists,
+        token,
+        signal,
+        undefined,
+        timings,
+      );
       if (album) catalog.set(albumKey(play.album, play.artists), album);
     } catch (error) {
       signal.throwIfAborted();
