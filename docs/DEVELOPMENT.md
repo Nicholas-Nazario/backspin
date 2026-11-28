@@ -109,23 +109,13 @@ mkdir -p data
 npm run import:discogs-masters -- 20261101 /path/to/discogs_20261101_masters.xml.gz
 ```
 
-The **Refresh Discogs masters** workflow runs on the fifth of each month and also supports manual runs. On the default branch, it publishes the validated index and its SHA-256 checksum as assets of a dated GitHub release, such as `discogs-masters-20261101`. The workflow skips an already published snapshot. A manual run can specify a date to skip discovery. If discovery fails, the workflow tries the first of the current month.
-
-Discogs returned HTTP 403 for both discovery and the dated checksum on a GitHub-hosted runner. If a dedicated Linux runner can reach the download site, register it with the `discogs-data` label and set the repository variable `DISCOGS_MASTERS_SELF_HOSTED` to `true`. Use an isolated runner for this public repository. The workflow uses the same checksum and import checks on either runner.
-
-For a one-off recovery, verify and import the official dump locally, then package and attach the index to a dated GitHub release. For example, from the repository root:
+To publish the latest snapshot from a development machine, install the project dependencies and sign in with `gh auth login` using an account that can publish releases for Backspin. Run this command once a month:
 
 ```sh
-work=$(mktemp -d)
-gzip -nc data/discogs-masters.sqlite > "$work/discogs-masters.sqlite.gz"
-(cd "$work" && shasum -a 256 discogs-masters.sqlite.gz > discogs-masters.sqlite.gz.sha256)
-gh release create discogs-masters-20261101 --target main --draft --latest=false \
-  --title "Discogs masters 20261101" --notes "Catalog index derived from https://data.discogs.com/." \
-  "$work/discogs-masters.sqlite.gz" "$work/discogs-masters.sqlite.gz.sha256"
-gh release edit discogs-masters-20261101 --draft=false --latest=false
+npm run refresh:discogs-masters
 ```
 
-Use the date stored in the imported index for the release tag.
+Pass a date to select a specific dump, for example `npm run refresh:discogs-masters -- 20261101`. The command verifies the Discogs archive checksum, builds and checks the SQLite index, then publishes the compressed index and checksum together to a dated GitHub release. It skips a complete published release and can resume a draft left by a failed upload. Allow roughly 1.5 GB of temporary space. Backspin uses release assets to keep the catalog out of Git history and give Fly a stable URL for each dated snapshot.
 
 To deploy with a published snapshot, pass its date to Fly:
 
