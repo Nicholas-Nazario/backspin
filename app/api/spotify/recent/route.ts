@@ -58,24 +58,55 @@ export async function POST(request: Request) {
       recommended: picks.recommended.filter(({ key }) => !blocked.has(key)),
     };
   }
+  const started = performance.now();
+  let stage = "cacheMs";
+  let stageStarted = started;
+  const timings: Record<string, number> = {};
+  const catalogTimings = {
+    snapshotMs: 0,
+    liveDiscogsMs: 0,
+    liveDiscogsRequests: 0,
+  };
+  function finishStage() {
+    const now = performance.now();
+    timings[stage] = Math.round(now - stageStarted);
+    stageStarted = now;
+  }
+  function measuredReply(body: object, status = 200) {
+    finishStage();
+    console.info(
+      "spotify.explore",
+      JSON.stringify({
+        status,
+        ...timings,
+        snapshotMs: Math.round(catalogTimings.snapshotMs),
+        liveDiscogsMs: Math.round(catalogTimings.liveDiscogsMs),
+        liveDiscogsRequests: catalogTimings.liveDiscogsRequests,
+        totalMs: Math.round(performance.now() - started),
+      }),
+    );
+    return reply(body, status);
+  }
   if (params.get("refresh") !== "1") {
     const cached = readSpotifyPicks(scope);
-    if (cached) return reply(eligiblePicks(cached));
+    if (cached) return measuredReply(eligiblePicks(cached));
   }
 
+  finishStage();
+  stage = "spotifyMs";
   const signal = request.signal;
   let recent: Awaited<ReturnType<typeof spotifyRecentPlays>>;
   try {
     recent = await spotifyRecentPlays(spotify.accessToken, signal);
   } catch {
-    return reply(
+    return measuredReply(
       { error: "Spotify couldn’t load your recent plays. Try again." },
       502,
     );
   }
   if (!recent.ok) {
     if (recent.status === 401 || recent.status === 403)
-      return reply(
+      return measuredReply(
         {
           error:
             "Reconnect Spotify in Settings. Your account also needs access to the Spotify development app.",
@@ -83,20 +114,24 @@ export async function POST(request: Request) {
         recent.status,
       );
     if (recent.status === 429)
-      return reply(
+      return measuredReply(
         { error: "Spotify is limiting requests. Wait a moment and try again." },
         429,
       );
-    return reply(
+    return measuredReply(
       { error: "Spotify couldn’t load your recent plays. Try again." },
       502,
     );
   }
 
+  finishStage();
+  stage = "shelfMs";
   try {
     const { entries, expiresAt } = recent.plays.length
       ? await discogsCollection(collectionUsername, discogs.token, signal)
       : { entries: [], expiresAt: Infinity };
+    finishStage();
+    stage = "matchingMs";
     const ids = [
       ...new Set(
         entries.flatMap(({ basic_information }) =>
@@ -116,31 +151,33 @@ export async function POST(request: Request) {
       { masters },
       discogs.token,
       signal,
+      undefined,
+      catalogTimings,
     );
     signal.throwIfAborted();
     cacheSpotifyPicks(
       { ...scope, expires: Math.min(scope.expires, expiresAt) },
       picks,
     );
-    return reply(eligiblePicks(picks));
+    return measuredReply(eligiblePicks(picks));
   } catch (error) {
     if (
       username &&
       error instanceof UpstreamError &&
       (error.status === 403 || error.status === 404)
     )
-      return reply(
+      return measuredReply(
         {
           error: "Discogs couldn’t find a public collection for this username.",
         },
         error.status,
       );
     if (error instanceof UpstreamError && error.status === 429)
-      return reply(
+      return measuredReply(
         { error: "Discogs is limiting requests. Wait a moment and try again." },
         429,
       );
-    return reply(
+    return measuredReply(
       {
         error: "Backspin couldn’t build picks from this collection. Try again.",
       },
