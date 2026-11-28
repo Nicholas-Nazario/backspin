@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import type { spotifyRecommendations } from "../../lib/spotify-recommendations";
 import { originalYear } from "../../lib/collection";
 import { YearStatus } from "../collection/year-status";
+import { useCollectionSource } from "../collection/collection-source";
 import { useCollection } from "../collection/use-collection";
 import { useMasterYears } from "../collection/use-master-years";
 import { useTypedText } from "../components/use-typed-text";
@@ -28,25 +29,47 @@ type Status =
 type Connection = { key: string; expires: number };
 
 // Keep one completed result in browser memory across navigation.
-let savedPicks: { key: string; results: Results } | undefined;
+let savedPicks: { key: string; username: string; results: Results } | undefined;
 
 export function SpotifyPicks({
   connection,
 }: {
   connection: Connection | null;
 }) {
-  const collection = useCollection();
+  const username = useCollectionSource()?.username ?? "";
+  return (
+    <SpotifyCollectionPicks
+      key={username}
+      connection={connection}
+      username={username}
+    />
+  );
+}
+
+function SpotifyCollectionPicks({
+  connection,
+  username,
+}: {
+  connection: Connection | null;
+  username: string;
+}) {
+  const collection = useCollection(username);
   const lookup = useMasterYears(collection.entries, collection.loading);
   const [status, setStatus] = useState<Status>(() =>
     connection &&
     connection.expires > Date.now() &&
-    savedPicks?.key === connection.key
+    savedPicks?.key === connection.key &&
+    savedPicks.username === username
       ? { phase: "ready", results: savedPicks.results, yearProgress: 0 }
       : { phase: "idle" },
   );
   useEffect(() => {
-    if (savedPicks?.key !== connection?.key) savedPicks = undefined;
-  }, [connection?.key]);
+    if (
+      savedPicks?.key !== connection?.key ||
+      savedPicks?.username !== username
+    )
+      savedPicks = undefined;
+  }, [connection?.key, username]);
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
 
@@ -63,8 +86,12 @@ export function SpotifyPicks({
     request.current = controller;
     setStatus({ phase: "loading" });
     try {
+      const params = new URLSearchParams();
+      if (refresh) params.set("refresh", "1");
+      if (username) params.set("username", username);
+      const query = params.toString();
       const response = await fetch(
-        refresh ? "/api/spotify/recent?refresh=1" : "/api/spotify/recent",
+        query ? `/api/spotify/recent?${query}` : "/api/spotify/recent",
         {
           method: "POST",
           cache: "no-store",
@@ -75,7 +102,7 @@ export function SpotifyPicks({
       if (controller.signal.aborted) return;
       if (response.ok) {
         if (connection && connection.expires > Date.now())
-          savedPicks = { key: connection.key, results: data };
+          savedPicks = { key: connection.key, username, results: data };
         setStatus({
           phase: "ready",
           results: data,
@@ -129,11 +156,11 @@ export function SpotifyPicks({
         </p>
       )}
       {!results && collection.loading && !collection.refreshing && (
-        <p role="status">Opening your Discogs collection…</p>
+        <p role="status">Opening the Discogs collection…</p>
       )}
       {collection.error && (
         <div role="alert">
-          <p>We couldn’t open your collection. {collection.error}</p>
+          <p>We couldn’t open the collection. {collection.error}</p>
           <button className={interaction.filled} onClick={collection.refresh}>
             Try loading again
           </button>
@@ -142,7 +169,11 @@ export function SpotifyPicks({
       {!collection.loading &&
         !collection.error &&
         !collection.entries.length && (
-          <p>Add records to your Discogs collection to get Spotify picks.</p>
+          <p>
+            {username
+              ? "This public collection is empty."
+              : "Add records to your Discogs collection to get Spotify picks."}
+          </p>
         )}
       {!results && (
         <div className={styles.pickStage} data-testid="explore-pick-stage">
@@ -197,12 +228,12 @@ export function SpotifyPicks({
         {results && !results.recommended.length && !results.onShelf.length && (
           <p>
             {results.hasRecentPlays
-              ? "No strong matches in your collection."
+              ? "No strong matches in this collection."
               : "Spotify returned no recent plays."}{" "}
             <Link href="/">Try Surprise Me</Link>.
           </p>
         )}
-        {results && <SpotifyResults {...results} />}
+        {results && <SpotifyResults {...results} username={username} />}
       </div>
       {!collection.error && collection.entries.length > 0 && (
         <details className={styles.yearLookup}>

@@ -4,8 +4,10 @@ import { useEffect, useRef } from "react";
 import {
   GearSixIcon,
   SignOutIcon,
+  XIcon,
   ArrowUpRightIcon,
 } from "@phosphor-icons/react";
+import { useCollectionSource } from "../collection/collection-source";
 import type { SpotifyReturnPath } from "../../lib/spotify-session";
 import styles from "./settings-menu.module.css";
 import interaction from "./interaction.module.css";
@@ -44,6 +46,9 @@ export function SettingsMenu({
 }) {
   const details = useRef<HTMLDetailsElement>(null);
   const trigger = useRef<HTMLElement>(null);
+  const collectionSource = useCollectionSource();
+  const sourceUsername = collectionSource?.username;
+  const sourceInput = useRef<HTMLInputElement>(null);
   const notice = connectionNotice(spotifyResult);
 
   useEffect(() => {
@@ -72,6 +77,16 @@ export function SettingsMenu({
     };
   }, []);
 
+  useEffect(() => {
+    if (!sourceUsername && details.current?.open) sourceInput.current?.focus();
+  }, [sourceUsername]);
+
+  function selectCollection(username: string) {
+    collectionSource?.setUsername(username);
+    if (details.current) details.current.open = false;
+    trigger.current?.focus();
+  }
+
   return (
     <details ref={details} className={styles.settings} open={!!notice}>
       <summary
@@ -91,6 +106,57 @@ export function SettingsMenu({
           <p className={styles.notice} role="status">
             {notice}
           </p>
+        )}
+        {discogsUsername && collectionSource && (
+          <section
+            className={styles.service}
+            aria-labelledby="recommendation-source"
+          >
+            <h3 id="recommendation-source">Discogs collection source</h3>
+            {sourceUsername ? (
+              <div className={styles.selectedSource}>
+                <span>
+                  Spinning <strong>{sourceUsername}</strong>’s collection
+                </span>
+                <button
+                  className={styles.clearSource}
+                  type="button"
+                  aria-label={`Remove ${sourceUsername} and use my collection`}
+                  onClick={() => collectionSource.setUsername("")}
+                >
+                  <XIcon size={16} aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <form
+                className={styles.sourceForm}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const value = new FormData(event.currentTarget).get(
+                    "username",
+                  );
+                  if (typeof value === "string" && value.trim())
+                    selectCollection(value.trim());
+                }}
+              >
+                <label htmlFor="recommendation-username">
+                  Public Discogs username
+                </label>
+                <input
+                  ref={sourceInput}
+                  id="recommendation-username"
+                  name="username"
+                  maxLength={64}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  required
+                />
+                <button className={interaction.filled} type="submit">
+                  Load collection
+                </button>
+              </form>
+            )}
+          </section>
         )}
         <section
           className={styles.service}

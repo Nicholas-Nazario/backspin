@@ -69,3 +69,37 @@
   font-size: 13px;
   line-height: 1.5;
 }
+
+.sourceForm {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sourceForm label {
+  font-size: 14px;
+}
+
+.sourceForm input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+}
+
+.selectedSource {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.clearSource {
+  composes: quiet icon from "./interaction.module.css";
+}

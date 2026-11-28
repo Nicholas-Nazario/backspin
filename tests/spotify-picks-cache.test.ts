@@ -7,10 +7,14 @@ import {
   spotifyPicksTtl,
 } from "../lib/spotify-picks-cache";
 
-test("completed picks are scoped to the connection and expire after ten minutes", () => {
+test("completed picks are scoped to the connection and collection and expire after ten minutes", () => {
   assert.equal(spotifyPicksTtl, 10 * 60_000);
   const now = Date.now();
-  const scope = { key: "fixture", expires: now + spotifyPicksTtl * 2 };
+  const scope = {
+    key: "fixture",
+    collectionUsername: "listener",
+    expires: now + spotifyPicksTtl * 2,
+  };
   const picks = {
     recommended: [],
     onShelf: [],
@@ -23,12 +27,20 @@ test("completed picks are scoped to the connection and expire after ten minutes"
     readSpotifyPicks({ ...scope, key: "other-connection" }, now),
     undefined,
   );
+  assert.equal(
+    readSpotifyPicks({ ...scope, collectionUsername: "tosker" }, now),
+    undefined,
+  );
   assert.equal(readSpotifyPicks(scope, now + spotifyPicksTtl), undefined);
 });
 
 test("partial results are not cached and connection expiry takes precedence", () => {
   const now = Date.now();
-  const scope = { key: "ending", expires: now + 1000 };
+  const scope = {
+    key: "ending",
+    collectionUsername: "listener",
+    expires: now + 1000,
+  };
   const picks = {
     recommended: [],
     onShelf: [],

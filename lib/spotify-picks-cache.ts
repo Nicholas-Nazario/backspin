@@ -1,14 +1,21 @@
 import type { spotifyConnectionScope } from "./spotify-session";
 import type { spotifyRecommendations } from "./spotify-recommendations";
 
-type Scope = ReturnType<typeof spotifyConnectionScope>;
+type Scope = ReturnType<typeof spotifyConnectionScope> & {
+  collectionUsername: string;
+};
 type Picks = Awaited<ReturnType<typeof spotifyRecommendations>>;
 
 export const spotifyPicksTtl = 10 * 60_000;
 const limit = 32;
 const cache = new Map<
   string,
-  { picks: Picks; expires: number; timer: ReturnType<typeof setTimeout> }
+  {
+    picks: Picks;
+    collectionUsername: string;
+    expires: number;
+    timer: ReturnType<typeof setTimeout>;
+  }
 >();
 
 export function clearSpotifyPicks(key: string) {
@@ -20,7 +27,10 @@ export function clearSpotifyPicks(key: string) {
 export function readSpotifyPicks(scope: Scope, now = Date.now()) {
   const entry = cache.get(scope.key);
   if (!entry) return;
-  if (entry.expires > now && scope.expires > now) return entry.picks;
+  if (entry.expires > now && scope.expires > now)
+    return entry.collectionUsername === scope.collectionUsername
+      ? entry.picks
+      : undefined;
   clearSpotifyPicks(scope.key);
 }
 
@@ -36,5 +46,10 @@ export function cacheSpotifyPicks(
   const expires = Math.min(now + spotifyPicksTtl, scope.expires);
   const timer = setTimeout(() => cache.delete(scope.key), expires - now);
   timer.unref();
-  cache.set(scope.key, { picks, expires, timer });
+  cache.set(scope.key, {
+    picks,
+    collectionUsername: scope.collectionUsername,
+    expires,
+    timer,
+  });
 }

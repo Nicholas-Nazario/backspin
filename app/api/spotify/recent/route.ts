@@ -1,6 +1,9 @@
 import { blockedAlbumKeys } from "../../../../lib/blocked-albums";
 import { database } from "../../../../lib/db";
-import { discogsCollection } from "../../../../lib/discogs-collection";
+import {
+  discogsCollection,
+  isDiscogsCollectionUsername,
+} from "../../../../lib/discogs-collection";
 import { UpstreamError } from "../../../../lib/discogs";
 import { sameOrigin, session } from "../../../../lib/session";
 import { spotifyRecentPlays } from "../../../../lib/spotify";
@@ -32,7 +35,16 @@ export async function POST(request: Request) {
   if (!spotify)
     return reply({ error: "Connect Spotify in Settings first." }, 401);
 
-  const scope = spotifyConnectionScope(discogs, spotify);
+  const params = new URL(request.url).searchParams;
+  const username = params.get("username");
+  if (username !== null && !isDiscogsCollectionUsername(username))
+    return reply({ error: "Enter a valid Discogs username." }, 400);
+
+  const collectionUsername = username ?? discogs.username;
+  const scope = {
+    ...spotifyConnectionScope(discogs, spotify),
+    collectionUsername,
+  };
   const userId = discogs.userId;
   function eligiblePicks(
     picks: Awaited<ReturnType<typeof spotifyRecommendations>>,
@@ -44,7 +56,7 @@ export async function POST(request: Request) {
       recommended: picks.recommended.filter(({ key }) => !blocked.has(key)),
     };
   }
-  if (new URL(request.url).searchParams.get("refresh") !== "1") {
+  if (params.get("refresh") !== "1") {
     const cached = readSpotifyPicks(scope);
     if (cached) return reply(eligiblePicks(cached));
   }
@@ -81,7 +93,7 @@ export async function POST(request: Request) {
 
   try {
     const { entries, expiresAt } = recent.plays.length
-      ? await discogsCollection(discogs.username, discogs.token, signal)
+      ? await discogsCollection(collectionUsername, discogs.token, signal)
       : { entries: [], expiresAt: Infinity };
     const ids = [
       ...new Set(
@@ -110,6 +122,17 @@ export async function POST(request: Request) {
     );
     return reply(eligiblePicks(picks));
   } catch (error) {
+    if (
+      username &&
+      error instanceof UpstreamError &&
+      (error.status === 403 || error.status === 404)
+    )
+      return reply(
+        {
+          error: "Discogs couldn’t find a public collection for this username.",
+        },
+        error.status,
+      );
     if (error instanceof UpstreamError && error.status === 429)
       return reply(
         { error: "Discogs is limiting requests. Wait a moment and try again." },
@@ -117,7 +140,7 @@ export async function POST(request: Request) {
       );
     return reply(
       {
-        error: "Backspin couldn’t build picks from your collection. Try again.",
+        error: "Backspin couldn’t build picks from this collection. Try again.",
       },
       502,
     );

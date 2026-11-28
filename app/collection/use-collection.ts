@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Entry } from "../../lib/collection";
 import { api } from "./api";
-export function useCollection() {
+export function useCollection(username?: string) {
   const hasSnapshot = useRef(false);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]),
@@ -27,7 +27,10 @@ export function useCollection() {
         const all = new Map<number, Entry>();
         do {
           const response = await api(
-            "/api/discogs?page=" + page + (force ? "&refresh=1" : ""),
+            "/api/discogs?page=" +
+              page +
+              (username ? "&username=" + encodeURIComponent(username) : "") +
+              (force ? "&refresh=1" : ""),
             controller.signal,
           );
           if (controller.signal.aborted) return;
@@ -73,21 +76,23 @@ export function useCollection() {
         if (!controller.signal.aborted) setLoading(false);
       }
     })();
-    api(
-      "/api/discogs?kind=folders" + (force ? "&refresh=1" : ""),
-      controller.signal,
-    )
-      .then((b) => {
-        if (!controller.signal.aborted) setFolders(b.data.folders || []);
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setFolders([]);
-      });
+    if (!username) {
+      api(
+        "/api/discogs?kind=folders" + (force ? "&refresh=1" : ""),
+        controller.signal,
+      )
+        .then((b) => {
+          if (!controller.signal.aborted) setFolders(b.data.folders || []);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setFolders([]);
+        });
+    }
     return () => {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [revision, force]);
+  }, [revision, force, username]);
   return {
     entries,
     total,

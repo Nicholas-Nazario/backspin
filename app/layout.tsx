@@ -1,5 +1,6 @@
 import "./style.css";
 import type { Viewport } from "next";
+import { CollectionSourceProvider } from "./collection/collection-source";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -16,7 +17,9 @@ export const metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <CollectionSourceProvider>{children}</CollectionSourceProvider>
+      </body>
     </html>
   );
 }

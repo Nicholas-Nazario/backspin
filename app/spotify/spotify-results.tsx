@@ -19,23 +19,37 @@ const sourcesPerPage = 3;
 export function SpotifyResults({
   recommended,
   onShelf,
+  username,
 }: {
   recommended: RecentPick[];
   onShelf: ShelfPick[];
+  username: string;
 }) {
   return (
     <>
       {recommended.length > 0 && (
         <MatchList
-          title="Recommended from Your Collection"
+          title={
+            username
+              ? `Recommended from ${username}’s collection`
+              : "Recommended from Your Collection"
+          }
           picks={recommended}
           renderPick={(pick) => <SpotifyConnection pick={pick} />}
         />
       )}
       {onShelf.length > 0 && (
         <MatchList
-          title="Already On Your Shelf"
-          subtitle="You've been listening to these on Spotify and they are in your collection"
+          title={
+            username
+              ? `Already in ${username}’s collection`
+              : "Already On Your Shelf"
+          }
+          subtitle={
+            username
+              ? "You’ve been listening to these on Spotify."
+              : "You've been listening to these on Spotify and they are in your collection"
+          }
           picks={onShelf}
           listClass={styles.shelfList}
           renderPick={(pick) => (
