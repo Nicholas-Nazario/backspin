@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { collectionFixture } from "./browser-fixture";
 const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
@@ -62,7 +62,7 @@ try {
   await page.getByRole("button", { name: "View Album 100" }).waitFor();
   await page.getByTestId("filter-panel").locator("summary").click();
   await page
-    .getByRole("button", { name: "Find original release years", exact: true })
+    .getByRole("button", { name: "Find missing years", exact: true })
     .click();
   await page
     .getByText("1 of 2 original years known.", { exact: false })
@@ -89,7 +89,7 @@ try {
   delay = true;
   started = false;
   await page
-    .getByRole("button", { name: "Find original release years", exact: true })
+    .getByRole("button", { name: "Find missing years", exact: true })
     .click();
   await page
     .getByRole("progressbar", { name: "Albums checked for original years" })
@@ -102,6 +102,39 @@ try {
     .getByText("2 of 2 original years known.", { exact: false })
     .waitFor();
   assert.equal(collectionForced, true);
+  const callsBeforeSnapshot = calls.length;
+  let fullSnapshot = true;
+  await page.route("**/api/master-years?*", (route) =>
+    route.fulfill({
+      json: {
+        years: [
+          { masterId: 100, year: 1971, expiresAt: null },
+          ...(fullSnapshot
+            ? [{ masterId: 200, year: null, expiresAt: null }]
+            : []),
+        ],
+      },
+    }),
+  );
+  await page.reload();
+  await page.getByTestId("filter-panel").locator("summary").click();
+  await expect(page.getByText("Original year lookup complete")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Find missing years" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Refresh years" })).toHaveCount(
+    0,
+  );
+  assert.equal(calls.length, callsBeforeSnapshot);
+
+  fullSnapshot = false;
+  await page.reload();
+  await page.getByTestId("filter-panel").locator("summary").click();
+  await page.getByRole("button", { name: "Find missing years" }).click();
+  const refresh = page.getByRole("button", { name: "Refresh years" });
+  await refresh.click();
+  await expect(refresh).toBeVisible();
+  assert.deepEqual(calls.slice(callsBeforeSnapshot), [200, 200]);
   console.log(
     "Recovery checks passed: failed album does not stop batch, retry skips completed masters, collection refresh resumes lookup.",
   );

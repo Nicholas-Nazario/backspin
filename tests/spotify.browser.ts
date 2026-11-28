@@ -408,7 +408,7 @@ try {
   });
   await expect(moreMatches).toHaveCount(0);
   const resolveYears = page.getByRole("button", {
-    name: "Resolve missing years",
+    name: "Find missing years",
   });
   await expect(resolveYears).toBeHidden();
   const yearAlert = page.getByText("1 album to check", { exact: true });

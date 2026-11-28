@@ -305,9 +305,7 @@ try {
   await page
     .getByRole("button", { name: "Narrow it down", exact: true })
     .click();
-  await sheet
-    .getByRole("button", { name: "Find original release years" })
-    .click();
+  await sheet.getByRole("button", { name: "Find missing years" }).click();
   await expect(sheet.getByLabel("Era", { exact: false })).toBeEnabled();
   await expect(sheet.getByText("Original year lookup complete")).toBeVisible();
   await sheet.getByLabel("Era", { exact: false }).selectOption("1970");

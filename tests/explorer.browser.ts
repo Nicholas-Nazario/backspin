@@ -97,7 +97,7 @@ try {
   await page.getByLabel("Find a record").fill("");
   await page.getByTestId("filter-panel").locator("summary").click();
   await page
-    .getByRole("button", { name: "Find original release years", exact: true })
+    .getByRole("button", { name: "Find missing years", exact: true })
     .click();
   await page
     .getByTestId("filter-controls")
@@ -144,7 +144,7 @@ try {
     .getByText("Original year lookup complete", { exact: true })
     .waitFor();
   await page
-    .getByRole("button", { name: "Find original release years", exact: true })
+    .getByRole("button", { name: "Find missing years", exact: true })
     .waitFor();
   await page
     .getByText("0 of 3 original years known.", { exact: false })

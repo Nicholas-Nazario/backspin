@@ -170,6 +170,12 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
   return {
     masters,
     pendingCount,
+    canRefreshLiveYears:
+      !loading &&
+      checkedCacheKey === idsKey &&
+      ids.some(
+        (id) => records[id]?.expiresAt != null && Object.hasOwn(masters, id),
+      ),
     status,
     progress,
     total,
