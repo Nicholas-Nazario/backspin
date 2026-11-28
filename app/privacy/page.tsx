@@ -53,6 +53,12 @@ export default function PrivacyPage() {
         authorization processing. Older databases and backups may retain legacy
         year corrections.
       </p>
+      <p>
+        If you block an album from recommendations, Backspin stores your Discogs
+        account ID and the album’s Discogs master or release ID. The preference
+        has no expiration and survives disconnecting. Use the recommendation
+        button on the album’s Collection card to remove the block.
+      </p>
       <h2>Disconnecting and removing access</h2>
       <p>
         Disconnect either service in Settings to clear that service’s connection

@@ -21,14 +21,24 @@ import { useRecommendation } from "./use-recommendation";
 import styles from "./recommendation.module.css";
 import interaction from "../components/interaction.module.css";
 
-export default function Recommendation({ tagline }: { tagline: string }) {
+export default function Recommendation({
+  tagline,
+  blockedKeys,
+}: {
+  tagline: string;
+  blockedKeys: string[];
+}) {
   const collection = useCollection();
   const lookup = useMasterYears(collection.entries, collection.loading);
   const [filters, setFilters] = useState(emptyRecommendationFilters);
   const [sheetOpen, setSheetOpen] = useState(false);
   const filterTrigger = useRef<HTMLButtonElement>(null);
   const years = { masters: lookup.masters };
-  const pool = recommendationPool(collection.entries, filters, years);
+  const blocked = new Set(blockedKeys);
+  const eligible = collection.entries.filter(
+    (entry) => !blocked.has(workKey(entry)),
+  );
+  const pool = recommendationPool(eligible, filters, years);
   const initialLoading = collection.loading && !collection.refreshing;
   const enabled = !collection.loading && !collection.error;
   const { entry, phase, pick, completeMotion } = useRecommendation(
@@ -129,7 +139,13 @@ export default function Recommendation({ tagline }: { tagline: string }) {
           .
         </p>
       )}
-      {enabled && collection.entries.length > 0 && !pool.length && (
+      {enabled && collection.entries.length > 0 && !eligible.length && (
+        <p role="status">
+          All your albums are blocked. Use the recommendation button on an album
+          in Collection to allow it again.
+        </p>
+      )}
+      {enabled && eligible.length > 0 && !pool.length && (
         <div className={styles.notice} role="status">
           <p>
             No records match those limits. Try another genre or era, or open up

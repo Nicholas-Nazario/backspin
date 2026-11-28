@@ -199,6 +199,36 @@
 .grid article p {
   font-size: 14px;
 }
+.cardArtwork {
+  position: relative;
+}
+.recommendationToggle {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+}
+.recommendationBadge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #929292;
+  color: white;
+}
+.recommendationToggle[aria-pressed="true"] .recommendationBadge {
+  background: #f6c9c9;
+  color: #c22738;
+}
+.recommendationToggle:not(:disabled):hover .recommendationBadge {
+  outline: 2px solid white;
+}
 .art {
   aspect-ratio: 1;
   background: #eadab7;

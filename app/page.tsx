@@ -1,3 +1,6 @@
+import { session } from "../lib/session";
+import { blockedAlbumKeys } from "../lib/blocked-albums";
+import { database } from "../lib/db";
 import { randomInt } from "node:crypto";
 import { taglines } from "./recommendation/taglines";
 import { AppShell } from "./components/app-shell";
@@ -10,6 +13,10 @@ export default async function Home({
 }) {
   const { error, spotify } = await searchParams;
   const tagline = taglines[randomInt(taglines.length)];
+  const account = await session();
+  const blockedKeys = account
+    ? blockedAlbumKeys(database(), account.userId)
+    : [];
   return (
     <AppShell
       active="discover"
@@ -17,7 +24,7 @@ export default async function Home({
       tagline={tagline}
       spotifyResult={spotify}
     >
-      <Recommendation tagline={tagline} />
+      <Recommendation tagline={tagline} blockedKeys={blockedKeys} />
     </AppShell>
   );
 }

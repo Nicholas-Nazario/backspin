@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { VinylRecordIcon } from "@phosphor-icons/react";
-import { Entry } from "../../lib/collection";
+import { BlockAlbumButton } from "./block-album-button";
+import { Entry, workKey } from "../../lib/collection";
 import styles from "./collection.module.css";
 export function Cover({
   entry,
@@ -32,11 +33,13 @@ export function Cover({
 }
 export function RecordCard({
   group,
+  blocked,
   year,
   onOpen,
   onGenre,
 }: {
   group: Entry[];
+  blocked: boolean;
   year: number | null;
   onOpen: (group: Entry[], trigger: HTMLElement) => void;
   onGenre: (genre: string) => void;
@@ -45,13 +48,20 @@ export function RecordCard({
     b = e.basic_information;
   return (
     <article>
-      <button
-        className={styles["cover-button"]}
-        onClick={(ev) => onOpen(group, ev.currentTarget)}
-        aria-label={"View " + b.title}
-      >
-        <Cover entry={e} />
-      </button>
+      <div className={styles.cardArtwork}>
+        <button
+          className={styles["cover-button"]}
+          onClick={(ev) => onOpen(group, ev.currentTarget)}
+          aria-label={"View " + b.title}
+        >
+          <Cover entry={e} />
+        </button>
+        <BlockAlbumButton
+          albumKey={workKey(e)}
+          title={b.title}
+          blocked={blocked}
+        />
+      </div>
       <h3>
         <button
           className={styles["text-button"]}
