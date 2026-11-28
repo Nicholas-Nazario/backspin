@@ -18,9 +18,30 @@ const searches = createCatalogCache<CatalogAlbum | null>();
 
 export type CatalogTimings = {
   snapshotMs: number;
+  snapshotMatches: number;
+  snapshotMisses: number;
+  snapshotAmbiguous: number;
   liveDiscogsMs: number;
   liveDiscogsRequests: number;
+  liveDiscogsMatches: number;
+  liveDiscogsNoMatch: number;
+  liveDiscogsErrors: number;
 };
+
+function debugCatalogOutcome(
+  outcome: string,
+  title: string,
+  artists: string[],
+) {
+  if (
+    process.env.NODE_ENV === "development" &&
+    process.env.BACKSPIN_DEBUG_CATALOG === "1"
+  )
+    console.info(
+      "spotify.catalog.debug",
+      JSON.stringify({ outcome, title, artists }),
+    );
+}
 
 export async function findDiscogsAlbum(
   title: string,
@@ -38,7 +59,17 @@ export async function findDiscogsAlbum(
   } finally {
     if (timings) timings.snapshotMs += performance.now() - snapshotStarted;
   }
-  if (indexed !== undefined) return indexed;
+  if (indexed) {
+    if (timings) timings.snapshotMatches++;
+    return indexed;
+  }
+  if (indexed === null) {
+    if (timings) timings.snapshotAmbiguous++;
+    debugCatalogOutcome("snapshot-ambiguous", title, artists);
+    return null;
+  }
+  if (timings) timings.snapshotMisses++;
+  debugCatalogOutcome("snapshot-miss", title, artists);
   const album = albumTitle(title);
   const params = new URLSearchParams({
     type: "master",
@@ -59,7 +90,18 @@ export async function findDiscogsAlbum(
         fetcher,
         signal,
       );
-      return matchAlbum(await response.json(), album, artists);
+      const match = matchAlbum(await response.json(), album, artists);
+      if (match) {
+        if (timings) timings.liveDiscogsMatches++;
+      } else {
+        if (timings) timings.liveDiscogsNoMatch++;
+        debugCatalogOutcome("live-no-match", title, artists);
+      }
+      return match;
+    } catch (error) {
+      if (timings) timings.liveDiscogsErrors++;
+      debugCatalogOutcome("live-error", title, artists);
+      throw error;
     } finally {
       if (timings) timings.liveDiscogsMs += performance.now() - liveStarted;
     }
