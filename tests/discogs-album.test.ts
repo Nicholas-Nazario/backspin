@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { findDiscogsAlbum } from "../lib/discogs-album";
+import { discogsCacheTtl } from "../lib/discogs-freshness";
 import { resetScheduler } from "../lib/discogs";
 
-test("catalog search accepts unique matching masters and rejects ambiguous or unrelated results", async () => {
+test("catalog search accepts unique matching masters and rejects ambiguous or unrelated results", async (t) => {
   process.env.DISCOGS_CONSUMER_KEY = "fixture";
   process.env.DISCOGS_CONSUMER_SECRET = "fixture";
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
   const match = {
     id: 1,
     type: "master",
@@ -41,8 +44,11 @@ test("catalog search accepts unique matching masters and rejects ambiguous or un
     styles: ["Conscious"],
     year: 2012,
   });
-  assert.equal((await lookup([]))?.year, 2012);
+  assert.equal((await lookup([], "other-account"))?.year, 2012);
   assert.equal(requests, 1);
-  assert.equal(await lookup([unrelated], "unrelated"), null);
+  now += discogsCacheTtl;
+  assert.equal(await lookup([unrelated], "other-account"), null);
+  assert.equal(requests, 2);
+  now += discogsCacheTtl;
   assert.equal(await lookup([match, { ...match, id: 3 }], "ambiguous"), null);
 });

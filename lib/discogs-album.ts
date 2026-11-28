@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { albumTitle, artistKey, artistKeys, normalize } from "./album-matching";
-import { json, type Token } from "./discogs";
+import { request, type Token } from "./discogs";
+import { createCatalogCache } from "./discogs-cache";
 import type { CatalogAlbum } from "./recent-recommendation";
 
 const resultSchema = z.object({
@@ -11,6 +12,8 @@ const resultSchema = z.object({
   style: z.array(z.string()).optional(),
   year: z.union([z.string(), z.number()]).optional(),
 });
+
+const searches = createCatalogCache<CatalogAlbum | null>();
 
 export async function findDiscogsAlbum(
   title: string,
@@ -26,10 +29,27 @@ export async function findDiscogsAlbum(
     q: `${artists.join(" ")} ${album}`,
     per_page: "20",
   });
-  const { value } = await json("/database/search?" + params, token, {
-    signal,
-    fetcher,
+  signal.throwIfAborted();
+  const key = JSON.stringify([artists, album]);
+  const { value } = await searches.load(key, async () => {
+    const response = await request(
+      "/database/search?" + params,
+      token,
+      "GET",
+      {},
+      fetcher,
+      signal,
+    );
+    return matchAlbum(await response.json(), album, artists);
   });
+  return value;
+}
+
+function matchAlbum(
+  value: unknown,
+  album: string,
+  artists: string[],
+): CatalogAlbum | null {
   const { results } = z.object({ results: z.array(z.unknown()) }).parse(value);
   const expectedCredit = artistKey(artists.join(" "));
   const expectedTitle = normalize(album);

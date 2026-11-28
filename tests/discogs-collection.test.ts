@@ -3,12 +3,13 @@ import test from "node:test";
 import {
   clearCollectionPages,
   collectionPath,
-  collectionTtl,
   discogsCollection,
 } from "../lib/discogs-collection";
-import { json, resetScheduler } from "../lib/discogs";
+import { resetScheduler } from "../lib/discogs";
+import { accountJson } from "../lib/discogs-cache";
+import { discogsCacheTtl } from "../lib/discogs-freshness";
 
-test("collection pages are reused for five hours and a refresh invalidates only that collection", async (t) => {
+test("collection pages are reused for six hours and a refresh invalidates only that collection", async (t) => {
   process.env.DISCOGS_CONSUMER_KEY = "fixture";
   process.env.DISCOGS_CONSUMER_SECRET = "fixture";
   let now = Date.now();
@@ -32,7 +33,7 @@ test("collection pages are reused for five hours and a refresh invalidates only 
   const signal = new AbortController().signal;
   const path = collectionPath("Fixture Listener", 1);
   const first = await discogsCollection("Fixture Listener", token, signal);
-  assert.equal(first.expiresAt - now, 5 * 60 * 60 * 1000);
+  assert.equal(first.expiresAt - now, 6 * 60 * 60 * 1000);
 
   now += 60 * 60 * 1000;
   assert.deepEqual(
@@ -44,7 +45,7 @@ test("collection pages are reused for five hours and a refresh invalidates only 
   await discogsCollection("Fixture Listener", otherToken, signal);
   clearCollectionPages("Fixture Listener", token);
   resetScheduler();
-  await json(path, token, { refresh: true, ttl: collectionTtl });
+  await accountJson(path, token, { refresh: true });
   assert.equal(
     (await discogsCollection("Fixture Listener", token, signal)).entries[0].id,
     3,
@@ -55,7 +56,7 @@ test("collection pages are reused for five hours and a refresh invalidates only 
     2,
   );
 
-  now += collectionTtl;
+  now += discogsCacheTtl;
   assert.equal(
     (await discogsCollection("Fixture Listener", token, signal)).entries[0].id,
     4,

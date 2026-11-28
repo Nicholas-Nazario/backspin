@@ -2,7 +2,6 @@ import {
   clearCollectionPages,
   collectionFoldersPath,
   collectionPath,
-  collectionTtl,
 } from "../../../lib/discogs-collection";
 import { database } from "../../../lib/db";
 import { resolveMasterYear } from "../../../lib/year-data";
@@ -12,7 +11,9 @@ import {
   spotifySession,
 } from "../../../lib/spotify-session";
 import { session } from "../../../lib/session";
-import { json, request, UpstreamError } from "../../../lib/discogs";
+import { accountJson } from "../../../lib/discogs-cache";
+import { discogsRelease } from "../../../lib/discogs-release";
+import { request, UpstreamError } from "../../../lib/discogs";
 const headers = { "Cache-Control": "private, no-store", Vary: "Cookie" };
 export async function GET(req: Request) {
   const s = await session();
@@ -69,11 +70,13 @@ export async function GET(req: Request) {
       if (spotify) clearSpotifyPicks(spotifyConnectionScope(s, spotify).key);
     }
     const isCollection = kind === "collection" || kind === "folders";
-    const result = await json(path, s.token, {
-      refresh: isCollection && refresh,
-      ttl: isCollection ? collectionTtl : undefined,
-      signal: req.signal,
-    });
+    const result =
+      kind === "release"
+        ? await discogsRelease(q.get("id")!, s.token, req.signal)
+        : await accountJson(path, s.token, {
+            refresh: isCollection && refresh,
+            signal: req.signal,
+          });
     return Response.json(
       {
         data: result.value,

@@ -10,12 +10,12 @@ import {
   spotifyConnectionScope,
   spotifySession,
 } from "../../../../lib/spotify-session";
-import { clearCache } from "../../../../lib/discogs";
+import { clearAccountCache } from "../../../../lib/discogs-cache";
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });
   const [s, spotify] = await Promise.all([session(), spotifySession()]);
   if (s) {
-    clearCache(s.token);
+    clearAccountCache(s.token);
     if (spotify) clearSpotifyPicks(spotifyConnectionScope(s, spotify).key);
   }
   const r = NextResponse.redirect(origin(), 303);
