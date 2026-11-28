@@ -6,6 +6,58 @@ discogs="https://data.discogs.com/"
 archive="discogs-masters.sqlite.gz"
 checksum="$archive.sha256"
 
+update_fly_snapshot() {
+  local branch="discogs-masters-$snapshot-fly"
+  local config_path="repos/$repo/contents/fly.toml"
+  local refs_path="repos/$repo/git"
+  local main_sha branch_sha config pinned pr blob_sha updated content
+
+  main_sha=$(gh api "$refs_path/ref/heads/main" --jq '.object.sha')
+  config=$(gh api "$config_path?ref=$main_sha" -H 'Accept: application/vnd.github.raw+json')
+  pinned=$(printf '%s\n' "$config" |
+    sed -nE 's/^[[:space:]]*DISCOGS_MASTERS_SNAPSHOT = "([0-9]{8})"$/\1/p')
+  if [[ ! "$pinned" =~ ^[0-9]{8}$ ]]; then
+    echo "Could not read the pinned Discogs snapshot from fly.toml on main." >&2
+    return 1
+  fi
+  if [[ "$pinned" == "$snapshot" || "$pinned" > "$snapshot" ]]; then
+    echo "fly.toml already pins $pinned."
+    return
+  fi
+
+  pr=$(gh pr list --repo "$repo" --base main --head "$branch" --state open --json url --jq '.[0].url // empty')
+  if [[ -n "$pr" ]]; then
+    echo "Snapshot update PR already open: $pr"
+    return
+  fi
+
+  # Reuse the branch if an earlier run stopped before opening the PR.
+  branch_sha=$(gh api "$refs_path/matching-refs/heads/$branch" \
+    --jq ".[] | select(.ref == \"refs/heads/$branch\") | .object.sha")
+  if [[ -z "$branch_sha" ]]; then
+    branch_sha=$(gh api --method POST "$refs_path/refs" \
+      -f ref="refs/heads/$branch" -f sha="$main_sha" --jq '.object.sha')
+  fi
+  config=$(gh api "$config_path?ref=$branch_sha" -H 'Accept: application/vnd.github.raw+json')
+  if ! printf '%s\n' "$config" | grep -Eq "^[[:space:]]*DISCOGS_MASTERS_SNAPSHOT = \"$snapshot\"$"; then
+    blob_sha=$(gh api "$config_path?ref=$branch_sha" --jq '.sha')
+    updated=$(printf '%s\n' "$config" |
+      sed -E "s/^([[:space:]]*DISCOGS_MASTERS_SNAPSHOT = \")[0-9]{8}(\")$/\1$snapshot\2/")
+    if [[ "$updated" == "$config" ]]; then
+      echo "Could not update the snapshot pin on $branch." >&2
+      return 1
+    fi
+    content=$(printf '%s\n' "$updated" | base64 | tr -d '\n')
+    gh api --method PUT "$config_path" -f branch="$branch" -f sha="$blob_sha" \
+      -f message="Pin Discogs masters snapshot $snapshot" -f content="$content" >/dev/null
+  fi
+
+  gh api --method POST "repos/$repo/pulls" -f base=main -f head="$branch" \
+    -f title="Pin Discogs masters snapshot $snapshot" \
+    -f body="Update the Fly build to use the published [Discogs masters snapshot $snapshot](https://github.com/$repo/releases/tag/$tag)." \
+    --jq '.html_url'
+}
+
 if [[ $# -gt 1 || (${1:-} != "" && ! ${1:-} =~ ^[0-9]{8}$) ]]; then
   echo "Usage: npm run refresh:discogs-masters -- [YYYYMMDD]" >&2
   exit 1
@@ -33,16 +85,19 @@ gh auth status --hostname github.com >/dev/null 2>&1 || {
   exit 1
 }
 
-if release=$(gh release view "$tag" --repo "$repo" --json isDraft,assets --jq '
+if release=$(gh release view "$tag" --repo "$repo" --json isDraft,isPrerelease,assets --jq '
   if .isDraft then "draft"
-  elif ([.assets[].name] | index("discogs-masters.sqlite.gz")) != null and
-       ([.assets[].name] | index("discogs-masters.sqlite.gz.sha256")) != null
+  elif (.isPrerelease | not) and
+       ([.assets[] | select(.state == "uploaded") | .name] |
+        index("discogs-masters.sqlite.gz") != null and
+        index("discogs-masters.sqlite.gz.sha256") != null)
   then "published"
   else "incomplete"
   end' 2>&1); then
   case "$release" in
     published)
       echo "$tag is already published."
+      update_fly_snapshot
       exit 0
       ;;
     incomplete)
@@ -89,3 +144,4 @@ if [[ "$release" == "missing" ]]; then
 fi
 gh release upload "$tag" --repo "$repo" --clobber "$work/$archive" "$work/$checksum"
 gh release edit "$tag" --repo "$repo" --draft=false --latest=false
+update_fly_snapshot

@@ -109,13 +109,13 @@ mkdir -p data
 npm run import:discogs-masters -- 20261101 /path/to/discogs_20261101_masters.xml.gz
 ```
 
-To publish the latest snapshot from a development machine, install the project dependencies and sign in with `gh auth login` using an account that can publish releases for Backspin. Run this command once a month:
+To publish the latest snapshot from a development machine, install the project dependencies and sign in with `gh auth login` using an account that can publish releases, push branches, and open pull requests for Backspin. Run this command once a month:
 
 ```sh
 npm run refresh:discogs-masters
 ```
 
-Pass a date to select a specific dump, for example `npm run refresh:discogs-masters -- 20261101`. The command verifies the Discogs archive checksum, builds and checks the SQLite index, then publishes the compressed index and checksum together to a dated GitHub release. It skips a complete published release and can resume a draft left by a failed upload. Allow roughly 1.5 GB of temporary space. Backspin uses release assets to keep the catalog out of Git history and give Fly a stable URL for each dated snapshot.
+Pass a date to select a specific dump, for example `npm run refresh:discogs-masters -- 20261101`. The command verifies the Discogs archive checksum, builds and checks the SQLite index, then publishes the compressed index and checksum together to a dated GitHub release. After publishing a newer snapshot, the command opens a pull request to update the Fly build argument in `fly.toml`. Merge that PR to let the GitHub-triggered Fly build pick up the new snapshot. Rerunning the command reuses a complete published release, avoids duplicate open PRs, and can resume a draft left by a failed upload. Allow roughly 1.5 GB of temporary space. Backspin uses release assets to keep the catalog out of Git history and give Fly a stable URL for each dated snapshot.
 
 To deploy from your local checkout with the newest published catalog, sign in to GitHub and Fly, then run:
 
@@ -123,4 +123,4 @@ To deploy from your local checkout with the newest published catalog, sign in to
 npm run deploy:discogs-masters
 ```
 
-Pass a date to pin an older catalog, for example `npm run deploy:discogs-masters -- 20261101`. The Docker build downloads and verifies the chosen asset, then includes the index at `/app/catalog/discogs-masters.sqlite`. The command deploys the app code in your checkout along with the selected snapshot. A plain `fly deploy` without the catalog build argument uses live lookups. Publishing the catalog and deploying the app are separate operations.
+Pass a date to pin an older catalog, for example `npm run deploy:discogs-masters -- 20261101`. The Docker build downloads and verifies the chosen asset, then includes the index at `/app/catalog/discogs-masters.sqlite`. The command deploys the app code in your checkout along with the selected snapshot. A plain `fly deploy` uses the snapshot pinned in `fly.toml`. The script overrides that pin for a single deployment.

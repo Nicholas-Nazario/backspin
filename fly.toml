@@ -6,7 +6,9 @@
 app = 'backspin'
 primary_region = 'ewr'
 
-[build]
+[build.args]
+  DISCOGS_MASTERS_SNAPSHOT = "20261101"
+
 [env]
   APP_URL = 'https://backspin.fly.dev'
   DATABASE_PATH = '/data/mystery.sqlite'
