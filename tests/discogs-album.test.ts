@@ -1,10 +1,22 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 import { findDiscogsAlbum } from "../lib/discogs-album";
 import { discogsCacheTtl } from "../lib/discogs-freshness";
 import { resetScheduler } from "../lib/discogs";
 
 test("catalog search accepts unique matching masters and rejects ambiguous or unrelated results", async (t) => {
+  const directory = mkdtempSync(join(tmpdir(), "backspin-live-catalog-"));
+  const previousIndex = process.env.DISCOGS_MASTER_INDEX_PATH;
+  process.env.DISCOGS_MASTER_INDEX_PATH = join(directory, "missing.sqlite");
+  t.after(() => {
+    if (previousIndex === undefined)
+      delete process.env.DISCOGS_MASTER_INDEX_PATH;
+    else process.env.DISCOGS_MASTER_INDEX_PATH = previousIndex;
+    rmdirSync(directory);
+  });
   process.env.DISCOGS_CONSUMER_KEY = "fixture";
   process.env.DISCOGS_CONSUMER_SECRET = "fixture";
   let now = Date.now();
