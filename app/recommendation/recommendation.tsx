@@ -15,20 +15,29 @@ import { useCollection } from "../collection/use-collection";
 import { useMasterYears } from "../collection/use-master-years";
 import { Cover } from "../collection/record-card";
 import { ShuffleDeck } from "../components/shuffle-deck";
+import { useCollectionSource } from "../collection/collection-source";
 import { NarrowSheet } from "./narrow-sheet";
 import { VinylButton } from "./vinyl-button";
 import { useRecommendation } from "./use-recommendation";
 import styles from "./recommendation.module.css";
 import interaction from "../components/interaction.module.css";
 
-export default function Recommendation({
-  tagline,
-  blockedKeys,
-}: {
+type RecommendationProps = {
   tagline: string;
   blockedKeys: string[];
-}) {
-  const collection = useCollection();
+};
+
+export default function Recommendation(props: RecommendationProps) {
+  const username = useCollectionSource()?.username ?? "";
+  return <RecommendationPicker key={username} {...props} username={username} />;
+}
+
+function RecommendationPicker({
+  tagline,
+  blockedKeys,
+  username,
+}: RecommendationProps & { username: string }) {
+  const collection = useCollection(username);
   const lookup = useMasterYears(collection.entries, collection.loading);
   const [filters, setFilters] = useState(emptyRecommendationFilters);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -124,13 +133,20 @@ export default function Recommendation({
       )}
       {collection.error && (
         <div className={styles.notice} role="alert">
-          <p>We couldn’t open your collection. {collection.error}</p>
+          <p>
+            {username
+              ? collection.error
+              : `We couldn’t open your collection. ${collection.error}`}
+          </p>
           <button className={interaction.filled} onClick={collection.refresh}>
             Try loading again
           </button>
         </div>
       )}
-      {enabled && !collection.entries.length && (
+      {enabled && !collection.entries.length && username && (
+        <p role="status">This public collection is empty.</p>
+      )}
+      {enabled && !collection.entries.length && !username && (
         <p role="status">
           Your crates are empty. Add records on Discogs, then{" "}
           <button className={styles.quiet} onClick={collection.refresh}>
@@ -141,8 +157,9 @@ export default function Recommendation({
       )}
       {enabled && collection.entries.length > 0 && !eligible.length && (
         <p role="status">
-          All your albums are blocked. Use the recommendation button on an album
-          in Collection to allow it again.
+          {username
+            ? "Your blocked albums cover every record in this collection."
+            : "All your albums are blocked. Use the recommendation button on an album in Collection to allow it again."}
         </p>
       )}
       {enabled && eligible.length > 0 && !pool.length && (

@@ -2,6 +2,7 @@ import {
   clearCollectionPages,
   collectionFoldersPath,
   collectionPath,
+  isDiscogsCollectionUsername,
 } from "../../../lib/discogs-collection";
 import { database } from "../../../lib/db";
 import { resolveMasterYear } from "../../../lib/year-data";
@@ -24,6 +25,15 @@ export async function GET(req: Request) {
     );
   const q = new URL(req.url).searchParams;
   const kind = q.get("kind") || "collection";
+  const collectionUsername = q.get("username");
+  if (
+    collectionUsername !== null &&
+    (kind !== "collection" || !isDiscogsCollectionUsername(collectionUsername))
+  )
+    return Response.json(
+      { error: "Enter a valid Discogs username." },
+      { status: 400, headers },
+    );
   const refresh = q.get("refresh") === "1";
   let startCollectionRefresh = false;
   let path: string;
@@ -37,7 +47,7 @@ export async function GET(req: Request) {
     const page = Number(q.get("page") || 1);
     if (!Number.isInteger(page) || page < 1 || page > 100000)
       return Response.json({ error: "Invalid page" }, { status: 400, headers });
-    path = collectionPath(s.username, page);
+    path = collectionPath(collectionUsername ?? s.username, page);
     startCollectionRefresh = refresh && page === 1;
   } else
     return Response.json(
@@ -65,7 +75,7 @@ export async function GET(req: Request) {
       );
     }
     if (startCollectionRefresh) {
-      clearCollectionPages(s.username, s.token);
+      clearCollectionPages(collectionUsername ?? s.username, s.token);
       const spotify = await spotifySession();
       if (spotify) clearSpotifyPicks(spotifyConnectionScope(s, spotify).key);
     }
@@ -94,13 +104,20 @@ export async function GET(req: Request) {
             ? "Discogs is rate limiting requests. Please retry shortly."
             : status === 401
               ? "Discogs authorization expired. Reconnect your account."
-              : status === 403
-                ? "Discogs denied access to this resource."
-                : "Discogs is unavailable. Please retry.",
+              : collectionUsername && (status === 403 || status === 404)
+                ? "Discogs couldn’t find a public collection for this username."
+                : status === 403
+                  ? "Discogs denied access to this resource."
+                  : "Discogs is unavailable. Please retry.",
         upstreamStatus: status,
       },
       {
-        status: status === 429 ? 429 : status === 401 ? 401 : 502,
+        status:
+          status === 429 ||
+          status === 401 ||
+          (collectionUsername && (status === 403 || status === 404))
+            ? status
+            : 502,
         headers: {
           ...headers,
           ...(e instanceof UpstreamError

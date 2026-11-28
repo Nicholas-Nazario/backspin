@@ -2,6 +2,14 @@ import type { Entry } from "./collection";
 import type { Token } from "./discogs";
 import { accountJson, clearAccountCache } from "./discogs-cache";
 
+export function isDiscogsCollectionUsername(username: string) {
+  return (
+    /^[a-zA-Z0-9_.-]{1,64}$/.test(username) &&
+    username !== "." &&
+    username !== ".."
+  );
+}
+
 export function collectionFoldersPath(username: string) {
   return `/users/${encodeURIComponent(username)}/collection/folders`;
 }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { MagnifyingGlassIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
 import { Entry, explore, originalYear, workKey } from "../lib/collection";
 import { useSearchPrompt } from "./search-prompts";
+import { useCollectionSource } from "./collection/collection-source";
 import { useCollection } from "./collection/use-collection";
 import { useMasterYears } from "./collection/use-master-years";
 import { CollectionFilters, initialFilters } from "./collection/filters";
@@ -11,14 +12,22 @@ import { RecordDetails } from "./collection/record-details";
 import { RandomSet } from "./sets/random-set";
 import interaction from "./components/interaction.module.css";
 import styles from "./collection/collection.module.css";
-export default function Collection({
-  mode = "collection",
-  blockedKeys = [],
-}: {
+type CollectionProps = {
   blockedKeys?: string[];
   mode?: "sets" | "collection";
-}) {
-  const collection = useCollection();
+};
+
+export default function Collection(props: CollectionProps) {
+  const username = useCollectionSource()?.username ?? "";
+  return <CollectionExplorer key={username} {...props} username={username} />;
+}
+
+function CollectionExplorer({
+  mode = "collection",
+  blockedKeys = [],
+  username,
+}: CollectionProps & { username: string }) {
+  const collection = useCollection(username);
   const blocked = new Set(blockedKeys);
   const { entries, loading } = collection;
   const lookup = useMasterYears(entries, loading);
@@ -56,6 +65,12 @@ export default function Collection({
               ? entries.length + " / " + collection.total
               : entries.length}{" "}
             records
+            {username && (
+              <>
+                {" "}
+                from <strong>{username}’s collection</strong>
+              </>
+            )}
             {collection.lastUpdated && (
               <span className={styles.lastUpdated}>
                 {" · Last updated "}
@@ -146,7 +161,11 @@ export default function Collection({
       )}
       <a
         className={styles["collection-attribution"]}
-        href="https://www.discogs.com/mycollection"
+        href={
+          username
+            ? `https://www.discogs.com/user/${encodeURIComponent(username)}/collection`
+            : "https://www.discogs.com/mycollection"
+        }
         target="_blank"
         rel="noopener"
       >
@@ -160,7 +179,9 @@ export default function Collection({
           </p>
           {!loading && !entries.length && !collection.error && (
             <p className={styles["empty"]}>
-              Your collection is empty. Add records on Discogs, then refresh.
+              {username
+                ? "This public collection is empty."
+                : "Your collection is empty. Add records on Discogs, then refresh."}
             </p>
           )}
           {entries.length > 0 && !groups.length && (

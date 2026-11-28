@@ -48,9 +48,9 @@ export function ExploreHelp() {
           </button>
         </div>
         <p>
-          Backspin compares your recent Spotify listening with the records you
-          own. It checks the Discogs catalog for releases it can’t match on your
-          shelf.
+          Backspin compares your recent Spotify listening with the selected
+          Discogs collection. It checks the Discogs catalog for releases it
+          can’t match in that collection.
         </p>
         <ul>
           <li>
@@ -69,8 +69,8 @@ export function ExploreHelp() {
         </ul>
         <p>
           Newer plays carry more weight, and support from several distinct
-          releases can lift a pick. Albums you played and already own appear
-          under <strong>Already On Your Shelf</strong>.
+          releases can lift a pick. Albums you played that are also in the
+          collection appear in their own section.
         </p>
       </dialog>
     </>

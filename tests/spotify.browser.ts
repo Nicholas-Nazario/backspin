@@ -200,10 +200,10 @@ try {
   });
   await page.route("**/api/spotify/recent*", async (route) => {
     pickRequests++;
-    assert.equal(
-      new URL(route.request().url()).searchParams.get("refresh"),
-      pickRequests === 1 ? null : "1",
-    );
+    const params = new URL(route.request().url()).searchParams;
+    if (pickRequests <= 2)
+      assert.equal(params.get("refresh"), pickRequests === 1 ? null : "1");
+    assert.equal(params.get("username"), pickRequests === 3 ? "tosker" : null);
     if (pickRequests === 1) await initialPicks;
     const results = await spotifyRecommendations(
       releases,
@@ -433,6 +433,30 @@ try {
   await expect(
     source.getByText("Shared genre: Jazz", { exact: true }),
   ).toBeVisible();
+
+  await settings.click();
+  await page
+    .getByRole("textbox", { name: "Public Discogs username" })
+    .fill("tosker");
+  await page.getByRole("button", { name: "Load collection" }).click();
+  await expect(recommended).toBeHidden();
+  await expect(tuner).toBeEnabled();
+  await tuner.click();
+  await expect(
+    page.getByRole("heading", { name: "Recommended from tosker’s collection" }),
+  ).toBeVisible();
+  await settings.click();
+  await page
+    .getByRole("button", { name: "Remove tosker and use my collection" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Recommended from tosker’s collection" }),
+  ).toBeHidden();
+  await settings.click();
+  await expect(tuner).toBeEnabled();
+  await tuner.click();
+  await expect(recommended).toBeVisible();
+  assert.equal(pickRequests, 4);
 
   await page.context().clearCookies();
   await page.goto(baseURL);

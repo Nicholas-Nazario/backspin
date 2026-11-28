@@ -27,7 +27,40 @@ try {
     },
   }));
   await page.route("**/api/discogs?*", async (route) => {
-    const kind = new URL(route.request().url()).searchParams.get("kind");
+    const params = new URL(route.request().url()).searchParams;
+    const kind = params.get("kind");
+    const username = params.get("username");
+    if (username) {
+      if (username !== "tosker")
+        return route.fulfill({
+          status: 403,
+          json: {
+            error:
+              "Discogs couldn’t find a public collection for this username.",
+          },
+        });
+      const pageNumber = Number(params.get("page"));
+      return route.fulfill({
+        json: {
+          data: {
+            pagination: { pages: 2, items: 1 },
+            releases:
+              pageNumber === 2
+                ? [
+                    {
+                      ...releases[0],
+                      basic_information: {
+                        ...releases[0].basic_information,
+                        title: "Public collection album",
+                      },
+                    },
+                  ]
+                : [],
+          },
+          expiresAt: Date.now() + clockOffset + 300000,
+        },
+      });
+    }
     if (holdRefresh && !kind)
       await new Promise<void>((resolve) => {
         releaseRefresh = resolve;
@@ -298,7 +331,7 @@ try {
     ),
     true,
   );
-  assert.equal(await page.locator("main [style]").count(), 0);
+  assert.equal(await page.locator('main [style]:not([style=""])').count(), 0);
   await page.screenshot({
     path: "/tmp/backspin-recommendation-mobile.png",
     fullPage: true,
@@ -381,6 +414,80 @@ try {
     path: "/tmp/backspin-recommendation-desktop.png",
     fullPage: true,
   });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const source = page.getByRole("textbox", {
+    name: "Public Discogs username",
+  });
+  const settings = page.getByLabel("Settings", { exact: true });
+  await expect(source).toBeHidden();
+  await settings.click();
+  await source.fill("tosker");
+  await page.getByRole("button", { name: "Load collection" }).click();
+  await expect(result).toHaveCount(0);
+  await expect(drop).toBeEnabled();
+  await drop.click();
+  await expect(result.getByRole("heading")).toHaveText(
+    "Public collection album",
+  );
+
+  const collectionTab = page.getByRole("link", {
+    name: "Collection",
+    exact: true,
+  });
+  const discoverTab = page.getByRole("link", {
+    name: "Surprise Me",
+    exact: true,
+  });
+  const grid = page.getByTestId("record-grid");
+
+  await collectionTab.click();
+  await expect(grid).toContainText("Public collection album");
+  await page.reload();
+  await expect(grid).toContainText("Public collection album");
+  await discoverTab.click();
+  await expect(drop).toBeEnabled();
+  await drop.click();
+  await expect(result.getByRole("heading")).toHaveText(
+    "Public collection album",
+  );
+
+  await collectionTab.click();
+  await expect(grid).toContainText("Public collection album");
+  await expect(source).toBeHidden();
+  await settings.click();
+  await expect(page.getByText("Spinning tosker’s collection")).toBeVisible();
+  await expect(source).toBeHidden();
+  await page
+    .getByRole("button", { name: "Remove tosker and use my collection" })
+    .click();
+  await expect(source).toBeFocused();
+  await expect(source).toHaveValue("");
+  await expect(grid).toContainText("Album 1");
+  await expect(grid).not.toContainText("Public collection album");
+  await settings.click();
+  await discoverTab.click();
+  await expect(drop).toBeEnabled();
+  await settings.click();
+  await source.fill("private-fixture");
+  await source.press("Enter");
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "couldn’t find a public collection" }),
+  ).toBeVisible();
+  await expect(result).toHaveCount(0);
+  await settings.click();
+  await page
+    .getByRole("button", {
+      name: "Remove private-fixture and use my collection",
+    })
+    .click();
+  await expect(source).toBeVisible();
+  await settings.click();
+  await expect(drop).toBeEnabled();
+  await drop.click();
+  await expect(result.getByRole("heading")).toHaveText(/^Album [123]$/);
+
   await page.goto(baseURL + "/collection");
   await expect(page.getByText(/Last updated/)).toBeVisible();
   await expect(page.locator("time")).toHaveAttribute("datetime", /T/);
