@@ -1,6 +1,6 @@
 import { session } from "../../../lib/session";
 import { database } from "../../../lib/db";
-import { cachedMasterYears } from "../../../lib/year-data";
+import { availableMasterYears } from "../../../lib/year-data";
 const headers = { "Cache-Control": "private, no-store", Vary: "Cookie" };
 export async function GET(req: Request) {
   if (!(await session()))
@@ -23,7 +23,9 @@ export async function GET(req: Request) {
       { status: 400, headers },
     );
   return Response.json(
-    { years: cachedMasterYears(database(), [...new Set(values.map(Number))]) },
+    {
+      years: availableMasterYears(database(), [...new Set(values.map(Number))]),
+    },
     { headers },
   );
 }

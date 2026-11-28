@@ -2,7 +2,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { Entry } from "../../lib/collection";
 import { api } from "./api";
-type CachedYear = { masterId: number; year: number | null; expiresAt: number };
+type CachedYear = {
+  masterId: number;
+  year: number | null;
+  expiresAt: number | null;
+};
+
+function yearExpiry(record: CachedYear) {
+  return record.expiresAt ?? Infinity;
+}
 export function useMasterYears(entries: Entry[], loading: boolean) {
   const [records, setRecords] = useState<Record<number, CachedYear>>({});
   const [checkedCacheKey, setCheckedCacheKey] = useState<string | null>(null);
@@ -23,11 +31,11 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
     ),
   ];
   const idsKey = ids.join(",");
-  const valid = Object.values(records).filter((r) => r.expiresAt > clock);
+  const valid = Object.values(records).filter((r) => yearExpiry(r) > clock);
   const masters = Object.fromEntries(valid.map((r) => [r.masterId, r.year]));
   // Expiry is enforced while the browser stays open, not only on reload.
   useEffect(() => {
-    const expiry = Math.min(...valid.map((r) => r.expiresAt));
+    const expiry = Math.min(...valid.map(yearExpiry));
     if (!Number.isFinite(expiry)) return;
     const timer = setTimeout(
       () => {
@@ -61,12 +69,19 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
         }
         if (!active) return;
         setClock(Date.now());
-        setRecords((old) => ({
-          ...old,
-          ...Object.fromEntries(found.map((y) => [y.masterId, y])),
-        }));
+        setRecords((old) => {
+          const next = { ...old };
+          for (const id of ids) {
+            if (next[id]?.expiresAt === null) delete next[id];
+          }
+          return Object.assign(
+            next,
+            Object.fromEntries(found.map((year) => [year.masterId, year])),
+          );
+        });
         const existing = Object.values(records).filter(
-          (r) => r.expiresAt > Date.now(),
+          (record) =>
+            record.expiresAt !== null && yearExpiry(record) > Date.now(),
         );
         const available = new Set(
           [...found, ...existing].map((r) => r.masterId),
@@ -101,7 +116,10 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
     const pending =
       requested ||
       ids.filter(
-        (id) => force || !records[id] || records[id].expiresAt <= Date.now(),
+        (id) =>
+          (force && records[id]?.expiresAt !== null) ||
+          !records[id] ||
+          yearExpiry(records[id]) <= Date.now(),
       );
     setStatus("running");
     setProgress(0);

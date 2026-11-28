@@ -3,6 +3,7 @@ import type { spotifyRecommendations } from "./spotify-recommendations";
 
 type Scope = ReturnType<typeof spotifyConnectionScope> & {
   collectionUsername: string;
+  snapshotDate?: string;
 };
 type Picks = Awaited<ReturnType<typeof spotifyRecommendations>>;
 
@@ -13,6 +14,7 @@ const cache = new Map<
   {
     picks: Picks;
     collectionUsername: string;
+    snapshotDate?: string;
     expires: number;
     timer: ReturnType<typeof setTimeout>;
   }
@@ -28,7 +30,8 @@ export function readSpotifyPicks(scope: Scope, now = Date.now()) {
   const entry = cache.get(scope.key);
   if (!entry) return;
   if (entry.expires > now && scope.expires > now)
-    return entry.collectionUsername === scope.collectionUsername
+    return entry.collectionUsername === scope.collectionUsername &&
+      entry.snapshotDate === scope.snapshotDate
       ? entry.picks
       : undefined;
   clearSpotifyPicks(scope.key);
@@ -49,6 +52,7 @@ export function cacheSpotifyPicks(
   cache.set(scope.key, {
     picks,
     collectionUsername: scope.collectionUsername,
+    snapshotDate: scope.snapshotDate,
     expires,
     timer,
   });

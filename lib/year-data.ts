@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import { discogsCacheTtl } from "./discogs-freshness";
+import { snapshotMasterYears } from "./discogs-master-index";
 export type MasterYear = {
   masterId: number;
   year: number | null;
@@ -21,6 +22,17 @@ export function cachedMasterYears(
     const row = read.get(id, now) as MasterYear | undefined;
     return row ? [row] : [];
   });
+}
+export function availableMasterYears(db: Database.Database, ids: number[]) {
+  const indexed = snapshotMasterYears(ids);
+  const present = new Set(indexed.map(({ masterId }) => masterId));
+  return [
+    ...indexed,
+    ...cachedMasterYears(
+      db,
+      ids.filter((id) => !present.has(id)),
+    ),
+  ];
 }
 export async function resolveMasterYear(
   db: Database.Database,

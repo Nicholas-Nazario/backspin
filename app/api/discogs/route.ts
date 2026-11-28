@@ -5,6 +5,7 @@ import {
   isDiscogsCollectionUsername,
 } from "../../../lib/discogs-collection";
 import { database } from "../../../lib/db";
+import { snapshotMasterYears } from "../../../lib/discogs-master-index";
 import { resolveMasterYear } from "../../../lib/year-data";
 import { clearSpotifyPicks } from "../../../lib/spotify-picks-cache";
 import {
@@ -56,15 +57,18 @@ export async function GET(req: Request) {
     );
   try {
     if (kind === "master") {
-      const result = await resolveMasterYear(
-        database(),
-        Number(q.get("id")),
-        async () => {
-          const data = await (await request(path, s.token)).json();
-          return data.year;
-        },
-        refresh,
-      );
+      const id = Number(q.get("id"));
+      const result =
+        snapshotMasterYears([id])[0] ??
+        (await resolveMasterYear(
+          database(),
+          id,
+          async () => {
+            const data = await (await request(path, s.token)).json();
+            return data.year;
+          },
+          refresh,
+        ));
       return Response.json(
         {
           data: { id: result.masterId, year: result.year },

@@ -4,6 +4,7 @@ import {
   discogsCollection,
   isDiscogsCollectionUsername,
 } from "../../../../lib/discogs-collection";
+import { masterSnapshotDate } from "../../../../lib/discogs-master-index";
 import { UpstreamError } from "../../../../lib/discogs";
 import { sameOrigin, session } from "../../../../lib/session";
 import { spotifyRecentPlays } from "../../../../lib/spotify";
@@ -16,7 +17,7 @@ import {
   spotifyConnectionScope,
   spotifySession,
 } from "../../../../lib/spotify-session";
-import { cachedMasterYears } from "../../../../lib/year-data";
+import { availableMasterYears } from "../../../../lib/year-data";
 
 function reply(body: object, status = 200) {
   return Response.json(body, {
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
   const scope = {
     ...spotifyConnectionScope(discogs, spotify),
     collectionUsername,
+    snapshotDate: masterSnapshotDate(),
   };
   const userId = discogs.userId;
   function eligiblePicks(
@@ -103,7 +105,7 @@ export async function POST(request: Request) {
       ),
     ];
     const masters = Object.fromEntries(
-      cachedMasterYears(database(), ids).map(({ masterId, year }) => [
+      availableMasterYears(database(), ids).map(({ masterId, year }) => [
         masterId,
         year,
       ]),
