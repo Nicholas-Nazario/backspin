@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import { discogsCacheTtl } from "./discogs-freshness";
 export type MasterYear = {
   masterId: number;
   year: number | null;
@@ -6,8 +7,7 @@ export type MasterYear = {
   fetchedAt: number;
   expiresAt: number;
 };
-// Refresh before the upstream six-hour freshness boundary. No artwork or ownership is stored.
-export const MASTER_YEAR_TTL = 5 * 60 * 60 * 1000;
+export const MASTER_YEAR_TTL = discogsCacheTtl;
 export function cachedMasterYears(
   db: Database.Database,
   ids: number[],

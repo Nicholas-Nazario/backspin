@@ -1,7 +1,6 @@
 import type { Entry } from "./collection";
-import { clearCache, json, type Token } from "./discogs";
-
-export const collectionTtl = 5 * 60 * 60 * 1000;
+import type { Token } from "./discogs";
+import { accountJson, clearAccountCache } from "./discogs-cache";
 
 export function collectionFoldersPath(username: string) {
   return `/users/${encodeURIComponent(username)}/collection/folders`;
@@ -16,7 +15,7 @@ export function collectionPath(username: string, page: number) {
 }
 
 export function clearCollectionPages(username: string, token: Token) {
-  clearCache(token, collectionPagePrefix(username));
+  clearAccountCache(token, collectionPagePrefix(username));
 }
 
 export async function discogsCollection(
@@ -29,10 +28,10 @@ export async function discogsCollection(
   let expiresAt = Infinity;
   for (let page = 1; page <= pages; page++) {
     signal.throwIfAborted();
-    const { value, expires } = await json(
+    const { value, expires } = await accountJson(
       collectionPath(username, page),
       token,
-      { signal, ttl: collectionTtl },
+      { signal },
     );
     expiresAt = Math.min(expiresAt, expires);
     const data = value as { pagination: { pages: number }; releases: Entry[] };
