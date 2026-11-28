@@ -5,10 +5,8 @@ const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
 const engine = process.env.MOBILE_BROWSER === "webkit" ? webkit : chromium;
 const browser = await engine.launch();
 try {
-  const { page, rememberYear, clearYears } = await collectionFixture(
-    browser,
-    baseURL,
-  );
+  const { page, rememberYear, clearYears, resolveYearsWith } =
+    await collectionFixture(browser, baseURL);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   let fail = false;
@@ -26,6 +24,7 @@ try {
       styles: [id === 1 ? "Soul-Jazz" : "Hard Rock"],
     },
   }));
+  resolveYearsWith(() => 1971);
   await page.route("**/api/discogs?*", async (route) => {
     const params = new URL(route.request().url()).searchParams;
     const kind = params.get("kind");
@@ -75,9 +74,7 @@ try {
         data:
           kind === "folders"
             ? { folders: [] }
-            : kind === "master"
-              ? { year: 1971 }
-              : { pagination: { pages: 1, items: 3 }, releases },
+            : { pagination: { pages: 1, items: 3 }, releases },
         expiresAt: Date.now() + clockOffset + 300000,
         fetchedAt: Date.now() + clockOffset,
       },
@@ -305,9 +302,7 @@ try {
   await page
     .getByRole("button", { name: "Narrow it down", exact: true })
     .click();
-  await sheet
-    .getByRole("button", { name: "Find original release years" })
-    .click();
+  await sheet.getByRole("button", { name: "Find missing years" }).click();
   await expect(sheet.getByLabel("Era", { exact: false })).toBeEnabled();
   await expect(sheet.getByText("Original year lookup complete")).toBeVisible();
   await sheet.getByLabel("Era", { exact: false }).selectOption("1970");

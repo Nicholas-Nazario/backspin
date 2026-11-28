@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
   output: "standalone",
+  outputFileTracingExcludes: {
+    "/api/**": ["./data/discogs-masters.sqlite"],
+  },
   logging: {
     incomingRequests: { ignore: [/\/api\/(?:auth|spotify)\/callback/] },
   },

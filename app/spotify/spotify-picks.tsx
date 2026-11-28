@@ -252,7 +252,6 @@ function SpotifyCollectionPicks({
             known={knownYears}
             count={collection.entries.length}
             loading={collection.loading}
-            resolveLabel="Resolve missing years"
           />
           {status.phase === "ready" &&
             lookup.status === "done" &&

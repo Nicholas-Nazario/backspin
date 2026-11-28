@@ -1,5 +1,4 @@
 import {
-  ArrowClockwiseIcon,
   SpinnerGapIcon,
   CheckCircleIcon,
   WarningCircleIcon,
@@ -12,13 +11,11 @@ export function YearStatus({
   known,
   count,
   loading,
-  resolveLabel = "Find original release years",
 }: {
   lookup: ReturnType<typeof useMasterYears>;
   known: number;
   count: number;
   loading: boolean;
-  resolveLabel?: string;
 }) {
   const {
     resolving,
@@ -77,15 +74,6 @@ export function YearStatus({
               {known < count ? " · remaining dates are unknown" : ""}
             </small>
           </div>
-          <button
-            className={styles["year-refresh-icon"]}
-            aria-label="Refresh years"
-            title="Refresh years"
-            disabled={loading}
-            onClick={() => resolveYears(true)}
-          >
-            <ArrowClockwiseIcon size={17} aria-hidden="true" />
-          </button>
         </div>
       ) : yearStatus === "partial" || yearStatus === "paused" ? (
         <div className={styles["year-result"]} role="status">
@@ -108,15 +96,15 @@ export function YearStatus({
             {yearStatus === "paused" ? "Resume" : "Retry missing"}
           </button>
         </div>
-      ) : (
+      ) : lookup.pendingCount > 0 ? (
         <button
           className={styles["secondary"]}
           disabled={loading || !count}
           onClick={() => resolveYears()}
         >
-          <CalendarBlankIcon size={18} aria-hidden="true" /> {resolveLabel}
+          <CalendarBlankIcon size={18} aria-hidden="true" /> Find missing years
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

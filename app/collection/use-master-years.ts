@@ -1,8 +1,20 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import {
+  masterYearLiveBatchSize,
+  masterYearReadBatchSize,
+} from "../../lib/master-year-batch";
 import type { Entry } from "../../lib/collection";
 import { api } from "./api";
-type CachedYear = { masterId: number; year: number | null; expiresAt: number };
+type CachedYear = {
+  masterId: number;
+  year: number | null;
+  expiresAt: number | null;
+};
+
+function yearExpiry(record: CachedYear) {
+  return record.expiresAt ?? Infinity;
+}
 export function useMasterYears(entries: Entry[], loading: boolean) {
   const [records, setRecords] = useState<Record<number, CachedYear>>({});
   const [checkedCacheKey, setCheckedCacheKey] = useState<string | null>(null);
@@ -23,11 +35,11 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
     ),
   ];
   const idsKey = ids.join(",");
-  const valid = Object.values(records).filter((r) => r.expiresAt > clock);
+  const valid = Object.values(records).filter((r) => yearExpiry(r) > clock);
   const masters = Object.fromEntries(valid.map((r) => [r.masterId, r.year]));
   // Expiry is enforced while the browser stays open, not only on reload.
   useEffect(() => {
-    const expiry = Math.min(...valid.map((r) => r.expiresAt));
+    const expiry = Math.min(...valid.map(yearExpiry));
     if (!Number.isFinite(expiry)) return;
     const timer = setTimeout(
       () => {
@@ -52,21 +64,29 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
     (async () => {
       try {
         const found: CachedYear[] = [];
-        for (let i = 0; i < ids.length; i += 100) {
+        for (let i = 0; i < ids.length; i += masterYearReadBatchSize) {
           const response = await api(
-            "/api/master-years?ids=" + ids.slice(i, i + 100).join(","),
+            "/api/master-years?ids=" +
+              ids.slice(i, i + masterYearReadBatchSize).join(","),
             abort.signal,
           );
           found.push(...response.years);
         }
         if (!active) return;
         setClock(Date.now());
-        setRecords((old) => ({
-          ...old,
-          ...Object.fromEntries(found.map((y) => [y.masterId, y])),
-        }));
+        setRecords((old) => {
+          const next = { ...old };
+          for (const id of ids) {
+            if (next[id]?.expiresAt === null) delete next[id];
+          }
+          return Object.assign(
+            next,
+            Object.fromEntries(found.map((year) => [year.masterId, year])),
+          );
+        });
         const existing = Object.values(records).filter(
-          (r) => r.expiresAt > Date.now(),
+          (record) =>
+            record.expiresAt !== null && yearExpiry(record) > Date.now(),
         );
         const available = new Set(
           [...found, ...existing].map((r) => r.masterId),
@@ -74,7 +94,7 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
         const missing = ids.filter((id) => !available.has(id));
         if (resume.current) {
           resume.current = false;
-          void run(false, missing);
+          void resolve(missing);
         } else if (!controller.current)
           setStatus(missing.length ? "idle" : ids.length ? "done" : "idle");
       } catch {
@@ -94,41 +114,55 @@ export function useMasterYears(entries: Entry[], loading: boolean) {
     },
     [],
   );
-  async function run(force = false, requested?: number[]) {
+  function run() {
+    return resolve(
+      ids.filter((id) => !records[id] || yearExpiry(records[id]) <= Date.now()),
+    );
+  }
+  async function resolve(pending: number[]) {
+    if (!pending.length) return;
     controller.current?.abort();
     const abort = new AbortController();
     controller.current = abort;
-    const pending =
-      requested ||
-      ids.filter(
-        (id) => force || !records[id] || records[id].expiresAt <= Date.now(),
-      );
     setStatus("running");
     setProgress(0);
     setTotal(pending.length);
     setFailures(0);
     let failed = 0;
     try {
-      for (const [index, id] of pending.entries()) {
+      for (
+        let index = 0;
+        index < pending.length;
+        index += masterYearLiveBatchSize
+      ) {
+        const batch = pending.slice(index, index + masterYearLiveBatchSize);
         try {
-          const result = await api(
-            "/api/discogs?kind=master&id=" + id + (force ? "&refresh=1" : ""),
+          const result: {
+            years: CachedYear[];
+            failures: number;
+            retryAfter?: number;
+          } = await api(
+            "/api/master-years?resolve=1&ids=" + batch.join(","),
             abort.signal,
           );
           if (abort.signal.aborted) return;
           setRecords((old) => ({
             ...old,
-            [id]: {
-              masterId: id,
-              year: result.data.year,
-              expiresAt: result.expiresAt,
-            },
+            ...Object.fromEntries(
+              result.years.map((year) => [year.masterId, year]),
+            ),
           }));
+          failed += result.failures;
+          setFailures(failed);
+          setProgress(index + result.years.length + result.failures);
+          if (result.retryAfter) break;
         } catch {
           if (abort.signal.aborted) return;
-          setFailures(++failed);
+          failed += batch.length;
+          setFailures(failed);
+          setProgress(index + batch.length);
+          break;
         }
-        setProgress(index + 1);
       }
     } finally {
       if (controller.current === abort) {

@@ -5,17 +5,17 @@ import { collectionFixture } from "./browser-fixture";
 const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
 const browser = await chromium.launch();
 try {
-  const { page, rememberYear } = await collectionFixture(browser, baseURL);
+  const { page, rememberYear, resolveYearsWith } = await collectionFixture(browser, baseURL);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   let masterCalls = 0;
+  resolveYearsWith(() => {
+    masterCalls++;
+    return 1971;
+  });
   await page.route("**/api/discogs?*", (route) => {
     const q = new URL(route.request().url()).searchParams;
     const kind = q.get("kind");
-    if (kind === "master") {
-      masterCalls++;
-      rememberYear(Number(q.get("id")), 1971);
-    }
     const record = (id: number, title: string, master: number) => ({
       id,
       instance_id: id,
@@ -37,24 +37,22 @@ try {
               { id: 1, name: "Shelf" },
             ],
           }
-        : kind === "master"
-          ? { year: 1971 }
-          : kind === "release"
-            ? {
-                id: 1,
-                title: "First Album",
-                genres: ["Jazz"],
-                styles: ["Soul-Jazz"],
-                extraartists: [{ name: "A Producer", role: "Producer" }],
-              }
-            : {
-                pagination: { page: 1, pages: 1, items: 3 },
-                releases: [
-                  record(1, "First Album", 100),
-                  record(2, "Another Edition", 100),
-                  record(3, "Unknown Album", 0),
-                ],
-              };
+        : kind === "release"
+          ? {
+              id: 1,
+              title: "First Album",
+              genres: ["Jazz"],
+              styles: ["Soul-Jazz"],
+              extraartists: [{ name: "A Producer", role: "Producer" }],
+            }
+          : {
+              pagination: { page: 1, pages: 1, items: 3 },
+              releases: [
+                record(1, "First Album", 100),
+                record(2, "Another Edition", 100),
+                record(3, "Unknown Album", 0),
+              ],
+            };
     return route.fulfill({ json: { data, expiresAt: Date.now() + 300000 } });
   });
   await page.goto(baseURL + "/collection");
@@ -97,7 +95,7 @@ try {
   await page.getByLabel("Find a record").fill("");
   await page.getByTestId("filter-panel").locator("summary").click();
   await page
-    .getByRole("button", { name: "Find original release years", exact: true })
+    .getByRole("button", { name: "Find missing years", exact: true })
     .click();
   await page
     .getByTestId("filter-controls")
@@ -144,7 +142,7 @@ try {
     .getByText("Original year lookup complete", { exact: true })
     .waitFor();
   await page
-    .getByRole("button", { name: "Find original release years", exact: true })
+    .getByRole("button", { name: "Find missing years", exact: true })
     .waitFor();
   await page
     .getByText("0 of 3 original years known.", { exact: false })

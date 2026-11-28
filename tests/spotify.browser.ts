@@ -8,7 +8,10 @@ import { SPOTIFY_SESSION_COOKIE } from "../lib/spotify-session";
 const baseURL = process.env.BACKSPIN_TEST_URL || "http://localhost:3000";
 const browser = await chromium.launch();
 try {
-  const { page, rememberYear } = await collectionFixture(browser, baseURL);
+  const { page, rememberYear, resolveYearsWith } = await collectionFixture(
+    browser,
+    baseURL,
+  );
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/discogs?*", (route) =>
     route.fulfill({
@@ -182,11 +185,10 @@ try {
   );
   rememberYear(2, null);
   let yearResolved = false;
-  await page.route("**/api/discogs?kind=master&id=6", (route) => {
+  resolveYearsWith((id) => {
+    assert.equal(id, 6);
     yearResolved = true;
-    return route.fulfill({
-      json: { data: { year: 2014 }, expiresAt: Date.now() + 300000 },
-    });
+    return 2014;
   });
   let pickRequests = 0;
   let releaseInitialPicks!: () => void;
@@ -408,7 +410,7 @@ try {
   });
   await expect(moreMatches).toHaveCount(0);
   const resolveYears = page.getByRole("button", {
-    name: "Resolve missing years",
+    name: "Find missing years",
   });
   await expect(resolveYears).toBeHidden();
   const yearAlert = page.getByText("1 album to check", { exact: true });

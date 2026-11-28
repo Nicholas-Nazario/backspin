@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { albumTitle, artistKey, artistKeys, normalize } from "./album-matching";
 import { request, type Token } from "./discogs";
+import { snapshotCatalogAlbum } from "./discogs-master-index";
 import { createCatalogCache } from "./discogs-cache";
 import type { CatalogAlbum } from "./recent-recommendation";
 
@@ -23,6 +24,8 @@ export async function findDiscogsAlbum(
   fetcher: typeof fetch = fetch,
 ): Promise<CatalogAlbum | null> {
   if (!artistKeys(artists).length) return null;
+  const indexed = snapshotCatalogAlbum(title, artists);
+  if (indexed !== undefined) return indexed;
   const album = albumTitle(title);
   const params = new URLSearchParams({
     type: "master",
