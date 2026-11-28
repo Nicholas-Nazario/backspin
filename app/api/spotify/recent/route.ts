@@ -64,8 +64,14 @@ export async function POST(request: Request) {
   const timings: Record<string, number> = {};
   const catalogTimings = {
     snapshotMs: 0,
+    snapshotMatches: 0,
+    snapshotMisses: 0,
+    snapshotAmbiguous: 0,
     liveDiscogsMs: 0,
     liveDiscogsRequests: 0,
+    liveDiscogsMatches: 0,
+    liveDiscogsNoMatch: 0,
+    liveDiscogsErrors: 0,
   };
   function finishStage() {
     const now = performance.now();
@@ -79,9 +85,10 @@ export async function POST(request: Request) {
       JSON.stringify({
         status,
         ...timings,
+        snapshotDate: scope.snapshotDate ?? null,
+        ...catalogTimings,
         snapshotMs: Math.round(catalogTimings.snapshotMs),
         liveDiscogsMs: Math.round(catalogTimings.liveDiscogsMs),
-        liveDiscogsRequests: catalogTimings.liveDiscogsRequests,
         totalMs: Math.round(performance.now() - started),
       }),
     );
