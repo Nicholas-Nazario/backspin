@@ -16,7 +16,8 @@
     "format": "prettier --write app lib scripts tests next.config.ts",
     "format:check": "prettier --check app lib scripts tests next.config.ts",
     "import:discogs-masters": "tsx scripts/import-discogs-masters.ts",
-    "refresh:discogs-masters": "bash scripts/refresh-discogs-masters.sh"
+    "refresh:discogs-masters": "bash scripts/refresh-discogs-masters.sh",
+    "deploy:discogs-masters": "bash scripts/deploy-discogs-masters.sh"
   },
   "keywords": [],
   "author": "",
