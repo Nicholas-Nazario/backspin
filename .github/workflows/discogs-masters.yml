@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "23 8 5 * *"
   workflow_dispatch:
+    inputs:
+      snapshot:
+        description: Discogs snapshot date (YYYYMMDD). Leave blank to discover the latest.
+        type: string
 
 permissions:
   contents: write
@@ -26,14 +30,25 @@ jobs:
 
       - name: Find latest Discogs snapshot
         id: snapshot
+        env:
+          REQUESTED_SNAPSHOT: ${{ inputs.snapshot }}
         run: |
           set -euo pipefail
-          year=$(date -u +%Y)
-          prefix=$(curl -fsSL --retry 3 "https://data.discogs.com/?prefix=data/${year}/" |
-            sed -nE 's@.*href="\?download=data%2F[0-9]{4}%2F(discogs_[0-9]{8})_masters\.xml\.gz".*@\1@p' |
-            sort | tail -1)
-          test -n "$prefix"
-          echo "date=${prefix#discogs_}" >> "$GITHUB_OUTPUT"
+          snapshot="$REQUESTED_SNAPSHOT"
+          if [[ -z "$snapshot" ]]; then
+            year=$(date -u +%Y)
+            if listing=$(curl -fsSL --retry 3 "https://data.discogs.com/?prefix=data/${year}/"); then
+              snapshot=$(printf '%s\n' "$listing" |
+                sed -nE 's@.*href="\?download=data%2F[0-9]{4}%2Fdiscogs_([0-9]{8})_masters\.xml\.gz".*@\1@p' |
+                sort | tail -1)
+            fi
+            if [[ -z "$snapshot" ]]; then
+              snapshot=$(date -u +%Y%m01)
+              echo "Discogs listing unavailable. Trying the dated $snapshot download."
+            fi
+          fi
+          [[ "$snapshot" =~ ^[0-9]{8}$ ]] || { echo "Expected a snapshot date in YYYYMMDD format." >&2; exit 1; }
+          echo "date=$snapshot" >> "$GITHUB_OUTPUT"
 
       - name: Check whether this snapshot is already published
         id: published
@@ -54,17 +69,20 @@ jobs:
           SNAPSHOT: ${{ steps.snapshot.outputs.date }}
         run: |
           set -euo pipefail
-          npm ci
           work="$RUNNER_TEMP/discogs-masters"
           mkdir -p "$work"
           base="https://data.discogs.com/?download=data%2F${SNAPSHOT:0:4}%2Fdiscogs_${SNAPSHOT}"
           file="discogs_${SNAPSHOT}_masters.xml.gz"
+          if ! curl -fsSL --retry 3 "${base}_CHECKSUM.txt" -o "$work/checksums"; then
+            echo "::error::Discogs would not serve the checksum for $SNAPSHOT to this runner."
+            exit 1
+          fi
           curl -fsSL --retry 3 "${base}_masters.xml.gz" -o "$work/$file"
-          curl -fsSL --retry 3 "${base}_CHECKSUM.txt" -o "$work/checksums"
           cd "$work"
           awk -v name="$file" '$2 == name {print; found++} END {if (found != 1) exit 1}' checksums |
             sha256sum --check
           cd "$GITHUB_WORKSPACE"
+          npm ci
           time npm run import:discogs-masters -- "$SNAPSHOT" "$work/$file" "$work/discogs-masters.sqlite"
           du -h "$work/discogs-masters.sqlite"
 
