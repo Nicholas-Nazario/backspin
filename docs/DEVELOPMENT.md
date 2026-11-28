@@ -109,12 +109,18 @@ mkdir -p data
 npm run import:discogs-masters -- 20261101 /path/to/discogs_20261101_masters.xml.gz
 ```
 
-The **Refresh Discogs masters** workflow runs on the fifth of each month and also supports manual runs. On the default branch, it publishes the validated index and its SHA-256 checksum as assets of a dated GitHub release, such as `discogs-masters-20261101`. The workflow skips an already published snapshot.
-
-To deploy with a published snapshot, pass its date to Fly:
+To publish the latest snapshot from a development machine, install the project dependencies and sign in with `gh auth login` using an account that can publish releases for Backspin. Run this command once a month:
 
 ```sh
-fly deploy --build-arg DISCOGS_MASTERS_SNAPSHOT=20261101
+npm run refresh:discogs-masters
 ```
 
-The Docker build downloads and verifies that dated asset, then includes the index at `/app/catalog/discogs-masters.sqlite`. Pin the date in the Fly build args when choosing a default for future deploys. A deployment without a snapshot date uses live lookups. Publishing the catalog and deploying the app are separate operations.
+Pass a date to select a specific dump, for example `npm run refresh:discogs-masters -- 20261101`. The command verifies the Discogs archive checksum, builds and checks the SQLite index, then publishes the compressed index and checksum together to a dated GitHub release. It skips a complete published release and can resume a draft left by a failed upload. Allow roughly 1.5 GB of temporary space. Backspin uses release assets to keep the catalog out of Git history and give Fly a stable URL for each dated snapshot.
+
+To deploy from your local checkout with the newest published catalog, sign in to GitHub and Fly, then run:
+
+```sh
+npm run deploy:discogs-masters
+```
+
+Pass a date to pin an older catalog, for example `npm run deploy:discogs-masters -- 20261101`. The Docker build downloads and verifies the chosen asset, then includes the index at `/app/catalog/discogs-masters.sqlite`. The command deploys the app code in your checkout along with the selected snapshot. A plain `fly deploy` without the catalog build argument uses live lookups. Publishing the catalog and deploying the app are separate operations.

@@ -117,6 +117,8 @@ Album artwork and catalog data come from Discogs. Artwork is displayed without r
 
 The hosted app is [backspin.fly.dev](https://backspin.fly.dev). The repository includes a Dockerfile for the standalone Next.js server and a Fly configuration with persistent storage under `/data`. The current request scheduler and collection cache are designed for one application process. Production secrets, database backups, and recovery procedures are covered in the [development and operations guide](docs/DEVELOPMENT.md).
 
+Maintainers can publish the latest Discogs catalog with `npm run refresh:discogs-masters` and deploy to Fly with the newest published snapshot using `npm run deploy:discogs-masters`. See the [Discogs snapshot guide](docs/DEVELOPMENT.md#discogs-masters-snapshot) for setup and date overrides.
+
 Backspin helps you choose a record; it does not play audio or save listening history. Explore picks stay in memory when you switch app tabs. Other picks and discovery filters last for the current page visit. Mood hints use catalog metadata, not audio analysis or a learned recommendation model. Spotify picks use recent plays to match artists and albums, then use Discogs styles and original release years to find related records. Explore searches the local masters snapshot first, with live Discogs search available for albums it cannot find there.
 
 The older multi-album set builder and illustrated listening room remain in the repository as legacy code, outside the current Discover and Collection experience.
