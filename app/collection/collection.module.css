@@ -467,10 +467,6 @@
 .year-result > svg {
   flex-shrink: 0;
 }
-.year-refresh-icon {
-  composes: quiet from "../components/interaction.module.css";
-  padding: 9px;
-}
 
 @keyframes loading-spin {
   to {

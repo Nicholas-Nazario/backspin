@@ -9,7 +9,7 @@ import {
   resolveMasterYear,
   MASTER_YEAR_TTL,
 } from "../lib/year-data";
-test("master cache survives reopen, is shared, expires, and supports forced refresh", async () => {
+test("master cache survives reopen, is shared, and expires", async () => {
   const dir = mkdtempSync(join(tmpdir(), "year-cache-"));
   const path = join(dir, "db.sqlite");
   let db = openDatabase(path);
@@ -29,23 +29,12 @@ test("master cache survives reopen, is shared, expires, and supports forced refr
       return 2020;
     });
     assert.equal(calls, 1);
-    const updated = await resolveMasterYear(
-      db,
-      100,
-      async () => {
-        calls++;
-        return 1968;
-      },
-      true,
-    );
-    assert.equal(updated.year, 1968);
-    assert.equal(calls, 2);
-    assert.deepEqual(cachedMasterYears(db, [100], updated.expiresAt), []);
+    assert.deepEqual(cachedMasterYears(db, [100], first.expiresAt), []);
     await resolveMasterYear(db, 100, async () => {
       calls++;
       return 1969;
     });
-    assert.equal(calls, 3);
+    assert.equal(calls, 2);
   } finally {
     db.close();
     rmSync(dir, { recursive: true });
@@ -62,16 +51,6 @@ test("unknown years are cached, failed lookups are not cached or substituted", a
       }),
     );
     assert.deepEqual(cachedMasterYears(db, [2]), []);
-    await assert.rejects(
-      resolveMasterYear(
-        db,
-        1,
-        async () => {
-          throw new Error("Unavailable");
-        },
-        true,
-      ),
-    );
     assert.equal(cachedMasterYears(db, [1])[0].year, null);
   } finally {
     db.close();

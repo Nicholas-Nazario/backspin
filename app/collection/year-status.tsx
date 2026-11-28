@@ -1,5 +1,4 @@
 import {
-  ArrowClockwiseIcon,
   SpinnerGapIcon,
   CheckCircleIcon,
   WarningCircleIcon,
@@ -75,17 +74,6 @@ export function YearStatus({
               {known < count ? " · remaining dates are unknown" : ""}
             </small>
           </div>
-          {lookup.canRefreshLiveYears && (
-            <button
-              className={styles["year-refresh-icon"]}
-              aria-label="Refresh years"
-              title="Refresh years"
-              disabled={loading}
-              onClick={() => resolveYears(true)}
-            >
-              <ArrowClockwiseIcon size={17} aria-hidden="true" />
-            </button>
-          )}
         </div>
       ) : yearStatus === "partial" || yearStatus === "paused" ? (
         <div className={styles["year-result"]} role="status">

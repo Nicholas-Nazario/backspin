@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import { UpstreamError } from "./discogs";
 import { discogsCacheTtl } from "./discogs-freshness";
 import { snapshotMasterYears } from "./discogs-master-index";
 export type MasterYear = {
@@ -38,13 +39,9 @@ export async function resolveMasterYear(
   db: Database.Database,
   id: number,
   fetchYear: () => Promise<unknown>,
-  force = false,
-  now = Date.now(),
 ): Promise<MasterYear> {
-  if (!force) {
-    const cached = cachedMasterYears(db, [id], now)[0];
-    if (cached) return cached;
-  }
+  const cached = cachedMasterYears(db, [id])[0];
+  if (cached) return cached;
   const raw = await fetchYear();
   const value = Number(raw);
   const year =
@@ -55,4 +52,31 @@ export async function resolveMasterYear(
     "INSERT INTO master_years(master_id,year,source,fetched_at,expires_at) VALUES(?,?,'discogs-master',?,?) ON CONFLICT(master_id) DO UPDATE SET year=excluded.year,fetched_at=excluded.fetched_at,expires_at=excluded.expires_at",
   ).run(id, year, fetchedAt, expiresAt);
   return { masterId: id, year, source: "discogs-master", fetchedAt, expiresAt };
+}
+
+export async function resolveMissingMasterYears(
+  db: Database.Database,
+  ids: number[],
+  fetchYear: (id: number) => Promise<unknown>,
+  signal: AbortSignal,
+) {
+  const years = availableMasterYears(db, ids);
+  const present = new Set(years.map(({ masterId }) => masterId));
+  let failures = 0;
+  let retryAfter: number | undefined;
+  for (const id of ids) {
+    signal.throwIfAborted();
+    if (present.has(id)) continue;
+    try {
+      years.push(await resolveMasterYear(db, id, () => fetchYear(id)));
+    } catch (error) {
+      signal.throwIfAborted();
+      failures++;
+      if (error instanceof UpstreamError && error.status === 429) {
+        retryAfter = error.retryAfter;
+        break;
+      }
+    }
+  }
+  return { years, failures, retryAfter };
 }

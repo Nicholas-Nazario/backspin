@@ -17,7 +17,6 @@ type Master = {
   artists: string[];
   genres: string[];
   styles: string[];
-  mainRelease: number | null;
 };
 
 function positiveInteger(value: string) {
@@ -44,23 +43,17 @@ export async function importDiscogsMasters(
       PRAGMA synchronous = OFF;
       CREATE TABLE snapshot (date TEXT NOT NULL);
       CREATE TABLE masters (
-        id INTEGER PRIMARY KEY, year INTEGER, main_release INTEGER,
-        title TEXT NOT NULL, artists TEXT NOT NULL, genres TEXT NOT NULL,
+        id INTEGER PRIMARY KEY, year INTEGER, genres TEXT NOT NULL,
         styles TEXT NOT NULL, album_key TEXT
       );
     `);
-    const insert = index.prepare(
-      "INSERT INTO masters VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    );
+    const insert = index.prepare("INSERT INTO masters VALUES (?, ?, ?, ?, ?)");
     const batch: Master[] = [];
     const flush = index.transaction(() => {
       for (const master of batch)
         insert.run(
           master.id,
           master.year,
-          master.mainRelease,
-          master.title,
-          JSON.stringify(master.artists),
           JSON.stringify(master.genres),
           JSON.stringify(master.styles),
           master.title && artistKeys(master.artists).length
@@ -89,7 +82,6 @@ export async function importDiscogsMasters(
           id,
           title: "",
           year: null,
-          mainRelease: null,
           artists: [],
           genres: [],
           styles: [],
@@ -99,7 +91,6 @@ export async function importDiscogsMasters(
         [
           "masters/master/title",
           "masters/master/year",
-          "masters/master/main_release",
           "masters/master/artists/artist/name",
           "masters/master/genres/genre",
           "masters/master/styles/style",
@@ -122,8 +113,6 @@ export async function importDiscogsMasters(
           const year = positiveInteger(text);
           current.year = year && year >= 1800 && year <= 2200 ? year : null;
         }
-        if (field === "main_release")
-          current.mainRelease = positiveInteger(text);
         if (field === "name" && text) current.artists.push(text);
         if (field === "genre" && text) current.genres.push(text);
         if (field === "style" && text) current.styles.push(text);

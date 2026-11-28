@@ -4,13 +4,18 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { gzipSync } from "node:zlib";
+import { UpstreamError } from "../lib/discogs";
 import { openDatabase } from "../lib/db";
 import { findDiscogsAlbum } from "../lib/discogs-album";
 import {
   masterSnapshotDate,
   snapshotMasterYears,
 } from "../lib/discogs-master-index";
-import { availableMasterYears, resolveMasterYear } from "../lib/year-data";
+import {
+  availableMasterYears,
+  resolveMasterYear,
+  resolveMissingMasterYears,
+} from "../lib/year-data";
 import { importDiscogsMasters } from "../scripts/import-discogs-masters";
 
 test("import preserves unknown masters and prefers snapshot metadata over live results", async () => {
@@ -44,6 +49,30 @@ test("import preserves unknown masters and prefers snapshot metadata over live r
         [1, 1985, "discogs-snapshot"],
         [2, null, "discogs-snapshot"],
         [5, 2005, "discogs-master"],
+      ],
+    );
+
+    const requested: number[] = [];
+    const partial = await resolveMissingMasterYears(
+      db,
+      [1, 2, 5, 6, 7, 8],
+      async (id) => {
+        requested.push(id);
+        if (id === 7) throw new UpstreamError(429, 30);
+        return 2006;
+      },
+      new AbortController().signal,
+    );
+    assert.deepEqual(requested, [6, 7]);
+    assert.equal(partial.retryAfter, 30);
+    assert.equal(partial.failures, 1);
+    assert.deepEqual(
+      partial.years.map(({ masterId, year }) => [masterId, year]),
+      [
+        [1, 1985],
+        [2, null],
+        [5, 2005],
+        [6, 2006],
       ],
     );
 

@@ -30,7 +30,7 @@ The **Collection** tab offers:
 - Original-release-year lookup with visible progress, pause, resume, retry, and refresh controls.
 - A last-updated timestamp and an icon to refresh the collection.
 
-Collection snapshots are cached for up to five hours. **Refresh collection** fetches your latest shelf from Discogs. Background refresh keeps the current view in place while the replacement loads; new picks pause until it finishes. Failed refreshes offer a retry. Original master years use a shared SQLite cache.
+Collection responses are cached for up to six hours. **Refresh collection** fetches your latest shelf from Discogs. Background refresh keeps the current view in place while the replacement loads; new picks pause until it finishes. Failed refreshes offer a retry. Original years come from a local monthly Discogs masters snapshot when installed. Backspin can check missing masters against Discogs and cache the result.
 
 The Backspin name and Citrus icon return you to Discover. The cog opens Settings, where Discogs and Spotify have separate connection status and connect/disconnect controls. Settings closes on an outside tap or Escape.
 
@@ -109,7 +109,7 @@ The main implementation lives in:
 
 You authorize each provider through its own sign-in screen; Backspin does not receive your Discogs or Spotify password. Access credentials are held in separate encrypted, HttpOnly session cookies and are not stored in SQLite or localStorage. Discogs sessions last up to eight hours. Spotify connections expire with the access token, usually after an hour; refresh tokens are not retained. Collection snapshots are short-lived and scoped to the authenticated account.
 
-SQLite stores cached original master years and expiring OAuth attempt IDs. Disconnecting clears your local session; revoke the application's authorization in Discogs settings to remove its access there.
+SQLite stores fallback master-year results and expiring OAuth attempt IDs. The local Discogs catalog is kept in a separate SQLite file. Disconnecting clears your local session; revoke the application's authorization in Discogs settings to remove its access there.
 
 Album artwork and catalog data come from Discogs. Artwork is displayed without recoloring or cropping. See [third-party notices](THIRD_PARTY_NOTICES.md) for icon and font licenses.
 
@@ -117,6 +117,6 @@ Album artwork and catalog data come from Discogs. Artwork is displayed without r
 
 The hosted app is [backspin.fly.dev](https://backspin.fly.dev). The repository includes a Dockerfile for the standalone Next.js server and a Fly configuration with persistent storage under `/data`. The current request scheduler and collection cache are designed for one application process. Production secrets, database backups, and recovery procedures are covered in the [development and operations guide](docs/DEVELOPMENT.md).
 
-Backspin helps you choose a record; it does not play audio or save listening history. Explore picks stay in memory when you switch app tabs. Other picks and discovery filters last for the current page visit. Mood hints use catalog metadata, not audio analysis or a learned recommendation model. Spotify picks use recent plays to match artists and albums, then use Discogs styles and original release years to find related records.
+Backspin helps you choose a record; it does not play audio or save listening history. Explore picks stay in memory when you switch app tabs. Other picks and discovery filters last for the current page visit. Mood hints use catalog metadata, not audio analysis or a learned recommendation model. Spotify picks use recent plays to match artists and albums, then use Discogs styles and original release years to find related records. Explore searches the local masters snapshot first, with live Discogs search available for albums it cannot find there.
 
 The older multi-album set builder and illustrated listening room remain in the repository as legacy code, outside the current Discover and Collection experience.

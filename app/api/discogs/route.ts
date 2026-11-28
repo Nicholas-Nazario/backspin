@@ -4,9 +4,6 @@ import {
   collectionPath,
   isDiscogsCollectionUsername,
 } from "../../../lib/discogs-collection";
-import { database } from "../../../lib/db";
-import { snapshotMasterYears } from "../../../lib/discogs-master-index";
-import { resolveMasterYear } from "../../../lib/year-data";
 import { clearSpotifyPicks } from "../../../lib/spotify-picks-cache";
 import {
   spotifyConnectionScope,
@@ -15,7 +12,7 @@ import {
 import { session } from "../../../lib/session";
 import { accountJson } from "../../../lib/discogs-cache";
 import { discogsRelease } from "../../../lib/discogs-release";
-import { request, UpstreamError } from "../../../lib/discogs";
+import { UpstreamError } from "../../../lib/discogs";
 const headers = { "Cache-Control": "private, no-store", Vary: "Cookie" };
 export async function GET(req: Request) {
   const s = await session();
@@ -40,8 +37,6 @@ export async function GET(req: Request) {
   let path: string;
   if (kind === "identity") path = "/oauth/identity";
   else if (kind === "folders") path = collectionFoldersPath(s.username);
-  else if (kind === "master" && /^\d+$/.test(q.get("id") || ""))
-    path = "/masters/" + q.get("id");
   else if (kind === "release" && /^\d+$/.test(q.get("id") || ""))
     path = "/releases/" + q.get("id");
   else if (kind === "collection") {
@@ -56,28 +51,6 @@ export async function GET(req: Request) {
       { status: 400, headers },
     );
   try {
-    if (kind === "master") {
-      const id = Number(q.get("id"));
-      const result =
-        snapshotMasterYears([id])[0] ??
-        (await resolveMasterYear(
-          database(),
-          id,
-          async () => {
-            const data = await (await request(path, s.token)).json();
-            return data.year;
-          },
-          refresh,
-        ));
-      return Response.json(
-        {
-          data: { id: result.masterId, year: result.year },
-          expiresAt: result.expiresAt,
-          source: result.source,
-        },
-        { headers },
-      );
-    }
     if (startCollectionRefresh) {
       clearCollectionPages(collectionUsername ?? s.username, s.token);
       const spotify = await spotifySession();

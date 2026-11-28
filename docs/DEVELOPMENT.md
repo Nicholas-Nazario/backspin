@@ -42,7 +42,7 @@ The single-process scheduler spaces upstream calls and honors observed rate-limi
 
 ## Original-year cache and code organization
 
-Original years are read from the monthly Discogs master index when it is installed. A master absent from the index can use the shared SQLite `master_years` cache or a live Discogs lookup. Live results expire after six hours, including live responses with an unknown year. Failed requests are uncached. Find missing years checks unresolved master IDs. The refresh icon appears when live years can be rechecked. Snapshot rows are reread when the collection reloads. The shared year data contains no collection membership, artwork, credentials, or user identifiers. The legacy `original_years` table remains in migration history.
+Original years are read from the monthly Discogs master index when it is installed. A master absent from the index can use the shared SQLite `master_years` cache or a live Discogs lookup. Live results expire after six hours, including live responses with an unknown year. Failed requests are uncached. Find missing years checks unresolved master IDs in bounded batches. The server stops the batch on rate limiting and the client retains successful years for retry. Snapshot rows are reread when the collection reloads. The shared year data contains no collection membership, artwork, credentials, or user identifiers. The legacy `original_years` table remains in migration history.
 
 `app/collection.tsx` composes focused components and hooks under `app/collection/`. Pure filtering/year rules live in `lib/collection.ts`; SQL lives in focused data modules with ordered migrations. Global CSS covers base elements; page and collection CSS Modules scope feature styles. No inline CSS is authored for application controls, including the native progress indicator. Provider brand assets remain unmodified. `npm run format` and `npm run format:check` maintain readable formatting.
 
@@ -98,7 +98,7 @@ The user verified live OAuth connection, collection preview, artwork, pagination
 
 ## Discogs masters snapshot
 
-Backspin reads the optional `discogs-masters.sqlite` file next to `DATABASE_PATH`. Set `DISCOGS_MASTER_INDEX_PATH` to use another location. The catalog keeps IDs, original years, titles, artist names, genres, styles, and representative release IDs. Collection membership, edition tags, and artwork still come from the collection API. The app fetches edition details when the user opens a record.
+Backspin reads the optional `discogs-masters.sqlite` file next to `DATABASE_PATH`. Set `DISCOGS_MASTER_INDEX_PATH` to use another location. The catalog keeps master IDs, original years, genres, styles, and a normalized lookup key derived from album titles and artist credits. Collection membership, edition tags, and artwork still come from the collection API. The app fetches edition details when the user opens a record.
 
 A snapshot row with an unknown year counts as checked. A master absent from the snapshot can use the existing live cache and live lookup. Explore uses a unique normalized artist-and-title match from the snapshot. An ambiguous local match is skipped. An absent match can use live catalog search.
 

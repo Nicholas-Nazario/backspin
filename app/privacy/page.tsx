@@ -16,25 +16,28 @@ export default function PrivacyPage() {
       <h2>Discogs</h2>
       <p>
         Backspin reads your authorized collection and release details to browse
-        your records and make album picks. Collection responses use a five-hour,
+        your records and make album picks. Collection responses use a six-hour,
         account-scoped cache and are not saved to the application database.
-        Original release years are cached separately using Discogs master data.
+        Original release years come from a local catalog built from Discogs’
+        monthly masters data. Backspin may look up and cache years for masters
+        missing from that catalog.
       </p>
       <h2>Spotify</h2>
       <p>
         Connecting Spotify reads your display name for Settings and requests
         access to recent plays. When you ask for Spotify picks, Backspin fetches
-        up to 50 recent plays and matches them against your collection on the
-        server. Backspin can reuse completed picks for up to ten minutes in a
-        connection-scoped server cache. Explore keeps the returned
-        recommendations and the listening metadata that explains them in memory
-        for this browser tab. Backspin does not save listening history to disk
-        or send your Discogs collection to Spotify.
+        up to 50 recent plays and matches them against the selected Discogs
+        collection on the server. Backspin can reuse completed picks for up to
+        ten minutes in a connection-scoped server cache. Explore keeps the
+        returned recommendations and the listening metadata that explains them
+        in memory for this browser tab. Backspin does not save listening history
+        to disk or send your Discogs collection to Spotify.
       </p>
       <p>
-        For albums that do not match a record on your shelf, Backspin searches
-        the Discogs catalog by album title and artist. The search sends those
-        names to Discogs without your Spotify account details or play times.
+        For albums outside the selected collection, Backspin first checks its
+        local Discogs catalog by album title and artist. If it falls back to a
+        live search, it sends the album title and artist names to Discogs.
+        Spotify account details and play times stay in Backspin.
       </p>
       <h2>Cookies and stored data</h2>
       <p>
